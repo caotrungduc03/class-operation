@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./apps/co"
+    },
+    {
+      "path": "./apps/web"
     }
   ]
 }
