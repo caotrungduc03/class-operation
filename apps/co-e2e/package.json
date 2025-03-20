@@ -1,0 +1,26 @@
+{
+  "name": "@class-operation/co-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "co-e2e",
+    "implicitDependencies": [
+      "co"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "apps/co-e2e/jest.config.ts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "co:build"
+        ]
+      }
+    }
+  }
+}
