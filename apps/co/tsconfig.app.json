@@ -2,21 +2,21 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": [
-      "node"
-    ],
-    "rootDir": "src",
+    "types": ["node"],
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "es2021"
+    "target": "es2021",
+    "paths": {
+      "@co/common": ["./src/common/index.ts"],
+      "@co/constants": ["./src/constants/index.ts"],
+      "@co/entities": ["./src/entities/index.ts"],
+      "@co/dtos": ["./src/dtos/index.ts"],
+      "@co/decorators": ["./src/decorators/index.ts"],
+      "@co/types": ["./src/types/index.ts"],
+      "@co/utils": ["./src/utils/index.ts"]
+    }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "eslint.config.js",
-    "eslint.config.cjs",
-    "eslint.config.mjs"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["eslint.config.js", "eslint.config.cjs", "eslint.config.mjs"]
 }
