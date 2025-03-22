@@ -43,12 +43,7 @@ export class DatabaseSeederService {
       user.email = process.env.ADMIN_EMAIL || '';
       user.password = encodePassword(process.env.ADMIN_PASSWORD || '');
       user.fullName = process.env.ADMIN_FULL_NAME || '';
-      const role = await this.roleService.findByName(ROLE_NAME.ADMIN);
-      if (!role) {
-        throw new Error('Admin role not found');
-      }
-
-      user.role = role;
+      user.role = await this.roleService.findByName(ROLE_NAME.ADMIN);
 
       await this.userService.store(user);
     }

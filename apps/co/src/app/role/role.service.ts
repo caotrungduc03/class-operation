@@ -65,8 +65,12 @@ export class RoleService extends BaseService<RoleEntity> {
     return role;
   }
 
-  async findByName(roleName: RoleName): Promise<RoleEntity | null> {
+  async findByName(roleName: RoleName): Promise<RoleEntity> {
     const role = await this.findOne({ where: { roleName } });
+
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
 
     return role;
   }

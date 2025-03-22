@@ -1,7 +1,8 @@
 import Entities from '@co/entities';
+import { CustomExceptionsFilter } from '@co/utils';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -40,6 +41,10 @@ import { UserModule } from './user/user.module';
   providers: [
     AppService,
     DatabaseSeederService,
+    {
+      provide: APP_FILTER,
+      useClass: CustomExceptionsFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

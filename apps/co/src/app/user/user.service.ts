@@ -1,5 +1,6 @@
 import { BaseService } from '@co/common';
-import { RegisterRequestDto } from '@co/dtos';
+import { ROLE_NAME } from '@co/constants';
+import { CreateUserDto, RegisterRequestDto } from '@co/dtos';
 import { UserEntity } from '@co/entities';
 import { FindOptions } from '@co/types';
 import { encodePassword } from '@co/utils';
@@ -62,7 +63,9 @@ export class UserService extends BaseService<UserEntity> {
     });
   }
 
-  async create(createUserDto: RegisterRequestDto): Promise<UserEntity> {
+  async create(
+    createUserDto: CreateUserDto | RegisterRequestDto
+  ): Promise<UserEntity> {
     if (createUserDto.password !== createUserDto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
@@ -76,6 +79,11 @@ export class UserService extends BaseService<UserEntity> {
     });
     if (user) {
       throw new BadRequestException('User already exists');
+    }
+
+    if (!('roleId' in createUserDto) || !createUserDto.roleId) {
+      const defaultRole = await this.roleService.findByName(ROLE_NAME.STUDENT);
+      newUser.role = defaultRole;
     }
 
     newUser.password = encodePassword(createUserDto.password);
