@@ -1,6 +1,5 @@
 import { BaseService } from '@co/common';
-import { ROLE_NAME } from '@co/constants';
-import { CreateUserDto, RegisterRequestDto } from '@co/dtos';
+import { CreateUserDto } from '@co/dtos';
 import { UserEntity } from '@co/entities';
 import { FindOptions } from '@co/types';
 import { encodePassword } from '@co/utils';
@@ -18,7 +17,7 @@ export class UserService extends BaseService<UserEntity> {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    private readonly roleService: RoleService
+    private readonly roleService: RoleService,
   ) {
     super(userRepository);
   }
@@ -53,7 +52,8 @@ export class UserService extends BaseService<UserEntity> {
         'id',
         'email',
         'password',
-        'fullName',
+        'firstName',
+        'lastName',
         'phoneNumber',
         'avatar',
         'status',
@@ -63,9 +63,7 @@ export class UserService extends BaseService<UserEntity> {
     });
   }
 
-  async create(
-    createUserDto: CreateUserDto | RegisterRequestDto
-  ): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     if (createUserDto.password !== createUserDto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
@@ -81,12 +79,13 @@ export class UserService extends BaseService<UserEntity> {
       throw new BadRequestException('User already exists');
     }
 
-    if (!('roleId' in createUserDto) || !createUserDto.roleId) {
-      const defaultRole = await this.roleService.findByName(ROLE_NAME.STUDENT);
-      newUser.role = defaultRole;
+    const role = await this.roleService.findById(createUserDto.roleId);
+    if (!role) {
+      throw new BadRequestException('Role not found');
     }
 
     newUser.password = encodePassword(createUserDto.password);
+    newUser.role = role;
 
     return this.store({
       ...createUserDto,

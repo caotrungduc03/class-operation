@@ -4,7 +4,15 @@ import { RoleDto } from '../role/role.dto';
 
 export class UserDto extends BaseDto {
   @Expose()
-  fullName: string;
+  firstName: string;
+
+  @Expose()
+  lastName: string;
+
+  @Expose()
+  get fullName(): string {
+    return `${this.lastName || ''} ${this.firstName || ''}`.trim();
+  }
 
   @Expose({
     groups: ['private', 'admin'],

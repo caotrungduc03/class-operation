@@ -4,6 +4,7 @@ import {
   IsEmail,
   IsEmpty,
   IsNotEmpty,
+  IsString,
   Matches,
   MinLength,
 } from 'class-validator';
@@ -28,7 +29,7 @@ export class CreateUserDto extends BaseRequestDto {
     {
       message:
         'Password must have at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character',
-    }
+    },
   )
   password: string;
 
@@ -41,8 +42,9 @@ export class CreateUserDto extends BaseRequestDto {
   @IsEmpty()
   avatar: string;
 
-  @Type(() => Number)
-  roleId: number;
+  @ApiProperty()
+  @IsString()
+  roleId: string;
 
   @Type(() => Number)
   status: number;

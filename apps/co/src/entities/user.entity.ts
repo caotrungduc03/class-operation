@@ -5,9 +5,14 @@ import { RoleEntity } from './role.entity';
 @Entity({ name: 'users' })
 export class UserEntity extends CustomBaseEntity {
   @Column({
-    name: 'full_name',
+    name: 'first_name',
   })
-  fullName: string;
+  firstName: string;
+
+  @Column({
+    name: 'last_name',
+  })
+  lastName: string;
 
   @Column({
     unique: true,

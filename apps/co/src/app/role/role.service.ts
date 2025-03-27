@@ -15,7 +15,7 @@ import { Repository } from 'typeorm';
 export class RoleService extends BaseService<RoleEntity> {
   constructor(
     @InjectRepository(RoleEntity)
-    private readonly roleRepository: Repository<RoleEntity>
+    private readonly roleRepository: Repository<RoleEntity>,
   ) {
     super(roleRepository);
   }
@@ -41,7 +41,7 @@ export class RoleService extends BaseService<RoleEntity> {
 
   async updateById(
     id: string,
-    updateRoleDto: UpdateRoleDto
+    updateRoleDto: UpdateRoleDto,
   ): Promise<RoleEntity> {
     const role = await this.findById(id);
     if (Object.keys(ROLE_NAME).includes(role.roleName)) {
@@ -65,12 +65,8 @@ export class RoleService extends BaseService<RoleEntity> {
     return role;
   }
 
-  async findByName(roleName: RoleName): Promise<RoleEntity> {
+  async findByName(roleName: RoleName): Promise<RoleEntity | null> {
     const role = await this.findOne({ where: { roleName } });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
 
     return role;
   }

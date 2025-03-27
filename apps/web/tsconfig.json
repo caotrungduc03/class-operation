@@ -20,7 +20,10 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@web/libs/*": ["libs/*"]
+      "@web/libs/*": ["libs/*"],
+      "@web/components/*": ["components/*"],
+      "@web/types/*": ["types/*"],
+      "@web/constants/*": ["constants/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -35,7 +38,11 @@
     "app/**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "libs/**/*.ts"
+    "libs/**/*.ts",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "types/**/*.ts",
+    "constants/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

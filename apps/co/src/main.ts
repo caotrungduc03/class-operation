@@ -14,6 +14,7 @@ async function bootstrap() {
 
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Cats example')
@@ -26,7 +27,7 @@ async function bootstrap() {
 
   await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
   );
 }
 

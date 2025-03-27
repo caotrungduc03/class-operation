@@ -9,7 +9,7 @@ import { UserService } from '../user/user.service';
 export class DatabaseSeederService {
   constructor(
     private readonly roleService: RoleService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   async seed() {
@@ -28,8 +28,6 @@ export class DatabaseSeederService {
       }
     }
 
-    console.log({ roles });
-
     await this.roleService.store(roles);
   }
 
@@ -42,8 +40,13 @@ export class DatabaseSeederService {
       const user = new UserEntity();
       user.email = process.env.ADMIN_EMAIL || '';
       user.password = encodePassword(process.env.ADMIN_PASSWORD || '');
-      user.fullName = process.env.ADMIN_FULL_NAME || '';
-      user.role = await this.roleService.findByName(ROLE_NAME.ADMIN);
+      user.firstName = process.env.ADMIN_FIRST_NAME || '';
+      user.lastName = process.env.ADMIN_LAST_NAME || '';
+      const role = await this.roleService.findByName(ROLE_NAME.ADMIN);
+      if (!role) {
+        throw new Error('Admin role not found');
+      }
+      user.role = role;
 
       await this.userService.store(user);
     }
