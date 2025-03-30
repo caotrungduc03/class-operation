@@ -14,7 +14,7 @@ const Home: React.FC = () => {
     if (user) {
       switch (user.role.roleName) {
         case ROLE_NAME.ADMIN:
-        case ROLE_NAME.STAFF:
+        case ROLE_NAME.RECEPTIONIST:
           router.push("/ops");
           break;
         default:

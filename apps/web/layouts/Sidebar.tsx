@@ -1,0 +1,44 @@
+"use client";
+import type { RootState } from "@web/libs/store";
+import { Layout } from "antd";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { useSelector } from "react-redux";
+import NavigationMenu from "./Menu";
+
+export const Sidebar: React.FC = () => {
+  const { sidebarCollapsed } = useSelector((state: RootState) => state.layout);
+
+  return (
+    <Layout.Sider
+      trigger={null}
+      collapsible
+      collapsed={sidebarCollapsed}
+      width={240}
+      className="sticky left-0 top-0 min-h-screen"
+    >
+      <Link href="/" className="block p-4">
+        {sidebarCollapsed ? (
+          <Image
+            src="/logo-collapsed.svg"
+            alt="Logo Collapsed"
+            width={50}
+            height={50}
+            priority
+          />
+        ) : (
+          <Image
+            src="/logo.svg"
+            alt="Logo"
+            width={200}
+            height={50}
+            className="h-auto w-full"
+            priority
+          />
+        )}
+      </Link>
+      <NavigationMenu />
+    </Layout.Sider>
+  );
+};

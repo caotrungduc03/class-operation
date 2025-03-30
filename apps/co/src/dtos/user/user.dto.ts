@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { BaseDto } from '../common/base.dto';
 import { RoleDto } from '../role/role.dto';
 
@@ -10,27 +10,17 @@ export class UserDto extends BaseDto {
   lastName: string;
 
   @Expose()
-  get fullName(): string {
-    return `${this.lastName || ''} ${this.firstName || ''}`.trim();
-  }
-
-  @Expose({
-    groups: ['private', 'admin'],
-  })
   email: string;
 
-  @Expose({
-    groups: ['private', 'admin'],
-  })
+  @Expose()
+  @Transform(({ obj }) => `${obj.lastName} ${obj.firstName}`)
+  fullName: string;
+
+  @Expose()
   phoneNumber: string;
 
   @Expose()
   avatar: string;
-
-  @Expose({
-    groups: ['admin'],
-  })
-  roleId: number;
 
   @Expose({
     groups: ['admin'],
@@ -42,9 +32,7 @@ export class UserDto extends BaseDto {
   })
   lastLogin: Date;
 
-  @Expose({
-    groups: ['private'],
-  })
+  @Expose()
   @Type(() => RoleDto)
   role: RoleDto;
 }

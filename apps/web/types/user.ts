@@ -6,7 +6,7 @@ export type RoleName = keyof typeof ROLE_NAME;
 export interface IUser extends ITimestamps {
   id: string;
   email: string;
-  name: string;
+  fullName: string;
   role: IRole;
 }
 

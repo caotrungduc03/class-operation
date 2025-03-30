@@ -33,7 +33,12 @@ export const authSlice = createSlice({
           state.user = payload.data;
           state.accessToken = getToken();
         },
-      );
+      )
+      .addMatcher(authApi.endpoints.getMe.matchRejected, (state) => {
+        state.user = null;
+        state.accessToken = "";
+        setToken("");
+      });
   },
 });
 

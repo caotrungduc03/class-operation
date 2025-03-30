@@ -1,4 +1,5 @@
 import { CustomBaseEntity } from '@co/common';
+import { ROLE_NAME } from '@co/constants';
 import { RoleName } from '@co/types';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { UserEntity } from './user.entity';
@@ -9,8 +10,8 @@ import { UserEntity } from './user.entity';
 export class RoleEntity extends CustomBaseEntity {
   @Column({
     name: 'role_name',
-    type: 'varchar',
-    unique: true,
+    type: 'enum',
+    enum: ROLE_NAME,
   })
   roleName: RoleName;
 

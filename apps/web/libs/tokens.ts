@@ -5,7 +5,7 @@ export const getToken = (): string => {
 };
 
 export const setToken = (token: string) => {
-  if (typeof window === "undefined" || !token) return;
+  if (typeof window === "undefined") return;
 
   localStorage.setItem("accessToken", token);
 };

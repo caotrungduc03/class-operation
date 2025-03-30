@@ -23,7 +23,8 @@
       "@web/libs/*": ["libs/*"],
       "@web/components/*": ["components/*"],
       "@web/types/*": ["types/*"],
-      "@web/constants/*": ["constants/*"]
+      "@web/constants/*": ["constants/*"],
+      "@web/layouts/*": ["layouts/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -42,7 +43,9 @@
     "components/**/*.ts",
     "components/**/*.tsx",
     "types/**/*.ts",
-    "constants/**/*.ts"
+    "constants/**/*.ts",
+    "layouts/**/*.ts",
+    "layouts/**/*.tsx"
   ],
   "exclude": [
     "out-tsc",
