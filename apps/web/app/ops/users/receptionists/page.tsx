@@ -15,7 +15,7 @@ const breadcrumbs: ItemType[] = [
 
 const Receptionists = () => {
   return (
-    <PageLayout breadcrumbs={breadcrumbs}>
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.RECEPTIONIST}>
       <Card>
         <h1>Receptionists</h1>
       </Card>

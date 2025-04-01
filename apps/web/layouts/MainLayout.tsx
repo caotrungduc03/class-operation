@@ -1,9 +1,9 @@
 "use client";
 import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
-import React from "react";
+import React, { memo } from "react";
 import Header from "./Header";
-import { Sidebar } from "./Sidebar";
+import Sidebar from "./Sidebar";
 
 const MainLayout = ({ children }: React.PropsWithChildren<{}>) => {
   return (
@@ -17,4 +17,4 @@ const MainLayout = ({ children }: React.PropsWithChildren<{}>) => {
   );
 };
 
-export default MainLayout;
+export default memo(MainLayout);

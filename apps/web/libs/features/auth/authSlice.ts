@@ -16,7 +16,13 @@ const initialState: AuthState = {
 export const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.accessToken = "";
+      setToken("");
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addMatcher(
@@ -42,4 +48,5 @@ export const authSlice = createSlice({
   },
 });
 
+export const { logout } = authSlice.actions;
 export default authSlice;

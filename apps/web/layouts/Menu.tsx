@@ -4,7 +4,7 @@ import { MenuItem, NavigationItem } from "@web/types/common";
 import { Menu } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 const navigationItems: NavigationItem[] = [
   {
@@ -13,12 +13,12 @@ const navigationItems: NavigationItem[] = [
     label: NAV_TITLE.USERS,
     children: [
       {
-        label: NAV_TITLE.TEACHERS,
-        url: NAV_LINK.TEACHERS,
-      },
-      {
         label: NAV_TITLE.RECEPTIONIST,
         url: NAV_LINK.RECEPTIONISTS,
+      },
+      {
+        label: NAV_TITLE.TEACHERS,
+        url: NAV_LINK.TEACHERS,
       },
       {
         label: NAV_TITLE.STUDENTS,
@@ -82,4 +82,4 @@ const NavigationMenu = () => {
   );
 };
 
-export default NavigationMenu;
+export default memo(NavigationMenu);

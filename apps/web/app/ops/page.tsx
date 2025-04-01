@@ -16,7 +16,7 @@ const HomeOPS = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs}>
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.HOME}>
       <Card>
         <Typography.Title level={2} className="mb-0">
           {`Chào mừng ${user?.fullName}, quay trở lại hệ thống!`}

@@ -3,11 +3,11 @@ import type { RootState } from "@web/libs/store";
 import { Layout } from "antd";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { memo } from "react";
 import { useSelector } from "react-redux";
 import NavigationMenu from "./Menu";
 
-export const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const { sidebarCollapsed } = useSelector((state: RootState) => state.layout);
 
   return (
@@ -42,3 +42,5 @@ export const Sidebar: React.FC = () => {
     </Layout.Sider>
   );
 };
+
+export default memo(Sidebar);
