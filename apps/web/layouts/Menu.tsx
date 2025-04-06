@@ -8,21 +8,17 @@ import { memo, useMemo } from "react";
 
 const navigationItems: NavigationItem[] = [
   {
-    key: NAV_LINK.USERS,
+    key: NAV_LINK.USER_LIST,
     icon: <UserOutlined />,
-    label: NAV_TITLE.USERS,
+    label: NAV_TITLE.USER_LIST,
     children: [
       {
-        label: NAV_TITLE.RECEPTIONIST,
-        url: NAV_LINK.RECEPTIONISTS,
+        label: NAV_TITLE.TEACHER_LIST,
+        url: NAV_LINK.TEACHER_LIST,
       },
       {
-        label: NAV_TITLE.TEACHERS,
-        url: NAV_LINK.TEACHERS,
-      },
-      {
-        label: NAV_TITLE.STUDENTS,
-        url: NAV_LINK.STUDENTS,
+        label: NAV_TITLE.RECEPTIONIST_LIST,
+        url: NAV_LINK.RECEPTIONIST_LIST,
       },
     ],
   },

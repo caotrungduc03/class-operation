@@ -9,10 +9,30 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/')
+  @Get('/teachers')
   @Roles(ROLE_NAME.ADMIN)
-  async find(@Query() query: Object) {
-    const { page, limit, total, data } = await this.userService.query(query);
+  async findTeachers(@Query() query: Object) {
+    const { page, limit, total, data } = await this.userService.query({
+      ...query,
+      // role: ROLE_NAME.TEACHER,
+    });
+    const results: Pagination<UserDto> = {
+      page,
+      limit,
+      total,
+      items: UserDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Get('/receptionists')
+  @Roles(ROLE_NAME.ADMIN)
+  async findReceptionists(@Query() query: Object) {
+    const { page, limit, total, data } = await this.userService.query({
+      ...query,
+      role: ROLE_NAME.RECEPTIONIST,
+    });
     const results: Pagination<UserDto> = {
       page,
       limit,

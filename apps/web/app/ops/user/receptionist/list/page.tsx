@@ -6,21 +6,21 @@ import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 const breadcrumbs: ItemType[] = [
   {
     href: "#",
-    title: NAV_TITLE.USERS,
+    title: NAV_TITLE.USER_LIST,
   },
   {
-    title: NAV_TITLE.STUDENTS,
+    title: NAV_TITLE.RECEPTIONIST_LIST,
   },
 ];
 
-const Students = () => {
+const Receptionists = () => {
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.STUDENTS}>
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.RECEPTIONIST_LIST}>
       <Card>
-        <h1>Students</h1>
+        <h1>Receptionists</h1>
       </Card>
     </PageLayout>
   );
 };
 
-export default Students;
+export default Receptionists;

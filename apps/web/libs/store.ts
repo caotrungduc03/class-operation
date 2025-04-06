@@ -2,6 +2,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./features/auth/authApi";
 import { authSlice } from "./features/auth/authSlice";
 import layoutSlice from "./features/layout/layoutSlice";
+import tableSlice from "./features/table/tableSlice";
+import { teacherApi } from "./features/teachers/teacherApi";
+import teacherSlice from "./features/teachers/teacherSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -9,9 +12,12 @@ export const makeStore = () => {
       auth: authSlice.reducer,
       [authApi.reducerPath]: authApi.reducer,
       layout: layoutSlice.reducer,
+      table: tableSlice.reducer,
+      teacher: teacherSlice.reducer,
+      [teacherApi.reducerPath]: teacherApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(authApi.middleware),
+      getDefaultMiddleware().concat(authApi.middleware, teacherApi.middleware),
   });
 };
 

@@ -1,6 +1,7 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { BaseDto } from '../common/base.dto';
 import { RoleDto } from '../role/role.dto';
+import { DetailUserDto } from './detail-user.dto';
 
 export class UserDto extends BaseDto {
   @Expose()
@@ -35,4 +36,7 @@ export class UserDto extends BaseDto {
   @Expose()
   @Type(() => RoleDto)
   role: RoleDto;
+
+  @Expose()
+  detail: DetailUserDto;
 }

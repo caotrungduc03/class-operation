@@ -1,10 +1,9 @@
 export const NAV_LINK = {
   OPS: "/ops",
   LMS: "/lms",
-  USERS: "/ops/users",
-  TEACHERS: "/ops/users/teachers",
-  RECEPTIONISTS: "/ops/users/receptionists",
-  STUDENTS: "/ops/users/students",
+  USER_LIST: "/ops/user",
+  TEACHER_LIST: "/ops/user/teacher/list",
+  RECEPTIONIST_LIST: "/ops/user/receptionist/list",
   MY_PROFILE: "/ops/my-profile",
   LOGIN: "/login",
 };
@@ -13,9 +12,8 @@ export const NAV_TITLE = {
   OPS: "OPS",
   LMS: "LMS",
   HOME: "Trang chủ",
-  USERS: "Quản lý người dùng",
-  TEACHERS: "Quản lý giáo viên",
-  RECEPTIONIST: "Quản lý lễ tân",
-  STUDENTS: "Quản lý học sinh",
+  USER_LIST: "Quản lý người dùng",
+  TEACHER_LIST: "Quản lý giáo viên",
+  RECEPTIONIST_LIST: "Quản lý lễ tân",
   MY_PROFILE: "Thông tin cá nhân",
 };
