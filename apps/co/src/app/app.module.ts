@@ -1,5 +1,4 @@
-import Entities from '@co/entities';
-import { CustomExceptionsFilter } from '@co/utils';
+import { CustomExceptionsFilter, ListEntity } from '@class-operation/libs';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
@@ -23,7 +22,7 @@ import { UserModule } from './user/user.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [...Entities],
+      entities: [...ListEntity],
       synchronize: true, // Don't use this in production
     }),
     JwtModule.register({

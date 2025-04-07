@@ -1,7 +1,12 @@
-import { ROLE_NAME } from '@co/constants';
-import { Roles } from '@co/decorators';
-import { CreateRoleDto, ResponseDto, RoleDto, UpdateRoleDto } from '@co/dtos';
-import { Pagination } from '@co/types';
+import {
+  CreateRoleDto,
+  Pagination,
+  ResponseDto,
+  RoleDto,
+  RoleName,
+  Roles,
+  UpdateRoleDto,
+} from '@class-operation/libs';
 import {
   Body,
   Controller,
@@ -20,7 +25,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Get('/')
-  @Roles(ROLE_NAME.ADMIN)
+  @Roles(RoleName.ADMIN)
   async find(@Query() queryObj: Object) {
     const {
       page,
@@ -40,51 +45,51 @@ export class RoleController {
   }
 
   @Get('/:id')
-  @Roles(ROLE_NAME.ADMIN)
+  @Roles(RoleName.ADMIN)
   async findById(@Param('id') id: string) {
     const role = await this.roleService.findById(id);
 
     return new ResponseDto(
       HttpStatus.OK,
       'Success',
-      RoleDto.plainToInstance(role, ['admin'])
+      RoleDto.plainToInstance(role, ['admin']),
     );
   }
 
   @Post('/')
-  @Roles(ROLE_NAME.ADMIN)
+  @Roles(RoleName.ADMIN)
   async create(@Body() createRoleDto: CreateRoleDto) {
     const role = await this.roleService.create(
-      CreateRoleDto.plainToClass(createRoleDto)
+      CreateRoleDto.plainToClass(createRoleDto),
     );
 
     return new ResponseDto(
       HttpStatus.CREATED,
       'Created a new role',
-      RoleDto.plainToInstance(role, ['admin'])
+      RoleDto.plainToInstance(role, ['admin']),
     );
   }
 
   @Put('/:id')
-  @Roles(ROLE_NAME.ADMIN)
+  @Roles(RoleName.ADMIN)
   async updateById(
     @Param('id') id: string,
-    @Body() updateRoleDto: UpdateRoleDto
+    @Body() updateRoleDto: UpdateRoleDto,
   ) {
     const role = await this.roleService.updateById(
       id,
-      UpdateRoleDto.plainToClass(updateRoleDto)
+      UpdateRoleDto.plainToClass(updateRoleDto),
     );
 
     return new ResponseDto(
       HttpStatus.OK,
       'Updated a role',
-      RoleDto.plainToInstance(role, ['admin'])
+      RoleDto.plainToInstance(role, ['admin']),
     );
   }
 
   @Delete('/:id')
-  @Roles(ROLE_NAME.ADMIN)
+  @Roles(RoleName.ADMIN)
   async deleteById(@Param('id') id: string) {
     await this.roleService.deleteById(id);
 

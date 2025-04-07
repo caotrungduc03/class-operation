@@ -77,7 +77,8 @@
     "webpack-cli": "^5.1.4"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "libs"
   ],
   "packageManager": "yarn@1.22.22"
 }

@@ -1,4 +1,4 @@
-import { Public } from '@co/decorators';
+import { Public } from '@class-operation/libs';
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 

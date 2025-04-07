@@ -1,6 +1,10 @@
-import { LoginRequestDto, LoginResponseDto, UserDto } from '@co/dtos';
-import { JwtPayload } from '@co/types';
-import { comparePassword } from '@co/utils';
+import {
+  comparePassword,
+  JwtPayload,
+  LoginRequestDto,
+  LoginResponseDto,
+  UserDto,
+} from '@class-operation/libs';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -9,7 +13,7 @@ import { UserService } from '../user/user.service';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {

@@ -1,7 +1,6 @@
-import { CustomBaseEntity } from '@co/common';
-import { ROLE_NAME } from '@co/constants';
-import { RoleName } from '@co/types';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { RoleName } from '../enums';
+import { CustomBaseEntity } from './customBase.entity';
 import { UserEntity } from './user.entity';
 
 @Entity({
@@ -11,7 +10,7 @@ export class RoleEntity extends CustomBaseEntity {
   @Column({
     name: 'role_name',
     type: 'enum',
-    enum: ROLE_NAME,
+    enum: RoleName,
   })
   roleName: RoleName;
 

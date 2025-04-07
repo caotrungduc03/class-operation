@@ -1,5 +1,9 @@
-import { IS_PUBLIC_KEY, ROLES_KEY } from '@co/decorators';
-import { JwtPayload, RoleName } from '@co/types';
+import {
+  IS_PUBLIC_KEY,
+  JwtPayload,
+  RoleName,
+  ROLES_KEY,
+} from '@class-operation/libs';
 import {
   CanActivate,
   ExecutionContext,
@@ -16,7 +20,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
-    private userService: UserService
+    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -63,13 +67,13 @@ export class AuthGuard implements CanActivate {
   }
 
   private async isUserHasRequiredRoles(
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const payload = request['user'];
     const requiredRoles = this.reflector.getAllAndOverride<RoleName[]>(
       ROLES_KEY,
-      [context.getHandler(), context.getClass()]
+      [context.getHandler(), context.getClass()],
     );
 
     return !requiredRoles || this.isUserInRequiredRoles(payload, requiredRoles);
@@ -77,7 +81,7 @@ export class AuthGuard implements CanActivate {
 
   private async isUserInRequiredRoles(
     payload: any,
-    requiredRoles: RoleName[]
+    requiredRoles: RoleName[],
   ): Promise<boolean> {
     const user = await this.userService.findById(payload.userId, {
       relations: ['role'],

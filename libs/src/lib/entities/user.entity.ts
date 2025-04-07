@@ -1,7 +1,7 @@
-import { CustomBaseEntity } from '@co/common';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
-import { DetailUser } from './detail-user.entity';
+import { CustomBaseEntity } from './customBase.entity';
 import { RoleEntity } from './role.entity';
+import { UserDetail } from './user-detail.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends CustomBaseEntity {
@@ -65,7 +65,7 @@ export class UserEntity extends CustomBaseEntity {
   })
   detailUserId: string;
 
-  @OneToOne(() => DetailUser, (detailUser: DetailUser) => detailUser.user)
+  @OneToOne(() => UserDetail, (detailUser: UserDetail) => detailUser.user)
   @JoinColumn({
     name: 'detail_user_id',
   })

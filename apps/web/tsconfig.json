@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
     "noEmit": true,
@@ -24,11 +23,15 @@
       "@web/components/*": ["components/*"],
       "@web/types/*": ["types/*"],
       "@web/constants/*": ["constants/*"],
-      "@web/layouts/*": ["layouts/*"]
+      "@web/layouts/*": ["layouts/*"],
+      "@web/enums/*": ["enums/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "target": "ES2017",
+    "skipLibCheck": true,
+    "strict": false
   },
   "include": [
     "../../apps/web/.next/types/**/*.ts",
@@ -45,7 +48,8 @@
     "types/**/*.ts",
     "constants/**/*.ts",
     "layouts/**/*.ts",
-    "layouts/**/*.tsx"
+    "layouts/**/*.tsx",
+    "enums/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

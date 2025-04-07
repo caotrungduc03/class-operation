@@ -1,4 +1,3 @@
-import { ResponseDto } from '@co/dtos';
 import {
   ArgumentsHost,
   Catch,
@@ -7,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { ResponseDto } from '../dtos';
 
 @Catch()
 export class CustomExceptionsFilter implements ExceptionFilter {

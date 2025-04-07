@@ -1,6 +1,9 @@
-import { ROLE_NAME } from '@co/constants';
-import { RoleEntity, UserEntity } from '@co/entities';
-import { encodePassword } from '@co/utils';
+import {
+  encodePassword,
+  RoleEntity,
+  RoleName,
+  UserEntity,
+} from '@class-operation/libs';
 import { Injectable } from '@nestjs/common';
 import { RoleService } from '../role/role.service';
 import { UserService } from '../user/user.service';
@@ -19,7 +22,7 @@ export class DatabaseSeederService {
 
   private async seedRoles() {
     const roles: RoleEntity[] = [];
-    for (const roleName of Object.values(ROLE_NAME)) {
+    for (const roleName of Object.values(RoleName)) {
       const existingRole = await this.roleService.findByName(roleName);
       if (!existingRole) {
         const role = new RoleEntity();
@@ -42,7 +45,7 @@ export class DatabaseSeederService {
       user.password = encodePassword(process.env.ADMIN_PASSWORD || '');
       user.firstName = process.env.ADMIN_FIRST_NAME || '';
       user.lastName = process.env.ADMIN_LAST_NAME || '';
-      const role = await this.roleService.findByName(ROLE_NAME.ADMIN);
+      const role = await this.roleService.findByName(RoleName.ADMIN);
       if (!role) {
         throw new Error('Admin role not found');
       }

@@ -1,7 +1,5 @@
-import { ROLE_NAME } from "@web/constants/user";
+import { RoleName } from "@web/enums/user";
 import { ITimestamps } from "./common";
-
-export type RoleName = keyof typeof ROLE_NAME;
 
 export interface IUser extends ITimestamps {
   id: string;

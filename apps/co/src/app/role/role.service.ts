@@ -1,8 +1,9 @@
-import { BaseService } from '@co/common';
-import { ROLE_NAME } from '@co/constants';
-import { CreateRoleDto, UpdateRoleDto } from '@co/dtos';
-import { RoleEntity } from '@co/entities';
-import { RoleName } from '@co/types';
+import {
+  CreateRoleDto,
+  RoleEntity,
+  RoleName,
+  UpdateRoleDto,
+} from '@class-operation/libs';
 import {
   BadRequestException,
   Injectable,
@@ -10,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { BaseService } from '../../common';
 
 @Injectable()
 export class RoleService extends BaseService<RoleEntity> {
@@ -44,7 +46,7 @@ export class RoleService extends BaseService<RoleEntity> {
     updateRoleDto: UpdateRoleDto,
   ): Promise<RoleEntity> {
     const role = await this.findById(id);
-    if (Object.keys(ROLE_NAME).includes(role.roleName)) {
+    if (Object.keys(RoleName).includes(role.roleName)) {
       throw new BadRequestException('You cannot update this role');
     }
 
@@ -56,7 +58,7 @@ export class RoleService extends BaseService<RoleEntity> {
 
   async deleteById(id: string): Promise<RoleEntity> {
     const role = await this.findById(id);
-    if (Object.keys(ROLE_NAME).includes(role.roleName)) {
+    if (Object.keys(RoleName).includes(role.roleName)) {
       throw new BadRequestException('You cannot delete this role');
     }
 
@@ -66,7 +68,7 @@ export class RoleService extends BaseService<RoleEntity> {
   }
 
   async findByName(roleName: RoleName): Promise<RoleEntity | null> {
-    const role = await this.findOne({ where: { roleName } });
+    const role = await this.roleRepository.findOne({ where: { roleName } });
 
     return role;
   }

@@ -1,8 +1,9 @@
-import { BaseService } from '@co/common';
-import { CreateUserDto } from '@co/dtos';
-import { UserEntity } from '@co/entities';
-import { FindOptions } from '@co/types';
-import { encodePassword } from '@co/utils';
+import {
+  CreateUserDto,
+  encodePassword,
+  FindOptions,
+  UserEntity,
+} from '@class-operation/libs';
 import {
   BadRequestException,
   Injectable,
@@ -10,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { BaseService } from '../../common';
 import { RoleService } from '../role/role.service';
 
 @Injectable()
@@ -45,7 +47,7 @@ export class UserService extends BaseService<UserEntity> {
       throw new BadRequestException('Email is required');
     }
 
-    return this.findOne({
+    return this.userRepository.findOne({
       where: { email },
       relations: ['role'],
       select: [

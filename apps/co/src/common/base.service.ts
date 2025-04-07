@@ -1,4 +1,4 @@
-import { IBaseService, QueryOptions, QueryResult } from '@co/types';
+import { IBaseService, QueryOptions, QueryResult } from '@class-operation/libs';
 import { BadRequestException } from '@nestjs/common';
 import {
   BaseEntity,
@@ -42,17 +42,17 @@ export abstract class BaseService<T extends BaseEntity>
 
   protected columnExists(
     columnName: string,
-    metadata: EntityMetadata
+    metadata: EntityMetadata,
   ): boolean {
     return metadata.columns.some(
-      (column) => column.propertyName === columnName
+      (column) => column.propertyName === columnName,
     );
   }
 
   protected applyPagination(
     queryBuilder: SelectQueryBuilder<T>,
     page: number,
-    limit: number
+    limit: number,
   ): SelectQueryBuilder<T> {
     queryBuilder.skip((page - 1) * limit);
     queryBuilder.take(limit);
@@ -61,7 +61,7 @@ export abstract class BaseService<T extends BaseEntity>
 
   protected applyRelations(
     queryBuilder: SelectQueryBuilder<T>,
-    relations: string[]
+    relations: string[],
   ): SelectQueryBuilder<T> {
     relations.forEach((relation) => {
       const [relationName, subRelation] = relation.split('.');
@@ -69,7 +69,7 @@ export abstract class BaseService<T extends BaseEntity>
       if (subRelation) {
         queryBuilder.leftJoinAndSelect(
           `${relationName}.${subRelation}`,
-          subRelation
+          subRelation,
         );
       } else {
         queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
@@ -81,7 +81,7 @@ export abstract class BaseService<T extends BaseEntity>
   protected applyFiltering(
     queryBuilder: SelectQueryBuilder<T>,
     filter: any,
-    metadata: EntityMetadata
+    metadata: EntityMetadata,
   ): SelectQueryBuilder<T> {
     Object.keys(filter).forEach((key) => {
       if (this.columnExists(key, metadata)) {
@@ -101,7 +101,7 @@ export abstract class BaseService<T extends BaseEntity>
                   });
                 }
               });
-            })
+            }),
           );
         } else {
           const numericValue = Number(value);
@@ -124,13 +124,13 @@ export abstract class BaseService<T extends BaseEntity>
   protected applySorting(
     queryBuilder: SelectQueryBuilder<T>,
     sort: string,
-    metadata: EntityMetadata
+    metadata: EntityMetadata,
   ): SelectQueryBuilder<T> {
     const [sortColumn, sortOrder] = sort.split(':');
     if (this.columnExists(sortColumn, metadata)) {
       queryBuilder.orderBy(
         `entity.${sortColumn}`,
-        sortOrder.toUpperCase() as 'ASC' | 'DESC'
+        sortOrder.toUpperCase() as 'ASC' | 'DESC',
       );
     }
     return queryBuilder;
@@ -170,7 +170,7 @@ export abstract class BaseService<T extends BaseEntity>
     queryBuilder: SelectQueryBuilder<T>,
     search: string,
     columns: string[],
-    metadata: EntityMetadata
+    metadata: EntityMetadata,
   ): SelectQueryBuilder<T> {
     if (search && columns.length > 0) {
       const searchConditions = columns

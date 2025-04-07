@@ -1,6 +1,10 @@
-import { Public, User } from '@co/decorators';
-import { LoginRequestDto, ResponseDto, UserDto } from '@co/dtos';
 import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
+import { Public, User } from '../../../../../libs/src/lib/decorators';
+import {
+  LoginRequestDto,
+  ResponseDto,
+  UserDto,
+} from '../../../../../libs/src/lib/dtos';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 

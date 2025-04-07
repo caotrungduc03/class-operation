@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
     "importHelpers": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "ES2022",
+    "moduleResolution": "node",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -16,6 +13,15 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "strictPropertyInitialization": false
-  }
+    "rootDir": ".",
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@class-operation/libs/common": ["libs/src/index.ts"]
+    }
+  },
+  "include": ["libs"],
+  "exclude": ["node_modules", "dist"]
 }

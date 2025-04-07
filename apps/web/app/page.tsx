@@ -1,6 +1,6 @@
 "use client";
 import Loading from "@web/components/common/Loading";
-import { ROLE_NAME } from "@web/constants/user";
+import { RoleName } from "@web/enums/user";
 import { RootState } from "@web/libs/store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,8 +13,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (user) {
       switch (user.role.roleName) {
-        case ROLE_NAME.ADMIN:
-        case ROLE_NAME.RECEPTIONIST:
+        case RoleName.ADMIN:
+        case RoleName.RECEPTIONIST:
           router.push("/ops");
           break;
         default:
