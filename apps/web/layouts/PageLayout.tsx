@@ -12,20 +12,22 @@ interface PageLayoutProps extends React.PropsWithChildren {
 const PageLayout = ({ children, breadcrumbs, title }: PageLayoutProps) => {
   return (
     <Layout className="px-10 pb-8 pt-2">
-      <Breadcrumb
-        className="my-4"
-        items={[
-          {
-            href: "#",
-            title: <HomeFilled />,
-          },
-          ...breadcrumbs,
-        ]}
-      />
-      <Typography.Title level={3} className="mb-4">
-        {title}
-      </Typography.Title>
-      {children}
+      <div className="container mx-auto">
+        <Breadcrumb
+          className="my-4"
+          items={[
+            {
+              href: "#",
+              title: <HomeFilled />,
+            },
+            ...breadcrumbs,
+          ]}
+        />
+        <Typography.Title level={3} className="mb-4">
+          {title}
+        </Typography.Title>
+        {children}
+      </div>
     </Layout>
   );
 };

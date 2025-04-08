@@ -5,9 +5,11 @@ export interface IUser extends ITimestamps {
   id: string;
   email: string;
   fullName: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   role: IRole;
   detail: IDetailUser;
+  status: boolean;
+  avatar?: string;
 }
 
 export interface IRole {

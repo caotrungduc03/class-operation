@@ -1,3 +1,4 @@
+"use client";
 import {
   BellOutlined,
   LogoutOutlined,
@@ -10,6 +11,7 @@ import { logout } from "@web/libs/features/auth/authSlice";
 import { toggleSidebar } from "@web/libs/features/layout/layoutSlice";
 import { RootState } from "@web/libs/store";
 import { Avatar, Badge, Button, Dropdown, Layout, MenuProps } from "antd";
+import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -55,7 +57,20 @@ const Header = () => {
             onClick={(e) => e.preventDefault()}
           >
             <span className="font-bold">{user?.fullName}</span>
-            <Avatar icon={<UserOutlined />} />
+            <Avatar
+              icon={
+                user?.avatar ? (
+                  <Image
+                    src={user?.avatar}
+                    alt="Avatar"
+                    width={160}
+                    height={160}
+                  />
+                ) : (
+                  <UserOutlined />
+                )
+              }
+            />
           </a>
         </Dropdown>
       </div>

@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.my-profile .ant-tabs .ant-tabs-nav {
+  @apply mb-0;
+}

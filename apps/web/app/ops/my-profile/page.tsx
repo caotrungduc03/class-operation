@@ -1,22 +1,17 @@
-import { NAV_TITLE } from "@web/constants/nav";
-import PageLayout from "@web/layouts/PageLayout";
-import { Card } from "antd";
-import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
-
-const breadcrumbs: ItemType[] = [
-  {
-    title: NAV_TITLE.MY_PROFILE,
-  },
-];
+"use client";
+import Loading from "@web/components/common/Loading";
+import { NAV_LINK } from "@web/constants/nav";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const MyProfile = () => {
-  return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MY_PROFILE}>
-      <Card>
-        <h1>MyProfile</h1>
-      </Card>
-    </PageLayout>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push(NAV_LINK.MY_PROFILE_OVERVIEW);
+  }, []);
+
+  return <Loading />;
 };
 
 export default MyProfile;

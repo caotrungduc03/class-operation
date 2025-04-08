@@ -5,6 +5,8 @@ export const NAV_LINK = {
   TEACHER_LIST: "/ops/user/teacher/list",
   RECEPTIONIST_LIST: "/ops/user/receptionist/list",
   MY_PROFILE: "/ops/my-profile",
+  MY_PROFILE_OVERVIEW: "/ops/my-profile/overview",
+  MY_PROFILE_SETTINGS: "/ops/my-profile/settings",
   LOGIN: "/login",
 };
 

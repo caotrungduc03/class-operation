@@ -23,9 +23,7 @@ export class UserDto extends BaseDto {
   @Expose()
   avatar: string;
 
-  @Expose({
-    groups: ['admin'],
-  })
+  @Expose()
   status: boolean;
 
   @Expose({
