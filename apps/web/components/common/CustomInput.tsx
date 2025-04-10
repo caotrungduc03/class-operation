@@ -9,6 +9,7 @@ interface CustomInputProps {
   prefix?: React.ReactNode;
   placeholder?: string;
   type?: string;
+  disabled?: boolean;
 }
 
 const CustomInput = ({
@@ -18,6 +19,7 @@ const CustomInput = ({
   prefix,
   placeholder,
   type,
+  disabled,
 }: CustomInputProps) => {
   return (
     <Controller
@@ -25,13 +27,14 @@ const CustomInput = ({
       name={name}
       render={({ field, fieldState: { error } }) => {
         return (
-          <div>
+          <div className="w-full">
             {type === "password" ? (
               <Input.Password
                 {...field}
                 size={size}
                 prefix={prefix}
                 placeholder={placeholder}
+                disabled={disabled}
               />
             ) : (
               <Input
@@ -39,6 +42,7 @@ const CustomInput = ({
                 size={size}
                 prefix={prefix}
                 placeholder={placeholder}
+                disabled={disabled}
               />
             )}
             {error?.message && <p className="text-red-500">{error.message}</p>}

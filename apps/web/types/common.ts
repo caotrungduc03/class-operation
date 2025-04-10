@@ -24,7 +24,7 @@ export interface ITimestamps {
 export interface CustomResponse<T> {
   data: T;
   message: string;
-  status: number;
+  statusCode: number;
 }
 
 export interface Pagination<T> {

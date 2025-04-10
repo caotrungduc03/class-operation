@@ -1,6 +1,6 @@
 "use client";
 import Loading from "@web/components/common/Loading";
-import { RoleName } from "@web/enums/user";
+import { RoleName } from "@web/enums/role";
 import { RootState } from "@web/libs/store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

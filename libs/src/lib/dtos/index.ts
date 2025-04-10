@@ -1,5 +1,6 @@
 export * from './auth/loginRequest.dto';
 export * from './auth/loginResponse.dto';
+export * from './auth/UpdateProfile.dto';
 export * from './common/base.dto';
 export * from './common/baseRequest.dto';
 export * from './common/response.dto';

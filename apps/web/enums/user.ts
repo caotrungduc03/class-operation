@@ -1,6 +1,4 @@
-export enum RoleName {
-  ADMIN = "ADMIN",
-  TEACHER = "TEACHER",
-  RECEPTIONIST = "RECEPTIONIST",
-  STUDENT = "STUDENT",
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  BLOCKED = 'BLOCKED',
 }

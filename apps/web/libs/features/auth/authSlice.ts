@@ -44,7 +44,13 @@ export const authSlice = createSlice({
         state.user = null;
         state.accessToken = "";
         setToken("");
-      });
+      })
+      .addMatcher(
+        authApi.endpoints.updateProfile.matchFulfilled,
+        (state, { payload }) => {
+          state.user = payload.data;
+        },
+      );
   },
 });
 

@@ -3,9 +3,14 @@ import {
   JwtPayload,
   LoginRequestDto,
   LoginResponseDto,
+  UpdateProfileDto,
   UserDto,
 } from '@class-operation/libs';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 
@@ -43,8 +48,27 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return {
-      user: UserDto.plainToInstance(user, ['private']),
+      user: UserDto.plainToInstance(user),
       accessToken,
     };
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const user = await this.userService.findById(userId, {
+      relations: ['role', 'detail'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Save the updated user
+    const updatedUser = await this.userService.store({
+      ...user,
+      firstName: updateProfileDto.firstName,
+      lastName: updateProfileDto.lastName,
+      phoneNumber: updateProfileDto.phoneNumber,
+    });
+    return updatedUser;
   }
 }

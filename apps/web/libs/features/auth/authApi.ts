@@ -8,6 +8,12 @@ export interface LoginResponse {
   accessToken: string;
 }
 
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+}
+
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
@@ -34,14 +40,25 @@ export const authApi = createApi({
     }),
     getMe: builder.query<CustomResponse<any>, { accessToken: string }>({
       query: ({ accessToken }) => ({
-        url: "/auth/me",
+        url: "/auth/my-profile",
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       }),
     }),
+    updateProfile: builder.mutation<
+      CustomResponse<IUser>,
+      UpdateProfileRequest
+    >({
+      query: (data) => ({
+        url: "/auth/update-profile",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useGetMeQuery } = authApi;
+export const { useLoginMutation, useGetMeQuery, useUpdateProfileMutation } =
+  authApi;

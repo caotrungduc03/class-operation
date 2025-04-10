@@ -6,6 +6,7 @@ import { UserEntity } from './user.entity';
 export class UserDetail extends CustomBaseEntity {
   @Column({
     name: 'code',
+    unique: true,
   })
   code: string;
 

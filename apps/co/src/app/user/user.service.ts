@@ -49,7 +49,7 @@ export class UserService extends BaseService<UserEntity> {
 
     return this.userRepository.findOne({
       where: { email },
-      relations: ['role'],
+      relations: ['role', 'detail'],
       select: [
         'id',
         'email',
@@ -60,7 +60,6 @@ export class UserService extends BaseService<UserEntity> {
         'avatar',
         'status',
         'lastLogin',
-        'roleId',
       ],
     });
   }

@@ -1,9 +1,11 @@
-import { RoleName } from "@web/enums/user";
+import { RoleName } from "@web/enums/role";
 import { ITimestamps } from "./common";
 
 export interface IUser extends ITimestamps {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   fullName: string;
   phoneNumber?: string;
   role: IRole;

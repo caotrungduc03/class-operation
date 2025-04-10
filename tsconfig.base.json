@@ -19,7 +19,7 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "paths": {
-      "@class-operation/libs/common": ["libs/src/index.ts"]
+      "@class-operation/libs": ["libs/src/index.ts"]
     }
   },
   "include": ["libs"],

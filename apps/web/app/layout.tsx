@@ -18,7 +18,7 @@ const RootLayout = ({ children }: React.PropsWithChildren) => (
       <StoreProvider>
         <AntdRegistry>
           <RouteGuard>{children}</RouteGuard>
-          <ToastContainer />
+          <ToastContainer autoClose={2000} />
         </AntdRegistry>
       </StoreProvider>
     </body>

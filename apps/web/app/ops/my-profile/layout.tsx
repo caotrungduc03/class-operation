@@ -6,8 +6,8 @@ import { RootState } from "@web/libs/store";
 import { Avatar, Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React, { useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 
 const breadcrumbs: ItemType[] = [
@@ -17,8 +17,10 @@ const breadcrumbs: ItemType[] = [
 ];
 
 const MyProfile = ({ children }: React.PropsWithChildren) => {
+  const [currentTab, setCurrentTab] = React.useState("1");
   const { user } = useSelector((state: RootState) => state.auth);
   const router = useRouter();
+  const pathname = usePathname();
 
   const totalFields = Object.keys(user).length;
   const countEmptyFields = useMemo(() => {
@@ -47,6 +49,19 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
       ),
     },
   ];
+
+  useEffect(() => {
+    switch (pathname) {
+      case NAV_LINK.MY_PROFILE_OVERVIEW:
+        setCurrentTab("1");
+        break;
+      case NAV_LINK.MY_PROFILE_SETTINGS:
+        setCurrentTab("2");
+        break;
+      default:
+        setCurrentTab("1");
+    }
+  }, [pathname, setCurrentTab]);
 
   return (
     <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MY_PROFILE}>
@@ -106,9 +121,14 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
               </div>
             </div>
           </div>
-          <Tabs items={tabs} className="mt-4" defaultActiveKey="1" />
+          <Tabs
+            size="large"
+            items={tabs}
+            className="mt-4"
+            activeKey={currentTab}
+          />
         </Card>
-        <Card>{children}</Card>
+        {children}
       </div>
     </PageLayout>
   );
