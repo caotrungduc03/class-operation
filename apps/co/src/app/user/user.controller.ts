@@ -1,11 +1,20 @@
 import {
+  CreateUserDto,
   Pagination,
   ResponseDto,
   RoleName,
   Roles,
   UserDto,
 } from '@class-operation/libs';
-import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -14,7 +23,7 @@ export class UserController {
 
   @Get('/teachers')
   @Roles(RoleName.ADMIN)
-  async findTeachers(@Query() query: Object) {
+  async findTeachers(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
       await this.userService.findUsersByRoleName(RoleName.TEACHER, query);
 
@@ -30,7 +39,7 @@ export class UserController {
 
   @Get('/receptionists')
   @Roles(RoleName.ADMIN)
-  async findReceptionists(@Query() query: Object) {
+  async findReceptionists(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
       await this.userService.findUsersByRoleName(RoleName.RECEPTIONIST, query);
 
@@ -42,5 +51,17 @@ export class UserController {
     };
 
     return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Post('/')
+  @Roles(RoleName.ADMIN)
+  async createUser(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+    const user = await this.userService.create(createUserDto);
+
+    return new ResponseDto(
+      HttpStatus.CREATED,
+      'User created successfully',
+      UserDto.plainToInstance(user, ['admin']),
+    );
   }
 }

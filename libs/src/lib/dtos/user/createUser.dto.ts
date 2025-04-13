@@ -3,18 +3,24 @@ import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEmpty,
+  IsEnum,
   IsNotEmpty,
-  IsString,
   Matches,
   MinLength,
 } from 'class-validator';
+import { RoleName } from '../../enums';
 import { BaseRequestDto } from '../common/baseRequest.dto';
 
 export class CreateUserDto extends BaseRequestDto {
   @ApiProperty()
   @IsNotEmpty()
-  @MinLength(3)
-  fullName: string;
+  @MinLength(1)
+  firstName: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @MinLength(1)
+  lastName: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -43,8 +49,8 @@ export class CreateUserDto extends BaseRequestDto {
   avatar: string;
 
   @ApiProperty()
-  @IsString()
-  roleId: string;
+  @IsEnum(RoleName)
+  roleName: RoleName;
 
   @Type(() => Number)
   status: number;

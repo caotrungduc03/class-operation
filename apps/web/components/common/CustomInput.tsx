@@ -1,6 +1,7 @@
 import { Input } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 import { Control, Controller } from "react-hook-form";
+import CustomLabel from "./CustomLabel";
 
 interface CustomInputProps {
   control: Control<any>;
@@ -10,6 +11,9 @@ interface CustomInputProps {
   placeholder?: string;
   type?: string;
   disabled?: boolean;
+  label?: string;
+  required?: boolean;
+  autoComplete?: string;
 }
 
 const CustomInput = ({
@@ -20,6 +24,9 @@ const CustomInput = ({
   placeholder,
   type,
   disabled,
+  label,
+  required,
+  autoComplete,
 }: CustomInputProps) => {
   return (
     <Controller
@@ -28,6 +35,8 @@ const CustomInput = ({
       render={({ field, fieldState: { error } }) => {
         return (
           <div className="w-full">
+            {label && <CustomLabel label={label} required={required} />}
+
             {type === "password" ? (
               <Input.Password
                 {...field}
@@ -35,6 +44,7 @@ const CustomInput = ({
                 prefix={prefix}
                 placeholder={placeholder}
                 disabled={disabled}
+                autoComplete={autoComplete}
               />
             ) : (
               <Input
@@ -43,6 +53,7 @@ const CustomInput = ({
                 prefix={prefix}
                 placeholder={placeholder}
                 disabled={disabled}
+                autoComplete={autoComplete}
               />
             )}
             {error?.message && <p className="text-red-500">{error.message}</p>}

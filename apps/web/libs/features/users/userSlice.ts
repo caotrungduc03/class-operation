@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IUser } from "@web/types/user";
-import { teacherApi } from "./teacherApi";
+import { userApi } from "./userApi";
 
 export interface AuthState {
   teachers: IUser[];
@@ -16,7 +16,7 @@ export const teacherSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addMatcher(
-      teacherApi.endpoints.getTeachers.matchFulfilled,
+      userApi.endpoints.getTeachers.matchFulfilled,
       (state, { payload }) => {
         state.teachers = payload.data.items;
       },

@@ -74,28 +74,31 @@ export class UserService extends BaseService<UserEntity> {
       throw new BadRequestException('Passwords do not match');
     }
 
-    const newUser = new UserEntity();
-    newUser.email = createUserDto.email.toLowerCase();
+    const lowerCaseEmail = createUserDto.email.toLowerCase();
     const user = await this.findOne({
       where: {
-        email: newUser.email,
+        email: lowerCaseEmail,
       },
     });
     if (user) {
       throw new BadRequestException('User already exists');
     }
 
-    const role = await this.roleService.findById(createUserDto.roleId);
+    const role = await this.roleService.findByName(createUserDto.roleName);
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+
     const code = await this.counterService.getNextCode(role.roleName);
     const userDetail = await this.userDetailService.createUserDetail(code);
 
-    newUser.password = encodePassword(createUserDto.password);
-    newUser.role = role;
-    newUser.detail = userDetail;
+    const encodedPassword = encodePassword(createUserDto.password);
 
     return this.store({
       ...createUserDto,
-      ...newUser,
+      password: encodedPassword,
+      role,
+      detail: userDetail,
     });
   }
 
@@ -105,6 +108,7 @@ export class UserService extends BaseService<UserEntity> {
     const queryBuilder = this.repository
       .createQueryBuilder('entity')
       .innerJoinAndSelect('entity.role', 'role')
+      .innerJoinAndSelect('entity.detail', 'detail')
       .where('role.roleName = :roleName', { roleName });
 
     if (search) {

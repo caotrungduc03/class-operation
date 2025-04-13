@@ -3,7 +3,7 @@ import "@ant-design/v5-patch-for-react-19";
 import RouteGuard from "@web/components/RouteGuard";
 import { Metadata } from "next";
 import React from "react";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 import StoreProvider from "./StoreProvider";
 import "./global.css";
 
@@ -18,7 +18,11 @@ const RootLayout = ({ children }: React.PropsWithChildren) => (
       <StoreProvider>
         <AntdRegistry>
           <RouteGuard>{children}</RouteGuard>
-          <ToastContainer autoClose={2000} />
+          <Toaster
+            toastOptions={{
+              duration: 2000,
+            }}
+          />
         </AntdRegistry>
       </StoreProvider>
     </body>

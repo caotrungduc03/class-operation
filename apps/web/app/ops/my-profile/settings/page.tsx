@@ -10,8 +10,8 @@ import { useUpdateProfileMutation } from "@web/libs/features/auth/authApi";
 import { RootState } from "@web/libs/store";
 import { Card, Typography } from "antd";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 
 const MyProfileSettings = () => {
   const { user } = useSelector((state: RootState) => state.auth);

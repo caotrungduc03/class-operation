@@ -2,6 +2,7 @@ import { Select } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 import { BaseOptionType } from "antd/es/select";
 import { Control, Controller } from "react-hook-form";
+import CustomLabel from "./CustomLabel";
 
 interface CustomSelectProps {
   control: Control<any>;
@@ -12,6 +13,8 @@ interface CustomSelectProps {
   options: BaseOptionType[];
   disabled?: boolean;
   defaultValue?: string;
+  label?: string;
+  required?: boolean;
 }
 
 const CustomSelect = ({
@@ -23,6 +26,8 @@ const CustomSelect = ({
   options,
   disabled,
   defaultValue,
+  label,
+  required,
 }: CustomSelectProps) => {
   return (
     <Controller
@@ -32,6 +37,8 @@ const CustomSelect = ({
       render={({ field, fieldState: { error } }) => {
         return (
           <div className="w-full">
+            {label && <CustomLabel label={label} required={required} />}
+
             <Select
               {...field}
               size={size}

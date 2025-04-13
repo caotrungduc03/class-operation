@@ -3,18 +3,31 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { CustomExceptionsFilter } from '@class-operation/libs';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as morgan from 'morgan';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.CO_PORT || 8080;
+  const httpAdapterHost = app.get(HttpAdapterHost);
 
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
   app.enableCors();
+
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new CustomExceptionsFilter(httpAdapterHost));
+  app.use(
+    morgan('short', {
+      stream: {
+        write: (message) => Logger.log(message),
+      },
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Class Operation API')

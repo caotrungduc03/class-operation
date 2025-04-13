@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@web/libs/store";
 import { CustomResponse, Pagination } from "@web/types/common";
-import { IUser } from "@web/types/user";
+import { CreateUserDto, IUser } from "@web/types/user";
 
-export const teacherApi = createApi({
-  reducerPath: "teacherApi",
+export const userApi = createApi({
+  reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL,
     prepareHeaders: (headers, { getState }) => {
@@ -17,6 +17,13 @@ export const teacherApi = createApi({
   }),
 
   endpoints: (builder) => ({
+    createUser: builder.mutation<CustomResponse<IUser>, CreateUserDto>({
+      query: (body) => ({
+        url: "/users",
+        method: "POST",
+        body,
+      }),
+    }),
     getTeachers: builder.query<
       CustomResponse<Pagination<IUser[]>>,
       { search?: string }
@@ -30,4 +37,4 @@ export const teacherApi = createApi({
   }),
 });
 
-export const { useGetTeachersQuery } = teacherApi;
+export const { useGetTeachersQuery, useCreateUserMutation } = userApi;

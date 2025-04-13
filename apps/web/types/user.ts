@@ -11,7 +11,18 @@ export interface IUser extends ITimestamps {
   role: IRole;
   detail: IDetailUser;
   status: boolean;
+  lastLogin?: Date;
   avatar?: string;
+}
+
+export interface CreateUserDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber?: string;
+  roleName: RoleName;
 }
 
 export interface IRole {

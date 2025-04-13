@@ -7,9 +7,8 @@ import { useLoginMutation } from "@web/libs/features/auth/authApi";
 import { Card, Typography } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { z } from "zod";
 
 interface FormValues {
@@ -26,24 +25,18 @@ const Login = () => {
     resolver: zodResolver(validationSchema),
   });
 
-  const [login, { data, isLoading, isSuccess, isError, error }] =
-    useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success(data?.message);
-
+  const onSubmit = async ({ email, password }: FormValues) => {
+    try {
+      const result = await login({ email, password }).unwrap();
+      toast.success(result.message);
       router.push("/");
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
     }
-    if (isError) {
-      toast.error(data?.message);
-    }
-  }, [isSuccess, data, isError, error, router]);
-
-  const onSubmit = ({ email, password }: FormValues) => {
-    login({ email, password });
   };
 
   return (
