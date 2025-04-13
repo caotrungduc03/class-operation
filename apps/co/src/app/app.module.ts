@@ -8,8 +8,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { CounterModule } from './counter/counter.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
 import { RoleModule } from './role/role.module';
+import { UserDetailModule } from './user-detail/user-detail.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -35,6 +37,8 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     RoleModule,
+    CounterModule,
+    UserDetailModule,
   ],
   controllers: [AppController],
   providers: [

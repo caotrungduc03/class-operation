@@ -69,5 +69,5 @@ export class UserEntity extends CustomBaseEntity {
   @JoinColumn({
     name: 'detail_user_id',
   })
-  detail: RoleEntity;
+  detail: UserDetail;
 }

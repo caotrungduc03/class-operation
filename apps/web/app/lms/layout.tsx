@@ -1,4 +1,3 @@
-import "@ant-design/v5-patch-for-react-19";
 import MainLayout from "@web/layouts/MainLayout";
 
 const Layout = ({ children }: React.PropsWithChildren) => {

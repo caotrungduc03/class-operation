@@ -36,5 +36,6 @@ export class UserDto extends BaseDto {
   role: RoleDto;
 
   @Expose()
+  @Type(() => DetailUserDto)
   detail: DetailUserDto;
 }

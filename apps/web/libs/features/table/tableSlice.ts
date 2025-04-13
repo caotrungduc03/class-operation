@@ -14,14 +14,25 @@ export const tableSlice = createSlice({
   name: "table",
   initialState,
   reducers: {
-    toggleCreateModal: (state) => {
-      state.isOpenCreateModal = !state.isOpenCreateModal;
+    openCreateModal: (state) => {
+      state.isOpenCreateModal = true;
     },
-    toggleEditModal: (state) => {
-      state.isOpenEditModal = !state.isOpenEditModal;
+    closeCreateModal: (state) => {
+      state.isOpenCreateModal = false;
+    },
+    openEditModal: (state) => {
+      state.isOpenEditModal = true;
+    },
+    closeEditModal: (state) => {
+      state.isOpenEditModal = false;
     },
   },
 });
 
-export const { toggleCreateModal, toggleEditModal } = tableSlice.actions;
+export const {
+  openCreateModal,
+  openEditModal,
+  closeCreateModal,
+  closeEditModal,
+} = tableSlice.actions;
 export default tableSlice;

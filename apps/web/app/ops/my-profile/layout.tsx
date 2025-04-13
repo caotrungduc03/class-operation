@@ -22,7 +22,7 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const totalFields = Object.keys(user).length;
+  const totalFields = Object.keys(user).length - 1; // Exclude id field
   const countEmptyFields = useMemo(() => {
     return Object.values(user).filter((value) => !value).length;
   }, [user]);

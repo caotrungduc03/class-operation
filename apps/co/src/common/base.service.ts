@@ -80,7 +80,7 @@ export abstract class BaseService<T extends BaseEntity>
 
   protected applyFiltering(
     queryBuilder: SelectQueryBuilder<T>,
-    filter: any,
+    filter: Record<string, any>,
     metadata: EntityMetadata,
   ): SelectQueryBuilder<T> {
     Object.keys(filter).forEach((key) => {
@@ -136,7 +136,10 @@ export abstract class BaseService<T extends BaseEntity>
     return queryBuilder;
   }
 
-  async query(query: any, options?: QueryOptions): Promise<QueryResult<T>> {
+  async query(
+    query: Record<string, any>,
+    options?: QueryOptions,
+  ): Promise<QueryResult<T>> {
     let { page = 1, limit = 10, sort = 'id:desc', ...filter } = query;
     const { relations = [] } = options || {};
     page = Number(page);
@@ -187,7 +190,10 @@ export abstract class BaseService<T extends BaseEntity>
     return queryBuilder;
   }
 
-  async search(query: any, options?: QueryOptions): Promise<QueryResult<T>> {
+  async search(
+    query: Record<string, any>,
+    options?: QueryOptions,
+  ): Promise<QueryResult<T>> {
     let {
       page = 1,
       limit = 10,

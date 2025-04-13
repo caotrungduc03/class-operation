@@ -22,7 +22,7 @@ const CustomButton = ({
   title,
   children,
   className,
-  size,
+  size = "large",
   color,
   icon,
   iconPosition = "start",

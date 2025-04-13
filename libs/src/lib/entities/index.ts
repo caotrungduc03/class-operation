@@ -1,3 +1,4 @@
+export * from './counter.entity';
 export * from './customBase.entity';
 export * from './list-entity';
 export * from './role.entity';

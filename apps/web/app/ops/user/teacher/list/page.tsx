@@ -6,6 +6,7 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import TableAction from "@web/components/table/TeacherAction";
 import { NAV_TITLE } from "@web/constants/nav";
 import PageLayout from "@web/layouts/PageLayout";
+import { openCreateModal } from "@web/libs/features/table/tableSlice";
 import { useGetTeachersQuery } from "@web/libs/features/teachers/teacherApi";
 import { TableColumn } from "@web/types/common";
 import { IUser } from "@web/types/user";
@@ -14,6 +15,7 @@ import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -73,8 +75,11 @@ const Teachers = () => {
     showSizeChanger: true,
     showQuickJumper: true,
   });
-  const { data, isLoading } = useGetTeachersQuery({});
-  const { control } = useForm();
+  const [searchParams, setSearchParams] = useState<{ search?: string }>({});
+  const dispatch = useDispatch();
+
+  const { data, isLoading, refetch } = useGetTeachersQuery(searchParams);
+  const { control, handleSubmit, reset: resetForm } = useForm();
   const { current, pageSize } = pagination;
 
   const tableColumns = columnsTitles.map((item, index) => {
@@ -94,32 +99,63 @@ const Teachers = () => {
     );
   }, [data, current, pageSize]);
 
+  const onSubmit = (formData: { search?: string }) => {
+    setSearchParams(formData);
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+  };
+
+  const handleReset = () => {
+    resetForm();
+    setSearchParams({});
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+    refetch();
+  };
+
   return (
     <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.TEACHER_LIST}>
       <div className="flex flex-col gap-6">
         <Card>
-          <div className="flex flex-col gap-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
+          >
             <FilterGrid>
               <CustomInput
                 control={control}
                 name="search"
                 size="large"
-                placeholder="Please enter teacher name"
+                placeholder="Please enter first name, last name or email"
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
-                <CustomButton title="Reset" size="large" />
-                <CustomButton type="primary" title="Search" size="large" />
+                <CustomButton
+                  title="Reset"
+                  size="large"
+                  onClick={handleReset}
+                />
+                <CustomButton
+                  type="primary"
+                  title="Search"
+                  size="large"
+                  onClick={handleSubmit(onSubmit)}
+                />
               </div>
               <CustomButton
                 type="primary"
                 title="Add Teacher"
                 size="large"
                 icon={<PlusOutlined />}
+                onClick={() => dispatch(openCreateModal())}
               />
             </div>
-          </div>
+          </form>
         </Card>
         <Card>
           <Table

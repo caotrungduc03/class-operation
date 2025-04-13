@@ -17,10 +17,14 @@ export const teacherApi = createApi({
   }),
 
   endpoints: (builder) => ({
-    getTeachers: builder.query<CustomResponse<Pagination<IUser[]>>, {}>({
-      query: () => ({
+    getTeachers: builder.query<
+      CustomResponse<Pagination<IUser[]>>,
+      { search?: string }
+    >({
+      query: (params) => ({
         url: "/users/teachers",
         method: "GET",
+        params,
       }),
     }),
   }),

@@ -2,6 +2,7 @@ import {
   CreateUserDto,
   encodePassword,
   FindOptions,
+  RoleName,
   UserEntity,
 } from '@class-operation/libs';
 import {
@@ -12,7 +13,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseService } from '../../common';
+import { CounterService } from '../counter/counter.service';
 import { RoleService } from '../role/role.service';
+import { UserDetailService } from '../user-detail/user-detail.service';
 
 @Injectable()
 export class UserService extends BaseService<UserEntity> {
@@ -20,6 +23,8 @@ export class UserService extends BaseService<UserEntity> {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly roleService: RoleService,
+    private readonly counterService: CounterService,
+    private readonly userDetailService: UserDetailService,
   ) {
     super(userRepository);
   }
@@ -81,16 +86,45 @@ export class UserService extends BaseService<UserEntity> {
     }
 
     const role = await this.roleService.findById(createUserDto.roleId);
-    if (!role) {
-      throw new BadRequestException('Role not found');
-    }
+    const code = await this.counterService.getNextCode(role.roleName);
+    const userDetail = await this.userDetailService.createUserDetail(code);
 
     newUser.password = encodePassword(createUserDto.password);
     newUser.role = role;
+    newUser.detail = userDetail;
 
     return this.store({
       ...createUserDto,
       ...newUser,
     });
+  }
+
+  async findUsersByRoleName(roleName: RoleName, query: Record<string, any>) {
+    const { page = 1, limit = 10, sort = 'id:desc', search } = query;
+
+    const queryBuilder = this.repository
+      .createQueryBuilder('entity')
+      .innerJoinAndSelect('entity.role', 'role')
+      .where('role.roleName = :roleName', { roleName });
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(entity.firstName ILIKE :search OR entity.lastName ILIKE :search OR entity.email ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    const metadata = this.repository.metadata;
+    this.applyPagination(queryBuilder, page, limit);
+    this.applySorting(queryBuilder, sort, metadata);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
   }
 }

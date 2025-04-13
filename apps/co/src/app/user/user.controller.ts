@@ -15,10 +15,9 @@ export class UserController {
   @Get('/teachers')
   @Roles(RoleName.ADMIN)
   async findTeachers(@Query() query: Object) {
-    const { page, limit, total, data } = await this.userService.query({
-      ...query,
-      // role: RoleName.TEACHER,
-    });
+    const { page, limit, total, data } =
+      await this.userService.findUsersByRoleName(RoleName.TEACHER, query);
+
     const results: Pagination<UserDto> = {
       page,
       limit,
@@ -32,10 +31,9 @@ export class UserController {
   @Get('/receptionists')
   @Roles(RoleName.ADMIN)
   async findReceptionists(@Query() query: Object) {
-    const { page, limit, total, data } = await this.userService.query({
-      ...query,
-      role: RoleName.RECEPTIONIST,
-    });
+    const { page, limit, total, data } =
+      await this.userService.findUsersByRoleName(RoleName.RECEPTIONIST, query);
+
     const results: Pagination<UserDto> = {
       page,
       limit,
