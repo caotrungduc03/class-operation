@@ -1,39 +1,59 @@
 "use client";
-import { useGetMeQuery } from "@web/libs/features/auth/authApi";
+import { NAV_LINK } from "@web/constants/nav";
 import { RootState } from "@web/libs/store";
 import { getToken } from "@web/libs/tokens";
+import {
+  canAccessLMS,
+  canAccessOPS,
+  getHomePathForUser,
+} from "@web/utils/permissions";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import Loading from "./common/Loading";
 
-const RouteGuard = ({ children }: { children: React.ReactNode }) => {
+interface RouteGuardProps {
+  children: React.ReactNode;
+  requiredAccess?: "LMS" | "OPS";
+}
+
+const RouteGuard: React.FC<RouteGuardProps> = ({
+  children,
+  requiredAccess,
+}) => {
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const accessToken = getToken();
-  const { isLoading } = useGetMeQuery(
-    {
-      accessToken,
-    },
-    {
-      skip: !!user || !accessToken,
-    },
-  );
 
   useEffect(() => {
-    if (!user && !accessToken) {
-      return router.push("/login");
+    const token = getToken();
+
+    // If not authenticated and no token exists, redirect to login
+    if (!isAuthenticated && !token) {
+      router.replace(NAV_LINK.LOGIN);
+      return;
     }
-  }, [user, accessToken, router]);
 
-  if (pathname === "/login") return children;
+    // Skip access check if no requiredAccess is specified
+    if (!requiredAccess) {
+      return;
+    }
 
-  if (!user || isLoading) {
-    return <Loading />;
-  }
+    // If the user is authenticated, check for proper access
+    if (isAuthenticated) {
+      const hasAccess =
+        (requiredAccess === "LMS" && canAccessLMS(user)) ||
+        (requiredAccess === "OPS" && canAccessOPS(user));
 
-  return children;
+      if (!hasAccess) {
+        const redirectPath = getHomePathForUser(user);
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, isAuthenticated, requiredAccess, router, pathname]);
+
+  return <>{children}</>;
 };
 
 export default RouteGuard;

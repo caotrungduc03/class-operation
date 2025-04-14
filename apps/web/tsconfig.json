@@ -24,7 +24,8 @@
       "@web/types/*": ["types/*"],
       "@web/constants/*": ["constants/*"],
       "@web/layouts/*": ["layouts/*"],
-      "@web/enums/*": ["enums/*"]
+      "@web/enums/*": ["enums/*"],
+      "@web/utils/*": ["utils/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -49,7 +50,8 @@
     "constants/**/*.ts",
     "layouts/**/*.ts",
     "layouts/**/*.tsx",
-    "enums/**/*.ts"
+    "enums/**/*.ts",
+    "utils/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

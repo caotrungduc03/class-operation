@@ -29,7 +29,7 @@ const MyProfileOverview = () => {
             <Typography.Text strong>Code:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <Typography.Text>{user?.detail?.code ?? ""}</Typography.Text>
+            <Typography.Text>{user?.detail?.code || ""}</Typography.Text>
           </div>
         </div>
         <div className="flex">
@@ -37,7 +37,7 @@ const MyProfileOverview = () => {
             <Typography.Text strong>Full name:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <Typography.Text>{user?.fullName ?? ""}</Typography.Text>
+            <Typography.Text>{user?.fullName || ""}</Typography.Text>
           </div>
         </div>
         <div className="flex">
@@ -45,7 +45,7 @@ const MyProfileOverview = () => {
             <Typography.Text strong>Email:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <Typography.Text>{user?.email ?? ""}</Typography.Text>
+            <Typography.Text>{user?.email || ""}</Typography.Text>
           </div>
         </div>
         <div className="flex">
@@ -53,7 +53,7 @@ const MyProfileOverview = () => {
             <Typography.Text strong>Phone number:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <Typography.Text>{user?.phoneNumber ?? ""}</Typography.Text>
+            <Typography.Text>{user?.phoneNumber || ""}</Typography.Text>
           </div>
         </div>
         <div className="flex">

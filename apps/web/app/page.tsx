@@ -1,29 +1,26 @@
 "use client";
-import Loading from "@web/components/common/Loading";
-import { RoleName } from "@web/enums/role";
+import { NAV_LINK } from "@web/constants/nav";
 import { RootState } from "@web/libs/store";
+import { getHomePathForUser } from "@web/utils/permissions";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 
-const Home: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+export default function Home() {
   const router = useRouter();
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   useEffect(() => {
-    if (user) {
-      switch (user.role.roleName) {
-        case RoleName.ADMIN:
-        case RoleName.RECEPTIONIST:
-          router.push("/ops");
-          break;
-        default:
-          router.push("/lms");
-      }
+    if (!isAuthenticated) {
+      router.replace(NAV_LINK.LOGIN);
+      return;
     }
-  }, []);
 
-  return <Loading />;
-};
+    const redirectPath = getHomePathForUser(user);
+    router.replace(redirectPath);
+  }, [router, user, isAuthenticated]);
 
-export default Home;
+  return null;
+}

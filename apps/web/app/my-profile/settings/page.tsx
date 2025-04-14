@@ -9,6 +9,7 @@ import { UserStatus } from "@web/enums/user";
 import { useUpdateProfileMutation } from "@web/libs/features/auth/authApi";
 import { RootState } from "@web/libs/store";
 import { Card, Typography } from "antd";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -16,6 +17,7 @@ import { useSelector } from "react-redux";
 const MyProfileSettings = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+  const router = useRouter();
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -52,6 +54,7 @@ const MyProfileSettings = () => {
       email: user?.email ?? "",
       phoneNumber: user?.phoneNumber ?? "",
     });
+    router.push("/my-profile");
   };
 
   return (
@@ -59,7 +62,7 @@ const MyProfileSettings = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Profile Overview
+            Profile Settings
           </Typography.Title>
         </div>
       }
@@ -116,7 +119,7 @@ const MyProfileSettings = () => {
               control={control}
               size="large"
               options={RoleOptions}
-              defaultValue={user.role.roleName}
+              defaultValue={user?.role?.roleName}
               disabled
             />
           </div>
@@ -132,7 +135,7 @@ const MyProfileSettings = () => {
               size="large"
               options={StatusOptions}
               defaultValue={
-                user.status ? UserStatus.ACTIVE : UserStatus.BLOCKED
+                user?.status ? UserStatus.ACTIVE : UserStatus.BLOCKED
               }
               disabled
             />
