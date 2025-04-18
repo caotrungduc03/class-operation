@@ -19,7 +19,7 @@ interface CustomInputProps {
 const CustomInput = ({
   control,
   name,
-  size,
+  size = "large",
   prefix,
   placeholder,
   type,
@@ -29,38 +29,42 @@ const CustomInput = ({
   autoComplete,
 }: CustomInputProps) => {
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState: { error } }) => {
-        return (
-          <div className="w-full">
-            {label && <CustomLabel label={label} required={required} />}
+    <div className="w-full">
+      {label && <CustomLabel label={label} required={required} />}
 
-            {type === "password" ? (
-              <Input.Password
-                {...field}
-                size={size}
-                prefix={prefix}
-                placeholder={placeholder}
-                disabled={disabled}
-                autoComplete={autoComplete}
-              />
-            ) : (
-              <Input
-                {...field}
-                size={size}
-                prefix={prefix}
-                placeholder={placeholder}
-                disabled={disabled}
-                autoComplete={autoComplete}
-              />
-            )}
-            {error?.message && <p className="text-red-500">{error.message}</p>}
-          </div>
-        );
-      }}
-    />
+      <Controller
+        control={control}
+        name={name}
+        render={({ field, fieldState: { error } }) => {
+          return (
+            <>
+              {type === "password" ? (
+                <Input.Password
+                  {...field}
+                  size={size}
+                  prefix={prefix}
+                  placeholder={placeholder}
+                  disabled={disabled}
+                  autoComplete={autoComplete}
+                />
+              ) : (
+                <Input
+                  {...field}
+                  size={size}
+                  prefix={prefix}
+                  placeholder={placeholder}
+                  disabled={disabled}
+                  autoComplete={autoComplete}
+                />
+              )}
+              {error?.message && (
+                <p className="text-red-500">{error.message}</p>
+              )}
+            </>
+          );
+        }}
+      />
+    </div>
   );
 };
 

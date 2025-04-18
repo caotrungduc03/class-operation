@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import {
   DeleteResult,
   FindManyOptions,
@@ -15,7 +16,7 @@ export interface IBaseService<T> {
   update(
     id: string,
     data: any,
-    options: FindOneOptions<T>
+    options: FindOneOptions<T>,
   ): Promise<UpdateResult>;
 
   delete(id: string): Promise<DeleteResult>;
@@ -51,3 +52,10 @@ export type JwtPayload = {
   userId: string;
   email: string;
 };
+
+export type UserDecoratorParam = keyof JwtPayload | 'role' | undefined;
+
+export interface RequestWithUser extends Request {
+  user?: JwtPayload;
+  role?: string;
+}

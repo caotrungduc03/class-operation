@@ -10,9 +10,11 @@ import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { CounterModule } from './counter/counter.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
+import { RequestModule } from './request/request.module';
 import { RoleModule } from './role/role.module';
 import { UserDetailModule } from './user-detail/user-detail.module';
 import { UserModule } from './user/user.module';
+import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { UserModule } from './user/user.module';
     RoleModule,
     CounterModule,
     UserDetailModule,
+    RequestModule,
+    WeeklyNormModule,
   ],
   controllers: [AppController],
   providers: [

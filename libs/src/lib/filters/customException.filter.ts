@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ResponseDto } from '../dtos';
@@ -36,6 +37,8 @@ export class CustomExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof Error) {
       message = exception.message;
     }
+
+    Logger.error(message, exception);
 
     const responseBody = new ResponseDto(statusCode, message, null);
 

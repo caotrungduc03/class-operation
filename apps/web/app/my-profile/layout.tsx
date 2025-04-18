@@ -1,9 +1,9 @@
 "use client";
 import { MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
 import RouteGuard from "@web/components/RouteGuard";
-import { NAV_LINK, NAV_TITLE } from "@web/constants/nav";
 import MainLayout from "@web/layouts/MainLayout";
 import PageLayout from "@web/layouts/PageLayout";
+import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
 import { Avatar, Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";

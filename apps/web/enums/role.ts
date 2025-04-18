@@ -1,6 +1,0 @@
-export enum RoleName {
-  ADMIN = "ADMIN",
-  TEACHER = "TEACHER",
-  RECEPTIONIST = "RECEPTIONIST",
-  STUDENT = "STUDENT",
-}

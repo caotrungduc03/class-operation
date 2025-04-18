@@ -1,8 +1,13 @@
-import { HomeOutlined, ProfileOutlined, UserOutlined } from "@ant-design/icons";
-import { NAV_LINK, NAV_TITLE } from "@web/constants/nav";
+import {
+  HomeOutlined,
+  ProfileOutlined,
+  ScheduleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
+import { canAccessLMS, canAccessOPS } from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
 import { MenuItem, NavigationItem } from "@web/types/common";
-import { canAccessLMS, canAccessOPS } from "@web/utils/permissions";
 import { Menu } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -48,6 +53,12 @@ const LMSNavigationItems: NavigationItem[] = [
     icon: <HomeOutlined />,
     label: NAV_TITLE.HOME,
     url: NAV_LINK.LMS,
+  },
+  {
+    key: NAV_LINK.WEEKLY_REGISTRATION,
+    icon: <ScheduleOutlined />,
+    label: NAV_TITLE.WEEKLY_REGISTRATION,
+    url: NAV_LINK.WEEKLY_REGISTRATION,
   },
   myProfileItem,
 ];

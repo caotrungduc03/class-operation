@@ -1,6 +1,7 @@
 import {
   IS_PUBLIC_KEY,
   JwtPayload,
+  RequestWithUser,
   RoleName,
   ROLES_KEY,
 } from '@class-operation/libs';
@@ -12,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -41,7 +41,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private async isTokenValid(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -52,7 +52,7 @@ export class AuthGuard implements CanActivate {
       const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      request['user'] = payload;
+      request.user = payload;
 
       return true;
     } catch (error: any) {
@@ -69,19 +69,27 @@ export class AuthGuard implements CanActivate {
   private async isUserHasRequiredRoles(
     context: ExecutionContext,
   ): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const payload = request['user'];
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const payload = request.user;
     const requiredRoles = this.reflector.getAllAndOverride<RoleName[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    return !requiredRoles || this.isUserInRequiredRoles(payload, requiredRoles);
+    if (!payload) {
+      throw new UnauthorizedException('User information not found in token');
+    }
+
+    return (
+      !requiredRoles ||
+      (await this.isUserInRequiredRoles(payload, requiredRoles, request))
+    );
   }
 
   private async isUserInRequiredRoles(
-    payload: any,
+    payload: JwtPayload,
     requiredRoles: RoleName[],
+    request: RequestWithUser,
   ): Promise<boolean> {
     const user = await this.userService.findById(payload.userId, {
       relations: ['role'],
@@ -92,10 +100,12 @@ export class AuthGuard implements CanActivate {
 
     const roleName = user.role?.roleName;
 
+    request.role = roleName;
+
     return requiredRoles.includes(roleName);
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
+  private extractTokenFromHeader(request: RequestWithUser): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }

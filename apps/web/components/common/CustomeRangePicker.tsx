@@ -1,59 +1,59 @@
-import { Select } from "antd";
+import { DatePicker } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
-import { BaseOptionType } from "antd/es/select";
+import { isEmpty } from "lodash";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
 
-interface CustomSelectProps {
+const { RangePicker } = DatePicker;
+
+interface CustomRangePickerProps {
   control: Control<any>;
   name: string;
   size?: SizeType;
-  prefix?: React.ReactNode;
-  placeholder?: string;
-  options: BaseOptionType[];
+  placeholder?: [string, string];
   disabled?: boolean;
-  defaultValue?: string;
   label?: string;
   required?: boolean;
+  format?: string;
+  className?: string;
 }
 
-const CustomSelect = ({
+const CustomRangePicker = ({
   control,
   name,
   size = "large",
-  prefix,
-  placeholder,
-  options,
+  placeholder = ["Start date", "End date"],
   disabled,
-  defaultValue,
   label,
   required,
-}: CustomSelectProps) => {
+  format = "DD/MM/YYYY",
+  className,
+}: CustomRangePickerProps) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {label && <CustomLabel label={label} required={required} />}
+
       <Controller
         control={control}
         name={name}
-        defaultValue={defaultValue}
         render={({ field, fieldState: { error } }) => {
+          console.log({ error });
           return (
             <>
-              <Select
+              <RangePicker
                 {...field}
                 size={size}
-                prefix={prefix}
                 placeholder={placeholder}
-                options={options}
-                onChange={(value) => {
-                  field.onChange(value);
-                }}
-                className="w-full"
                 disabled={disabled}
+                format={format}
+                style={{ width: "100%" }}
+                value={[field.value?.[0], field.value?.[1]]}
               />
 
-              {error?.message && (
-                <p className="text-red-500">{error.message}</p>
+              {!isEmpty(error) && (
+                <p className="text-red-500">
+                  {error?.[0]?.message || error?.message}
+                </p>
               )}
             </>
           );
@@ -63,4 +63,4 @@ const CustomSelect = ({
   );
 };
 
-export default CustomSelect;
+export default CustomRangePicker;

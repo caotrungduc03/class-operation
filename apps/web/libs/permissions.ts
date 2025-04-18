@@ -1,6 +1,6 @@
-import { NAV_LINK } from "@web/constants/nav";
-import { RoleName } from "@web/enums/role";
-import { IUser } from "@web/types/user";
+import { NAV_LINK } from "@web/libs/nav";
+import { RoleName } from "@web/libs/role";
+import { IUser } from "@web/libs/user";
 
 export const LMS_ROLES = [RoleName.TEACHER, RoleName.STUDENT];
 export const OPS_ROLES = [RoleName.ADMIN, RoleName.RECEPTIONIST];

@@ -1,5 +1,10 @@
 import { Button } from "antd";
-import { ButtonColorType, ButtonSize, ButtonType } from "antd/es/button";
+import {
+  ButtonColorType,
+  ButtonSize,
+  ButtonType,
+  ButtonVariantType,
+} from "antd/es/button";
 import clsx from "clsx";
 import { ReactNode } from "react";
 
@@ -15,6 +20,7 @@ interface CustomButtonProps {
   onClick?: any;
   loading?: boolean;
   disabled?: boolean;
+  variant?: ButtonVariantType;
 }
 
 const CustomButton = ({
@@ -22,13 +28,14 @@ const CustomButton = ({
   title,
   children,
   className,
-  size,
+  size = "large",
   color,
   icon,
   iconPosition = "start",
   onClick,
   loading,
   disabled,
+  variant = "text",
 }: CustomButtonProps) => {
   return (
     <Button
@@ -41,6 +48,7 @@ const CustomButton = ({
       loading={loading}
       disabled={disabled}
       color={color}
+      variant={variant}
     >
       {title}
       {children}

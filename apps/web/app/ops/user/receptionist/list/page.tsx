@@ -1,5 +1,5 @@
-import { NAV_TITLE } from "@web/constants/nav";
 import PageLayout from "@web/layouts/PageLayout";
+import { NAV_TITLE } from "@web/libs/nav";
 import { Card } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 

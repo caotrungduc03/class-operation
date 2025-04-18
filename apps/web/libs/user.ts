@@ -1,4 +1,4 @@
-import { RoleName } from "@web/enums/role";
+import { RoleName } from "@web/libs/role";
 import { ITimestamps } from "./common";
 
 export interface IUser extends ITimestamps {
@@ -33,3 +33,24 @@ export interface IRole {
 export interface IDetailUser {
   code: string;
 }
+
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  BLOCKED = "BLOCKED",
+}
+
+export const StatusTag = {
+  [UserStatus.ACTIVE]: "green",
+  [UserStatus.BLOCKED]: "red",
+};
+
+export const StatusOptions = [
+  {
+    label: "Active",
+    value: UserStatus.ACTIVE,
+  },
+  {
+    label: "Blocked",
+    value: UserStatus.BLOCKED,
+  },
+];

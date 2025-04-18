@@ -46,13 +46,18 @@ const CustomDrawer = ({
       size="large"
       extra={
         <Space>
-          <CustomButton title="Cancel" onClick={showCloseConfirm} />
+          <CustomButton
+            title="Cancel"
+            onClick={showCloseConfirm}
+            size="large"
+          />
           <CustomButton
             title="Submit"
             type="primary"
             onClick={onSubmit}
             loading={loading}
             disabled={loading}
+            size="large"
           />
         </Space>
       }

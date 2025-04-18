@@ -1,57 +1,51 @@
-import { Select } from "antd";
+import { InputNumber } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
-import { BaseOptionType } from "antd/es/select";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
 
-interface CustomSelectProps {
+interface CustomInputNumberProps {
   control: Control<any>;
   name: string;
   size?: SizeType;
-  prefix?: React.ReactNode;
   placeholder?: string;
-  options: BaseOptionType[];
+  min?: number;
+  max?: number;
   disabled?: boolean;
-  defaultValue?: string;
   label?: string;
   required?: boolean;
+  className?: string;
 }
 
-const CustomSelect = ({
+const CustomInputNumber = ({
   control,
   name,
   size = "large",
-  prefix,
   placeholder,
-  options,
+  min,
+  max,
   disabled,
-  defaultValue,
   label,
   required,
-}: CustomSelectProps) => {
+  className,
+}: CustomInputNumberProps) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {label && <CustomLabel label={label} required={required} />}
       <Controller
         control={control}
         name={name}
-        defaultValue={defaultValue}
         render={({ field, fieldState: { error } }) => {
           return (
             <>
-              <Select
+              <InputNumber
                 {...field}
                 size={size}
-                prefix={prefix}
                 placeholder={placeholder}
-                options={options}
-                onChange={(value) => {
-                  field.onChange(value);
-                }}
-                className="w-full"
+                min={min}
+                max={max}
                 disabled={disabled}
+                style={{ width: "100%" }}
               />
-
               {error?.message && (
                 <p className="text-red-500">{error.message}</p>
               )}
@@ -63,4 +57,4 @@ const CustomSelect = ({
   );
 };
 
-export default CustomSelect;
+export default CustomInputNumber;

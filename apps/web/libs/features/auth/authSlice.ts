@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getToken, removeToken, setToken } from "@web/libs/tokens";
-import { IUser } from "@web/types/user";
+import { IUser } from "@web/libs/user";
 import { authApi } from "./authApi";
 
 export interface AuthState {

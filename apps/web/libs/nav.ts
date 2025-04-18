@@ -8,6 +8,7 @@ export const NAV_LINK = {
   MY_PROFILE_OVERVIEW: "/my-profile/overview",
   MY_PROFILE_SETTINGS: "/my-profile/settings",
   LOGIN: "/login",
+  WEEKLY_REGISTRATION: "/lms/weekly-norms",
 };
 
 export const NAV_TITLE = {
@@ -18,4 +19,5 @@ export const NAV_TITLE = {
   TEACHER_LIST: "Quản lý giáo viên",
   RECEPTIONIST_LIST: "Quản lý lễ tân",
   MY_PROFILE: "Thông tin cá nhân",
+  WEEKLY_REGISTRATION: "Đăng ký định mức tuần",
 };

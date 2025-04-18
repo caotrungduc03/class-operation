@@ -1,7 +1,7 @@
 "use client";
-import { NAV_LINK } from "@web/constants/nav";
+import { NAV_LINK } from "@web/libs/nav";
+import { getHomePathForUser } from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
-import { getHomePathForUser } from "@web/utils/permissions";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";

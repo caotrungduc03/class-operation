@@ -1,4 +1,9 @@
-import { RoleName } from "@web/enums/role";
+export enum RoleName {
+  ADMIN = "ADMIN",
+  TEACHER = "TEACHER",
+  RECEPTIONIST = "RECEPTIONIST",
+  STUDENT = "STUDENT",
+}
 
 export const RoleTag = {
   [RoleName.ADMIN]: "red",

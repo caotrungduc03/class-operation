@@ -1,6 +1,6 @@
 "use client";
-import { NAV_TITLE } from "@web/constants/nav";
 import PageLayout from "@web/layouts/PageLayout";
+import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
 import { Card, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";

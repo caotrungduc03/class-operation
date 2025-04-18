@@ -6,8 +6,6 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomInput from "@web/components/common/CustomInput";
 import FilterGrid from "@web/components/common/FilterGrid";
 import TableAction from "@web/components/table/TeacherAction";
-import { NAV_TITLE } from "@web/constants/nav";
-import { RoleName } from "@web/enums/role";
 import PageLayout from "@web/layouts/PageLayout";
 import {
   closeCreateModal,
@@ -17,9 +15,11 @@ import {
   useCreateUserMutation,
   useGetTeachersQuery,
 } from "@web/libs/features/users/userApi";
+import { NAV_TITLE } from "@web/libs/nav";
+import { RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
+import { IUser } from "@web/libs/user";
 import { TableColumn } from "@web/types/common";
-import { IUser } from "@web/types/user";
 import { Card, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";

@@ -6,9 +6,9 @@ import {
   MenuUnfoldOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { NAV_LINK } from "@web/constants/nav";
 import { logout } from "@web/libs/features/auth/authSlice";
 import { toggleSidebar } from "@web/libs/features/layout/layoutSlice";
+import { NAV_LINK } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
 import { Avatar, Badge, Button, Dropdown, Layout, MenuProps } from "antd";
 import Image from "next/image";

@@ -1,55 +1,51 @@
-import { Select } from "antd";
+import { DatePicker } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
-import { BaseOptionType } from "antd/es/select";
+import dayjs from "dayjs";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
 
-interface CustomSelectProps {
+interface CustomDatePickerProps {
   control: Control<any>;
   name: string;
   size?: SizeType;
-  prefix?: React.ReactNode;
   placeholder?: string;
-  options: BaseOptionType[];
   disabled?: boolean;
-  defaultValue?: string;
   label?: string;
   required?: boolean;
+  format?: string;
+  className?: string;
 }
 
-const CustomSelect = ({
+const CustomDatePicker = ({
   control,
   name,
   size = "large",
-  prefix,
   placeholder,
-  options,
   disabled,
-  defaultValue,
   label,
   required,
-}: CustomSelectProps) => {
+  format = "DD/MM/YYYY",
+  className,
+}: CustomDatePickerProps) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {label && <CustomLabel label={label} required={required} />}
+
       <Controller
         control={control}
         name={name}
-        defaultValue={defaultValue}
         render={({ field, fieldState: { error } }) => {
           return (
             <>
-              <Select
+              <DatePicker
                 {...field}
                 size={size}
-                prefix={prefix}
                 placeholder={placeholder}
-                options={options}
-                onChange={(value) => {
-                  field.onChange(value);
-                }}
-                className="w-full"
                 disabled={disabled}
+                format={format}
+                style={{ width: "100%" }}
+                onChange={(date) => field.onChange(date ? date.toDate() : null)}
+                value={field.value ? dayjs(field.value) : null}
               />
 
               {error?.message && (
@@ -63,4 +59,4 @@ const CustomSelect = ({
   );
 };
 
-export default CustomSelect;
+export default CustomDatePicker;

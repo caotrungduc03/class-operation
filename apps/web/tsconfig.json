@@ -21,11 +21,7 @@
     "paths": {
       "@web/libs/*": ["libs/*"],
       "@web/components/*": ["components/*"],
-      "@web/types/*": ["types/*"],
-      "@web/constants/*": ["constants/*"],
-      "@web/layouts/*": ["layouts/*"],
-      "@web/enums/*": ["enums/*"],
-      "@web/utils/*": ["utils/*"]
+      "@web/layouts/*": ["layouts/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -46,12 +42,7 @@
     "libs/**/*.ts",
     "components/**/*.ts",
     "components/**/*.tsx",
-    "types/**/*.ts",
-    "constants/**/*.ts",
-    "layouts/**/*.ts",
-    "layouts/**/*.tsx",
-    "enums/**/*.ts",
-    "utils/**/*.ts"
+    "layouts/**/*.tsx"
   ],
   "exclude": [
     "out-tsc",

@@ -1,0 +1,45 @@
+import { Exclude, Expose, Type } from 'class-transformer';
+import { RequestStatus, RequestType } from '../../enums/request.enum';
+import { BaseDto } from '../common/base.dto';
+import { UserDto } from '../user/user.dto';
+import { WeeklyNormDto } from '../weekly-norm/weekly-norm.dto';
+
+@Exclude()
+export class RequestDto extends BaseDto {
+  @Expose()
+  name: string;
+
+  @Expose()
+  description: string;
+
+  @Expose()
+  type: RequestType;
+
+  @Expose()
+  creatorId: string;
+
+  @Expose()
+  @Type(() => UserDto)
+  creator: UserDto;
+
+  @Expose()
+  requesterId: string;
+
+  @Expose()
+  @Type(() => UserDto)
+  requester: UserDto;
+
+  @Expose()
+  approverId: string;
+
+  @Expose()
+  @Type(() => UserDto)
+  approver: UserDto;
+
+  @Expose()
+  @Type(() => WeeklyNormDto)
+  weeklyNorms: WeeklyNormDto[];
+
+  @Expose()
+  status: RequestStatus;
+}

@@ -1,12 +1,12 @@
 "use client";
-import { NAV_LINK } from "@web/constants/nav";
-import { RootState } from "@web/libs/store";
-import { getToken } from "@web/libs/tokens";
+import { NAV_LINK } from "@web/libs/nav";
 import {
   canAccessLMS,
   canAccessOPS,
   getHomePathForUser,
-} from "@web/utils/permissions";
+} from "@web/libs/permissions";
+import { RootState } from "@web/libs/store";
+import { getToken } from "@web/libs/tokens";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";

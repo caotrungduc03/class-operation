@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 import { useSelector } from "react-redux";
-import NavigationMenu from "./Menu";
+import NavigationMenu from "./NavigationMenu";
 
 const Sidebar = () => {
   const { sidebarCollapsed } = useSelector((state: RootState) => state.layout);
