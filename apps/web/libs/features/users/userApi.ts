@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { CustomResponse, Pagination } from "@web/libs/common";
 import { RootState } from "@web/libs/store";
 import { CreateUserDto, IUser } from "@web/libs/user";
-import { CustomResponse, Pagination } from "@web/types/common";
 
 export const userApi = createApi({
   reducerPath: "userApi",

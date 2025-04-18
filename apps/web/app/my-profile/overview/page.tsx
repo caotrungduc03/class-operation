@@ -1,7 +1,7 @@
 "use client";
 import CustomButton from "@web/components/common/CustomButton";
-import { RoleTag } from "@web/constants/role";
 import { NAV_LINK } from "@web/libs/nav";
+import { RoleTag } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import { Card, Tag, Typography } from "antd";
 import Link from "next/link";

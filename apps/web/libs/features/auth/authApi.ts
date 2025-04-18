@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { CustomResponse } from "@web/libs/common";
 import { RootState } from "@web/libs/store";
 import { getToken } from "@web/libs/tokens";
 import { IUser } from "@web/libs/user";
-import { CustomResponse } from "@web/types/common";
 
 export interface LoginResponse {
   user: IUser;

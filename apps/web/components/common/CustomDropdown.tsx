@@ -1,5 +1,5 @@
 import { MoreOutlined } from "@ant-design/icons";
-import { Placement } from "@web/types/common";
+import { Placement } from "@web/libs/common";
 import { Dropdown } from "antd";
 import React from "react";
 

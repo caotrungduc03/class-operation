@@ -19,8 +19,14 @@ import {
 } from "@web/libs/features/requests/requestApi";
 import { clearSelectedWeeklyNorm } from "@web/libs/features/requests/requestSlice";
 import {
+  closeCancelModal,
   closeCreateModal,
+  closeDetailModal,
+  openCancelModal,
   openCreateModal,
+  openDetailModal,
+  setEditMode,
+  setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
@@ -118,9 +124,6 @@ const WeeklyNormActions = ({
   onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
 }) => {
-  const [cancelWeeklyNorm, { isLoading: isCanceling }] =
-    useCancelWeeklyNormMutation();
-
   return (
     <CustomDropdown>
       <CustomButton
@@ -163,13 +166,15 @@ const WeeklyNorms = () => {
     showSizeChanger: true,
     showQuickJumper: true,
   });
-  const [selectedNormId, setSelectedNormId] = useState<string | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const dispatch = useDispatch();
-  const { isOpenCreateModal } = useSelector((state: RootState) => state.table);
+  const {
+    isOpenCreateModal,
+    isDetailModalOpen,
+    isCancelModalOpen,
+    isEditMode,
+    selectedItemId,
+  } = useSelector((state: RootState) => state.table);
   const { selectedWeeklyNorm } = useSelector(
     (state: RootState) => state.request,
   );
@@ -250,26 +255,33 @@ const WeeklyNorms = () => {
     refetch();
   }, [searchParams]);
 
-  useEffect(() => {
-    if (isEditMode && selectedWeeklyNorm) {
-      weeklyNormForm.setValue("name", selectedWeeklyNorm.name);
-      weeklyNormForm.setValue("description", selectedWeeklyNorm.description);
+  const handleStartEdit = async (id: string) => {
+    dispatch(setSelectedItemId(id));
+    dispatch(setEditMode(true));
+    dispatch(closeDetailModal());
 
-      if (
-        selectedWeeklyNorm.weeklyNorms &&
-        selectedWeeklyNorm.weeklyNorms.length > 0
-      ) {
-        const formattedNorms = selectedWeeklyNorm.weeklyNorms.map((norm) => ({
-          rangeDate: [new Date(norm.startDate), new Date(norm.endDate)] as [
-            Date,
-            Date,
-          ],
-          quantity: norm.quantity,
-        }));
-        replace(formattedNorms);
+    try {
+      const response = await fetchNormDetail(id).unwrap();
+      if (response?.data) {
+        // Populate form with fetched data
+        weeklyNormForm.setValue("name", response.data.name);
+        weeklyNormForm.setValue("description", response.data.description || "");
+
+        if (response.data.weeklyNorms && response.data.weeklyNorms.length > 0) {
+          const formattedNorms = response.data.weeklyNorms.map((norm) => ({
+            // Keep as dayjs objects instead of converting to Date objects
+            rangeDate: [dayjs(norm.startDate), dayjs(norm.endDate)],
+            quantity: norm.quantity,
+          }));
+          replace(formattedNorms);
+        }
       }
+      // Open the drawer after data is loaded
+      dispatch(openCreateModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
     }
-  }, [isEditMode, selectedWeeklyNorm, replace, weeklyNormForm]);
+  };
 
   const onSubmitSearch = (data: { search?: string; status?: string }) => {
     setSearchParams({
@@ -296,37 +308,27 @@ const WeeklyNorms = () => {
   };
 
   const handleOpenDetail = (id: string) => {
-    setSelectedNormId(id);
-    setIsDetailModalOpen(true);
+    dispatch(openDetailModal(id));
     fetchNormDetail(id);
   };
 
   const handleCloseDetail = () => {
-    setIsDetailModalOpen(false);
-    setSelectedNormId(null);
+    dispatch(closeDetailModal());
     dispatch(clearSelectedWeeklyNorm());
   };
 
-  const handleStartEdit = (id: string) => {
-    setSelectedNormId(id);
-    setIsEditMode(true);
-    setIsDetailModalOpen(false);
-    dispatch(openCreateModal());
-  };
-
   const handleOpenCancelModal = (id: string) => {
-    setSelectedNormId(id);
-    setIsCancelModalOpen(true);
+    dispatch(openCancelModal(id));
   };
 
   const handleCancel = async () => {
-    if (!selectedNormId) return;
+    if (!selectedItemId) return;
 
     try {
-      await cancelWeeklyNorm(selectedNormId).unwrap();
+      await cancelWeeklyNorm(selectedItemId).unwrap();
       toast.success("Weekly norm request canceled successfully");
       refetch();
-      setIsCancelModalOpen(false);
+      dispatch(closeCancelModal());
     } catch (error) {
       toast.error("Failed to cancel weekly norm request");
     }
@@ -345,9 +347,9 @@ const WeeklyNorms = () => {
     };
 
     try {
-      if (isEditMode && selectedNormId) {
+      if (isEditMode && selectedItemId) {
         const res = await updateWeeklyNorm({
-          id: selectedNormId,
+          id: selectedItemId,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
@@ -365,8 +367,8 @@ const WeeklyNorms = () => {
   const handleCloseDrawer = () => {
     dispatch(closeCreateModal());
     weeklyNormForm.reset();
-    setIsEditMode(false);
-    setSelectedNormId(null);
+    dispatch(setEditMode(false));
+    dispatch(setSelectedItemId(null));
   };
 
   const addNormEntry = () => {
@@ -449,7 +451,6 @@ const WeeklyNorms = () => {
           />
         </Card>
       </div>
-
       {/* Detail Modal */}
       <Modal
         title="Weekly Norm Request Details"
@@ -547,7 +548,6 @@ const WeeklyNorms = () => {
           </div>
         )}
       </Modal>
-
       {/* Create/Edit Drawer */}
       <CustomDrawer
         title={
@@ -626,17 +626,16 @@ const WeeklyNorms = () => {
           />
         </div>
       </CustomDrawer>
-
       {/* Cancel Confirmation Modal */}
       <Modal
         title="Cancel Weekly Norm Request"
         open={isCancelModalOpen}
-        onCancel={() => setIsCancelModalOpen(false)}
+        onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
             title="No, Keep It"
-            onClick={() => setIsCancelModalOpen(false)}
+            onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
@@ -650,9 +649,9 @@ const WeeklyNorms = () => {
       >
         <Typography.Paragraph>
           Are you sure you want to cancel this weekly norm request? This action
-          cannot be undone.
-        </Typography.Paragraph>
-      </Modal>
+          cannot be undone.{" "}
+        </Typography.Paragraph>{" "}
+      </Modal>{" "}
     </PageLayout>
   );
 };

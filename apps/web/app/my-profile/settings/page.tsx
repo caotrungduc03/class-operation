@@ -3,11 +3,10 @@
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
-import { RoleOptions } from "@web/constants/role";
-import { StatusOptions } from "@web/constants/user";
-import { UserStatus } from "@web/enums/user";
 import { useUpdateProfileMutation } from "@web/libs/features/auth/authApi";
+import { RoleOptions } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
+import { StatusOptions, UserStatus } from "@web/libs/user";
 import { Card, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";

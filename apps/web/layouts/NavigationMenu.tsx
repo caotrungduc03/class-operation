@@ -4,10 +4,10 @@ import {
   ScheduleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { MenuItem, NavigationItem } from "@web/libs/common";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { canAccessLMS, canAccessOPS } from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
-import { MenuItem, NavigationItem } from "@web/types/common";
 import { Menu } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

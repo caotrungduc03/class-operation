@@ -7,6 +7,7 @@ import CustomInput from "@web/components/common/CustomInput";
 import FilterGrid from "@web/components/common/FilterGrid";
 import TableAction from "@web/components/table/TeacherAction";
 import PageLayout from "@web/layouts/PageLayout";
+import { TableColumn } from "@web/libs/common";
 import {
   closeCreateModal,
   openCreateModal,
@@ -19,7 +20,6 @@ import { NAV_TITLE } from "@web/libs/nav";
 import { RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
-import { TableColumn } from "@web/types/common";
 import { Card, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
