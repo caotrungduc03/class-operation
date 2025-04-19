@@ -1,5 +1,6 @@
 export enum RequestType {
   WEEKLY_NORM = 'WEEKLY_NORM',
+  TIME_OFF = 'TIME_OFF',
 }
 
 export enum RequestStatus {

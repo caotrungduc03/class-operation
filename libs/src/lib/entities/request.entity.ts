@@ -1,6 +1,14 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { RequestStatus, RequestType } from '../enums/request.enum';
 import { CustomBaseEntity } from './customBase.entity';
+import { ScheduleEntity } from './schedule.entity';
 import { UserEntity } from './user.entity';
 import { WeeklyNormEntity } from './weekly-norm.entity';
 
@@ -19,6 +27,12 @@ export class RequestEntity extends CustomBaseEntity {
     enum: RequestType,
   })
   type: RequestType;
+
+  @Column({
+    // type: 'enum',
+    // enum: RequestStatus,
+  })
+  status: RequestStatus;
 
   @Column({
     name: 'creator_id',
@@ -61,6 +75,8 @@ export class RequestEntity extends CustomBaseEntity {
   )
   weeklyNorms: WeeklyNormEntity[];
 
-  @Column()
-  status: RequestStatus;
+  @OneToOne(() => ScheduleEntity, (schedule) => schedule.request, {
+    nullable: true,
+  })
+  schedule: ScheduleEntity;
 }

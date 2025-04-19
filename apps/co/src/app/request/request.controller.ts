@@ -3,9 +3,11 @@ import {
   Pagination,
   RequestAction,
   RequestDto,
+  RequestType,
   ResponseDto,
   RoleName,
   Roles,
+  ScheduleType,
   User,
 } from '@class-operation/libs';
 import {
@@ -53,9 +55,9 @@ export class RequestController {
 
   @Get('weekly-norms')
   @Roles(RoleName.ADMIN, RoleName.TEACHER)
-  async findWeeklyNorms(@Query() queryObj: Object) {
+  async findWeeklyNorms(@Query() queryObj: Record<string, any>) {
     const { page, limit, total, data } = await this.requestService.query(
-      queryObj,
+      { ...queryObj, type: RequestType.WEEKLY_NORM },
       {
         relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
       },
@@ -134,6 +136,120 @@ export class RequestController {
     return new ResponseDto(
       HttpStatus.OK,
       `Weekly norm request ${RequestAction.APPROVE} successfully`,
+      updatedRequest,
+    );
+  }
+
+  @Post('time-offs')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async createTimeOff(
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+    @Body()
+    createScheduleDto: {
+      name: string;
+      description: string;
+      type: ScheduleType;
+      startDate: Date;
+      endDate: Date;
+    },
+  ) {
+    const result = await this.requestService.createTimeOffSchedule(
+      createScheduleDto,
+      userId,
+      role,
+    );
+
+    return new ResponseDto(
+      HttpStatus.CREATED,
+      'Time off schedule request created successfully',
+      result.request,
+    );
+  }
+
+  @Get('time-offs')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async findTimeOff(@Query() queryObj: Object) {
+    const { page, limit, total, data } = await this.requestService.query(
+      {
+        ...queryObj,
+        type: RequestType.TIME_OFF,
+      },
+      {
+        relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
+      },
+    );
+
+    const results: Pagination<any> = {
+      page,
+      limit,
+      total,
+      items: RequestDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Get('time-offs/:id')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async findTimeOffById(@Param('id') id: string) {
+    const request = await this.requestService.getTimeOffScheduleById(id);
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Success',
+      RequestDto.plainToInstance(request, ['admin']),
+    );
+  }
+
+  @Put('time-offs/:id')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async updateTimeOffById(
+    @Param('id') id: string,
+    @Body()
+    updateData: {
+      name: string;
+      description: string;
+      type: ScheduleType;
+      startDate: Date;
+      endDate: Date;
+    },
+  ) {
+    const updatedRequest = await this.requestService.updateTimeOffSchedule(
+      id,
+      updateData,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Time off schedule request updated successfully',
+      updatedRequest,
+    );
+  }
+
+  @Patch('time-offs/:id/update-status')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async updateTimeOffStatus(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+    @Body() body: { action: RequestAction },
+  ) {
+    if (body.action === RequestAction.APPROVE) {
+      // Only admins can approve
+      if (role !== RoleName.ADMIN) {
+        throw new ForbiddenException('Only admins can approve requests');
+      }
+    }
+
+    const updatedRequest = await this.requestService.updateTimeOffStatus(
+      id,
+      body.action,
+      body.action === RequestAction.APPROVE ? userId : undefined,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      `Time off schedule request ${body.action} successfully`,
       updatedRequest,
     );
   }

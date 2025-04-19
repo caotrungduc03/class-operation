@@ -1,6 +1,7 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 import { RequestStatus, RequestType } from '../../enums/request.enum';
 import { BaseDto } from '../common/base.dto';
+import { ScheduleDto } from '../schedule/schedule.dto';
 import { UserDto } from '../user/user.dto';
 import { WeeklyNormDto } from '../weekly-norm/weekly-norm.dto';
 
@@ -42,4 +43,8 @@ export class RequestDto extends BaseDto {
 
   @Expose()
   status: RequestStatus;
+
+  @Expose()
+  @Type(() => ScheduleDto)
+  schedule: ScheduleDto;
 }

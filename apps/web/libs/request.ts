@@ -2,6 +2,7 @@ import { IUser } from "./user";
 
 export enum RequestType {
   WEEKLY_NORM = "WEEKLY_NORM",
+  TIME_OFF = "TIME_OFF",
 }
 
 export enum RequestStatus {
@@ -19,6 +20,12 @@ export interface WeeklyNormDto {
   teacherId?: string;
 }
 
+export interface ITimeOff {
+  date: Date;
+  startTime: Date;
+  endTime: Date;
+}
+
 export interface IRequest {
   id: string;
   name: string;
@@ -33,6 +40,7 @@ export interface IRequest {
   approver?: IUser;
   teacherId?: string;
   weeklyNorms?: WeeklyNormDto[];
+  timeOff?: ITimeOff;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +54,14 @@ export interface CreateRequestWeeklyNormDto {
   requesterId?: string;
   approverId?: string;
   weeklyNorms?: WeeklyNormDto[];
+}
+
+export interface CreateRequestTimeOffDto {
+  name: string;
+  description?: string;
+  type: RequestType;
+  startDate: Date;
+  endDate: Date;
 }
 
 export const RequestStatusOptions = [

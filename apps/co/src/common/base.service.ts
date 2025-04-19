@@ -86,6 +86,10 @@ export abstract class BaseService<T extends BaseEntity>
     Object.keys(filter).forEach((key) => {
       if (this.columnExists(key, metadata)) {
         const value = filter[key];
+        const column = metadata.columns.find((col) => col.propertyName === key);
+        const isEnumColumn =
+          column?.type === 'enum' || column?.type === 'simple-enum';
+
         if (Array.isArray(value)) {
           queryBuilder.andWhere(
             new Brackets((qb) => {
@@ -94,6 +98,11 @@ export abstract class BaseService<T extends BaseEntity>
                 if (!isNaN(numericItem)) {
                   qb.andWhere(`entity.${key} = :${key}_${index}`, {
                     [`${key}_${index}`]: numericItem,
+                  });
+                } else if (isEnumColumn) {
+                  // Use direct equality for enum columns
+                  qb.andWhere(`entity.${key} = :${key}_${index}`, {
+                    [`${key}_${index}`]: item,
                   });
                 } else {
                   qb.andWhere(`entity.${key} ILIKE :${key}_${index}`, {
@@ -108,6 +117,10 @@ export abstract class BaseService<T extends BaseEntity>
           if (!isNaN(numericValue)) {
             queryBuilder.andWhere(`entity.${key} = :${key}`, {
               [key]: numericValue,
+            });
+          } else if (isEnumColumn) {
+            queryBuilder.andWhere(`entity.${key} = :${key}`, {
+              [key]: value,
             });
           } else {
             queryBuilder.andWhere(`entity.${key} ILIKE :${key}`, {
@@ -140,7 +153,7 @@ export abstract class BaseService<T extends BaseEntity>
     query: Record<string, any>,
     options?: QueryOptions,
   ): Promise<QueryResult<T>> {
-    let { page = 1, limit = 10, sort = 'id:desc', ...filter } = query;
+    let { page = 1, limit = 10, sort = 'createdAt:asc', ...filter } = query;
     const { relations = [] } = options || {};
     page = Number(page);
     limit = Math.min(Number(limit), 100);
@@ -197,7 +210,7 @@ export abstract class BaseService<T extends BaseEntity>
     let {
       page = 1,
       limit = 10,
-      sort = 'id:desc',
+      sort = 'createdAt:asc',
       q = '',
       columns = [],
     } = query;
