@@ -8,3 +8,8 @@ export enum RequestStatus {
   REJECTED = 'REJECTED',
   CANCELED = 'CANCELED',
 }
+
+export enum RequestAction {
+  APPROVE = 'APPROVE',
+  CANCEL = 'CANCEL',
+}

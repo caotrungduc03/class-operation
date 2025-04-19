@@ -1,7 +1,11 @@
-import { WeeklyNormEntity } from '@class-operation/libs';
+import {
+  GetWeeklyNormDto,
+  RoleName,
+  WeeklyNormEntity,
+} from '@class-operation/libs';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { BaseService } from '../../common';
 
 @Injectable()
@@ -61,5 +65,65 @@ export class WeeklyNormService extends BaseService<WeeklyNormEntity> {
       .set(updateData)
       .whereInIds(ids)
       .execute();
+  }
+
+  async findByRangeDate(
+    query: GetWeeklyNormDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    switch (role) {
+      case RoleName.ADMIN:
+        break;
+      case RoleName.TEACHER:
+        query.teacherId = userId;
+        break;
+    }
+
+    const { startDate, endDate, teacherId } = query;
+    if (!teacherId) {
+      throw new NotFoundException('Teacher ID is required');
+    }
+
+    return this.weeklyNormRepository.find({
+      where: {
+        teacherId,
+        startDate: Between(new Date(startDate), new Date(endDate)),
+        endDate: Between(new Date(startDate), new Date(endDate)),
+        status: true,
+      },
+      order: {
+        startDate: 'ASC',
+      },
+    });
+  }
+
+  async checkOverlappingNorms(
+    teacherId: string,
+    startDate: Date,
+    endDate: Date,
+    excludeRequestId?: string,
+  ): Promise<boolean> {
+    const query = this.weeklyNormRepository
+      .createQueryBuilder('weeklyNorm')
+      .where('weeklyNorm.teacherId = :teacherId', { teacherId })
+      .andWhere('weeklyNorm.status = TRUE')
+      .andWhere(
+        '(weeklyNorm.startDate <= :endDate AND weeklyNorm.endDate >= :startDate)',
+        { startDate, endDate },
+      );
+
+    if (excludeRequestId) {
+      query.andWhere('weeklyNorm.requestId != :requestId', {
+        requestId: excludeRequestId,
+      });
+    }
+
+    const overlappingNorms = await query.getCount();
+    return overlappingNorms > 0;
+  }
+
+  async deleteByRequestId(requestId: string): Promise<void> {
+    await this.weeklyNormRepository.delete({ requestId });
   }
 }

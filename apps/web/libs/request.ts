@@ -66,3 +66,8 @@ export const RequestStatusOptions = [
     label: "Canceled",
   },
 ];
+
+export enum RequestAction {
+  APPROVE = "APPROVE",
+  CANCEL = "CANCEL",
+}

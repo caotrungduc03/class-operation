@@ -5,6 +5,7 @@ export interface TableState {
   isOpenEditModal: boolean;
   isDetailModalOpen: boolean;
   isCancelModalOpen: boolean;
+  isApproveModalOpen: boolean;
   isEditMode: boolean;
   selectedItemId: string | null;
 }
@@ -14,6 +15,7 @@ const initialState: TableState = {
   isOpenEditModal: false,
   isDetailModalOpen: false,
   isCancelModalOpen: false,
+  isApproveModalOpen: false,
   isEditMode: false,
   selectedItemId: null,
 };
@@ -51,6 +53,14 @@ export const tableSlice = createSlice({
       state.isCancelModalOpen = false;
       state.selectedItemId = null;
     },
+    openApproveModal: (state, action: PayloadAction<string>) => {
+      state.isApproveModalOpen = true;
+      state.selectedItemId = action.payload;
+    },
+    closeApproveModal: (state) => {
+      state.isApproveModalOpen = false;
+      state.selectedItemId = null;
+    },
     setEditMode: (state, action: PayloadAction<boolean>) => {
       state.isEditMode = action.payload;
     },
@@ -69,6 +79,8 @@ export const {
   closeDetailModal,
   openCancelModal,
   closeCancelModal,
+  openApproveModal,
+  closeApproveModal,
   setEditMode,
   setSelectedItemId,
 } = tableSlice.actions;

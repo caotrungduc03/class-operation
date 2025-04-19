@@ -14,9 +14,6 @@ export class WeeklyNormDto extends BaseDto {
   quantity: number;
 
   @Expose()
-  requestId: string;
-
-  @Expose()
   status: boolean;
 
   @Expose()

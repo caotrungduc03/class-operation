@@ -54,7 +54,7 @@ export const requestSlice = createSlice({
     );
 
     builder.addMatcher(
-      requestApi.endpoints.cancelWeeklyNorm.matchFulfilled,
+      requestApi.endpoints.updateWeeklyNormStatus.matchFulfilled,
       (state, { payload }) => {
         state.selectedWeeklyNorm = payload.data;
         state.weeklyNorms = state.weeklyNorms.map((request) =>

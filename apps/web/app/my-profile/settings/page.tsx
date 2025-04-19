@@ -41,7 +41,7 @@ const MyProfileSettings = () => {
         toast.error(res.data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      // Handled by the apiErrorMiddleware
     }
   };
 

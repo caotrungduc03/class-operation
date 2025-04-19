@@ -11,11 +11,11 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import {
-  useCancelWeeklyNormMutation,
   useCreateWeeklyNormMutation,
   useGetWeeklyNormsQuery,
   useLazyGetWeeklyNormByIdQuery,
   useUpdateWeeklyNormMutation,
+  useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import { clearSelectedWeeklyNorm } from "@web/libs/features/requests/requestSlice";
 import {
@@ -30,13 +30,13 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
+  RequestAction,
   RequestStatus,
   RequestStatusOptions,
   RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import {
-  Badge,
   Card,
   Divider,
   Modal,
@@ -79,23 +79,21 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Status",
     dataIndex: "status",
-    render: (status: RequestStatus) => {
-      let color = "default";
-      switch (status) {
-        case RequestStatus.APPROVED:
-          color = "success";
-          break;
-        case RequestStatus.REJECTED:
-          color = "error";
-          break;
-        case RequestStatus.CANCELED:
-          color = "warning";
-          break;
-        default:
-          color = "processing";
-      }
-      return <Badge status={color as any} text={status} />;
-    },
+    render: (status: RequestStatus) => (
+      <Tag
+        color={
+          status === RequestStatus.APPROVED
+            ? "success"
+            : status === RequestStatus.REJECTED
+              ? "error"
+              : status === RequestStatus.PENDING
+                ? "warning"
+                : "default"
+        }
+      >
+        {status}
+      </Tag>
+    ),
   },
   {
     title: "Created At",
@@ -150,7 +148,7 @@ const WeeklyNormActions = ({
   );
 };
 
-const WeeklyNorms = () => {
+const WeeklyNormRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     search?: string;
     status?: string;
@@ -163,6 +161,7 @@ const WeeklyNorms = () => {
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     defaultCurrent: 1,
     defaultPageSize: 10,
+    total: 0,
     showSizeChanger: true,
     showQuickJumper: true,
   });
@@ -186,15 +185,15 @@ const WeeklyNorms = () => {
     refetch,
   } = useGetWeeklyNormsQuery(searchParams);
 
-  const [fetchNormDetail, { data: normDetail, isLoading: isDetailLoading }] =
+  const [fetchNormDetail, { data: normDetail }] =
     useLazyGetWeeklyNormByIdQuery();
 
   const [createWeeklyNorm, { isLoading: isCreating }] =
     useCreateWeeklyNormMutation();
   const [updateWeeklyNorm, { isLoading: isUpdating }] =
     useUpdateWeeklyNormMutation();
-  const [cancelWeeklyNorm, { isLoading: isCanceling }] =
-    useCancelWeeklyNormMutation();
+  const [updateWeeklyNormStatus, { isLoading: isCanceling }] =
+    useUpdateWeeklyNormStatusMutation();
 
   const searchForm = useForm();
 
@@ -255,6 +254,18 @@ const WeeklyNorms = () => {
     refetch();
   }, [searchParams]);
 
+  // Add this useEffect to update pagination when data changes
+  useEffect(() => {
+    if (weeklyNormsData?.data) {
+      setPagination((prev) => ({
+        ...prev,
+        current: weeklyNormsData.data.page || prev.current,
+        pageSize: weeklyNormsData.data.limit || prev.pageSize,
+        total: weeklyNormsData.data.total || 0,
+      }));
+    }
+  }, [weeklyNormsData]);
+
   const handleStartEdit = async (id: string) => {
     dispatch(setSelectedItemId(id));
     dispatch(setEditMode(true));
@@ -269,7 +280,6 @@ const WeeklyNorms = () => {
 
         if (response.data.weeklyNorms && response.data.weeklyNorms.length > 0) {
           const formattedNorms = response.data.weeklyNorms.map((norm) => ({
-            // Keep as dayjs objects instead of converting to Date objects
             rangeDate: [dayjs(norm.startDate), dayjs(norm.endDate)],
             quantity: norm.quantity,
           }));
@@ -289,10 +299,6 @@ const WeeklyNorms = () => {
       ...data,
       page: 1,
     });
-    setPagination({
-      ...pagination,
-      current: 1,
-    });
   };
 
   const handleReset = () => {
@@ -300,10 +306,6 @@ const WeeklyNorms = () => {
     setSearchParams({
       page: 1,
       limit: pagination.pageSize || 10,
-    });
-    setPagination({
-      ...pagination,
-      current: 1,
     });
   };
 
@@ -325,12 +327,15 @@ const WeeklyNorms = () => {
     if (!selectedItemId) return;
 
     try {
-      await cancelWeeklyNorm(selectedItemId).unwrap();
+      await updateWeeklyNormStatus({
+        id: selectedItemId,
+        action: RequestAction.CANCEL,
+      }).unwrap();
       toast.success("Weekly norm request canceled successfully");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
-      toast.error("Failed to cancel weekly norm request");
+      // Handled by the apiErrorMiddleware
     }
   };
 
@@ -342,7 +347,7 @@ const WeeklyNorms = () => {
       weeklyNorms: data.weeklyNorms.map((norm) => ({
         startDate: norm.rangeDate[0],
         endDate: norm.rangeDate[1],
-        quantity: norm.quantity,
+        quantity: Number(norm.quantity),
       })),
     };
 
@@ -387,7 +392,6 @@ const WeeklyNorms = () => {
   };
 
   const handlePaginationChange = (newPagination: TablePaginationConfig) => {
-    setPagination(newPagination);
     setSearchParams({
       ...searchParams,
       page: newPagination.current,
@@ -485,7 +489,7 @@ const WeeklyNorms = () => {
             <div>
               <Typography.Text type="secondary">Description:</Typography.Text>
               <Typography.Paragraph className="mt-1">
-                {normDetail.data.description || "No description provided"}
+                {normDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
@@ -498,9 +502,9 @@ const WeeklyNorms = () => {
                       ? "success"
                       : normDetail.data.status === RequestStatus.REJECTED
                         ? "error"
-                        : normDetail.data.status === RequestStatus.CANCELED
+                        : normDetail.data.status === RequestStatus.PENDING
                           ? "warning"
-                          : "processing"
+                          : "default"
                   }
                 >
                   {normDetail.data.status}
@@ -656,4 +660,4 @@ const WeeklyNorms = () => {
   );
 };
 
-export default WeeklyNorms;
+export default WeeklyNormRegistration;

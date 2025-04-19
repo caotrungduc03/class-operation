@@ -8,6 +8,8 @@ import requestSlice from "./features/requests/requestSlice";
 import tableSlice from "./features/table/tableSlice";
 import { userApi } from "./features/users/userApi";
 import userSlice from "./features/users/userSlice";
+import { weeklyNormApi } from "./features/weekly-norms/weeklyNormApi";
+import weeklyNormSlice from "./features/weekly-norms/weeklyNormSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -20,10 +22,17 @@ export const makeStore = () => {
       [userApi.reducerPath]: userApi.reducer,
       request: requestSlice.reducer,
       [requestApi.reducerPath]: requestApi.reducer,
+      weeklyNorm: weeklyNormSlice.reducer,
+      [weeklyNormApi.reducerPath]: weeklyNormApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
-        .concat(authApi.middleware, userApi.middleware, requestApi.middleware)
+        .concat(
+          authApi.middleware,
+          userApi.middleware,
+          requestApi.middleware,
+          weeklyNormApi.middleware,
+        )
         .concat(apiErrorMiddleware),
   });
 };

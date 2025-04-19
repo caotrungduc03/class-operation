@@ -1,6 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { CustomResponse, Pagination } from "@web/libs/common";
-import { CreateRequestWeeklyNormDto, IRequest } from "@web/libs/request";
+import {
+  CreateRequestWeeklyNormDto,
+  IRequest,
+  RequestAction,
+} from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 
 export const requestApi = createApi({
@@ -57,10 +61,14 @@ export const requestApi = createApi({
       }),
     }),
 
-    cancelWeeklyNorm: builder.mutation<CustomResponse<IRequest>, string>({
-      query: (id) => ({
-        url: `/requests/weekly-norms/${id}/cancel`,
+    updateWeeklyNormStatus: builder.mutation<
+      CustomResponse<IRequest>,
+      { id: string; action: RequestAction }
+    >({
+      query: ({ id, action }) => ({
+        url: `/requests/weekly-norms/${id}/update-status`,
         method: "PATCH",
+        body: { action },
       }),
     }),
   }),
@@ -72,5 +80,5 @@ export const {
   useLazyGetWeeklyNormByIdQuery,
   useCreateWeeklyNormMutation,
   useUpdateWeeklyNormMutation,
-  useCancelWeeklyNormMutation,
+  useUpdateWeeklyNormStatusMutation,
 } = requestApi;

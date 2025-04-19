@@ -1,6 +1,7 @@
 import {
   CreateRequestWeeklyNormDto,
   Pagination,
+  RequestAction,
   RequestDto,
   ResponseDto,
   RoleName,
@@ -10,10 +11,12 @@ import {
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpStatus,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -103,6 +106,34 @@ export class RequestController {
     return new ResponseDto(
       HttpStatus.OK,
       'Weekly norm request updated successfully',
+      updatedRequest,
+    );
+  }
+
+  @Patch('weekly-norms/:id/update-status')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async updateWeeklyNormStatus(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+    @Body() body: { action: RequestAction },
+  ) {
+    if (body.action === RequestAction.APPROVE) {
+      // Only admins can approve
+      if (role !== RoleName.ADMIN) {
+        throw new ForbiddenException('Only admins can approve requests');
+      }
+    }
+
+    const updatedRequest = await this.requestService.updateWeeklyNormStatus(
+      id,
+      body.action,
+      body.action === RequestAction.APPROVE ? userId : undefined,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      `Weekly norm request ${RequestAction.APPROVE} successfully`,
       updatedRequest,
     );
   }

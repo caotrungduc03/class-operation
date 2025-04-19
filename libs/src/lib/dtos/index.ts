@@ -13,5 +13,6 @@ export * from './role/updateRole.dto';
 export * from './user/createUser.dto';
 export * from './user/detail-user.dto';
 export * from './user/user.dto';
+export * from './weekly-norm/get-weekly-norm.dto';
 export * from './weekly-norm/update-weekly-norm.dto';
 export * from './weekly-norm/weekly-norm.dto';
