@@ -1,4 +1,7 @@
 import {
+  CalendarOutlined,
+  FileTextOutlined,
+  FormOutlined,
   HomeOutlined,
   ProfileOutlined,
   ScheduleOutlined,
@@ -29,10 +32,17 @@ const OPSNavigationItems: NavigationItem[] = [
     label: NAV_TITLE.HOME,
     url: NAV_LINK.OPS,
   },
+  myProfileItem,
   {
-    key: NAV_LINK.USER_LIST,
+    key: NAV_LINK.MANAGE_CALENDAR,
+    icon: <CalendarOutlined />,
+    label: NAV_TITLE.MANAGE_CALENDAR,
+    url: NAV_LINK.MANAGE_CALENDAR,
+  },
+  {
+    key: NAV_LINK.MANAGE_USERS,
     icon: <UserOutlined />,
-    label: NAV_TITLE.USER_LIST,
+    label: NAV_TITLE.MANAGE_USERS,
     children: [
       {
         label: NAV_TITLE.TEACHER_LIST,
@@ -44,7 +54,33 @@ const OPSNavigationItems: NavigationItem[] = [
       },
     ],
   },
-  myProfileItem,
+  {
+    key: NAV_LINK.MANAGE_REQUESTS,
+    icon: <FormOutlined />,
+    label: NAV_TITLE.MANAGE_REQUESTS,
+    children: [
+      {
+        key: NAV_LINK.WEEKLY_NORM_LIST,
+        label: NAV_TITLE.WEEKLY_NORM_LIST,
+        url: NAV_LINK.WEEKLY_NORM_LIST,
+      },
+      {
+        key: NAV_LINK.TIME_OFF_LIST,
+        label: NAV_TITLE.TIME_OFF_LIST,
+        url: NAV_LINK.TIME_OFF_LIST,
+      },
+      {
+        key: NAV_LINK.BUSY_SCHEDULE_LIST,
+        label: NAV_TITLE.BUSY_SCHEDULE_LIST,
+        url: NAV_LINK.BUSY_SCHEDULE_LIST,
+      },
+      {
+        key: NAV_LINK.TEACHING_MODE_LIST,
+        label: NAV_TITLE.TEACHING_MODE_LIST,
+        url: NAV_LINK.TEACHING_MODE_LIST,
+      },
+    ],
+  },
 ];
 
 const LMSNavigationItems: NavigationItem[] = [
@@ -54,13 +90,25 @@ const LMSNavigationItems: NavigationItem[] = [
     label: NAV_TITLE.HOME,
     url: NAV_LINK.LMS,
   },
-  {
-    key: NAV_LINK.WEEKLY_REGISTRATION,
-    icon: <ScheduleOutlined />,
-    label: NAV_TITLE.WEEKLY_REGISTRATION,
-    url: NAV_LINK.WEEKLY_REGISTRATION,
-  },
   myProfileItem,
+  {
+    key: NAV_LINK.MY_CALENDAR,
+    icon: <CalendarOutlined />,
+    label: NAV_TITLE.MY_CALENDAR,
+    url: NAV_LINK.MY_CALENDAR,
+  },
+  {
+    key: NAV_LINK.WEEKLY_NORM_REGISTRATION,
+    icon: <ScheduleOutlined />,
+    label: NAV_TITLE.WEEKLY_NORM_REGISTRATION,
+    url: NAV_LINK.WEEKLY_NORM_REGISTRATION,
+  },
+  {
+    key: NAV_LINK.TIME_OFF_REGISTRATION,
+    icon: <FileTextOutlined />,
+    label: NAV_TITLE.TIME_OFF_REGISTRATION,
+    url: NAV_LINK.TIME_OFF_REGISTRATION,
+  },
 ];
 
 const transformToMenuItems = (

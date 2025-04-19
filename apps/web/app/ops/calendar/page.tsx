@@ -1,3 +1,4 @@
+"use client";
 import PageLayout from "@web/layouts/PageLayout";
 import { NAV_TITLE } from "@web/libs/nav";
 import { Card } from "antd";
@@ -5,22 +6,18 @@ import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 
 const breadcrumbs: ItemType[] = [
   {
-    href: "#",
-    title: NAV_TITLE.MANAGE_USERS,
-  },
-  {
-    title: NAV_TITLE.RECEPTIONIST_LIST,
+    title: NAV_TITLE.MANAGE_CALENDAR,
   },
 ];
 
-const Receptionists = () => {
+const Calendar = () => {
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.RECEPTIONIST_LIST}>
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MANAGE_CALENDAR}>
       <Card>
-        <h1>Receptionists</h1>
+        <h1>Calendar Management</h1>
       </Card>
     </PageLayout>
   );
 };
 
-export default Receptionists;
+export default Calendar;

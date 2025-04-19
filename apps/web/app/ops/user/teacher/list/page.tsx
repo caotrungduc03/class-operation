@@ -32,7 +32,7 @@ import { z } from "zod";
 const breadcrumbs: ItemType[] = [
   {
     href: "#",
-    title: NAV_TITLE.USER_LIST,
+    title: NAV_TITLE.MANAGE_USERS,
   },
   {
     title: NAV_TITLE.TEACHER_LIST,
