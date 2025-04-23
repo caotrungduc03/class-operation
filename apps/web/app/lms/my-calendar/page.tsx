@@ -1,18 +1,26 @@
 "use client";
+import { PlusOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
+import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTextArea from "@web/components/common/CustomTextArea";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
+import { useCreateBusyScheduleMutation } from "@web/libs/features/requests/requestApi";
 import { useGetWeeklyNormsQuery } from "@web/libs/features/weekly-norms/weeklyNormApi";
 import { NAV_TITLE } from "@web/libs/nav";
-import { Card } from "antd";
+import { Card, DatePicker, Divider, TimePicker, Typography } from "antd";
 import AntdCalendar from "antd-calendar";
 import { IEvent } from "antd-calendar/dist/types";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import * as z from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -20,14 +28,29 @@ const breadcrumbs: ItemType[] = [
   },
 ];
 
-// Example event types - replace with your actual options
-const EVENT_TYPES = [
-  { value: "meeting", label: "Meeting" },
-  { value: "class", label: "Class" },
-  { value: "appointment", label: "Appointment" },
-];
+// Define validation schemas
+const searchFormSchema = z.object({
+  eventName: z.string().optional(),
+  eventType: z.string().optional(),
+});
+
+const busyScheduleFormSchema = z.object({
+  name: z.string().min(1, "Request name is required"),
+  description: z.string().optional(),
+  reason: z.string().min(1, "Reason is required"),
+  date: z.any().refine((val) => !!val, "Date is required"),
+  startTime: z.any().refine((val) => !!val, "Start time is required"),
+  endTime: z.any().refine((val) => !!val, "End time is required"),
+});
+
+// Define types based on the schemas
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+type BusyScheduleFormValues = z.infer<typeof busyScheduleFormSchema>;
 
 const MyCalendar = () => {
+  const dispatch = useDispatch();
+  const [isBusyScheduleModalOpen, setIsBusyScheduleModalOpen] = useState(false);
+
   const [dateRange, setDateRange] = useState({
     startDate: dayjs().startOf("month").toISOString(),
     endDate: dayjs().endOf("month").toISOString(),
@@ -38,18 +61,44 @@ const MyCalendar = () => {
   });
 
   const { data: weeklyNorms, isFetching } = useGetWeeklyNormsQuery(dateRange);
+  const [createBusySchedule, { isLoading: isCreatingBusySchedule }] =
+    useCreateBusyScheduleMutation();
 
-  const searchForm = useForm();
+  // Update forms with zod resolver
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+    defaultValues: {
+      eventName: "",
+      eventType: "",
+    },
+  });
+
+  const busyScheduleForm = useForm<BusyScheduleFormValues>({
+    resolver: zodResolver(busyScheduleFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      reason: "",
+      date: null,
+      startTime: null,
+      endTime: null,
+    },
+  });
 
   const handleOpenDetail = useCallback((date: Date, events: IEvent[]) => {
     // Handle opening event details
     console.log("Open event details", date, events);
   }, []);
 
-  const handleOpenCreate = useCallback((date: Date) => {
-    // Handle creating new event
-    console.log("Create new event on", date);
-  }, []);
+  const handleOpenCreate = useCallback(
+    (date: Date) => {
+      // Pre-fill the date field with the selected date
+      busyScheduleForm.setValue("date", dayjs(date));
+      // Open the busy schedule modal using local state
+      setIsBusyScheduleModalOpen(true);
+    },
+    [busyScheduleForm],
+  );
 
   const handleRefetchAPI = useCallback(
     async (startDate: Date, endDate: Date) => {
@@ -72,7 +121,7 @@ const MyCalendar = () => {
     [dateRange],
   );
 
-  const onSubmitSearch = (data: { eventName?: string; eventType?: string }) => {
+  const onSubmitSearch = (data: SearchFormValues) => {
     setSearchParams({
       eventName: data.eventName || "",
       eventType: data.eventType || "",
@@ -85,6 +134,52 @@ const MyCalendar = () => {
       eventName: "",
       eventType: "",
     });
+  };
+
+  const handleCloseBusyScheduleModal = () => {
+    setIsBusyScheduleModalOpen(false);
+    busyScheduleForm.reset();
+  };
+
+  const onSubmitBusySchedule = async (data: BusyScheduleFormValues) => {
+    // Create a date object for the selected date
+    const selectedDate = data.date.toDate();
+
+    // Create start and end datetime by combining the date with selected times
+    const startDateTime = data.startTime.toDate();
+    const endDateTime = data.endTime.toDate();
+
+    // Set the date component of startDateTime and endDateTime to match the selected date
+    startDateTime.setFullYear(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+    );
+    endDateTime.setFullYear(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+    );
+
+    const formattedData = {
+      name: data.name,
+      description: data.description || "",
+      reason: data.reason || "",
+      startDate: startDateTime.toISOString(),
+      endDate: endDateTime.toISOString(),
+    };
+
+    try {
+      // Call the API to create busy schedule
+      await createBusySchedule(formattedData).unwrap();
+      toast.success("Busy schedule created successfully");
+      handleCloseBusyScheduleModal();
+    } catch (error) {
+      toast.error(
+        "Failed to create busy schedule: " +
+          (error.data?.message || "Unknown error"),
+      );
+    }
   };
 
   return (
@@ -104,7 +199,7 @@ const MyCalendar = () => {
                 name="eventType"
                 size="large"
                 placeholder="Filter by event type"
-                options={EVENT_TYPES}
+                options={[]}
               />
             </FilterGrid>
             <div className="flex justify-between">
@@ -121,6 +216,13 @@ const MyCalendar = () => {
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
+              <CustomButton
+                type="primary"
+                title="Create Busy Schedule"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={() => setIsBusyScheduleModalOpen(true)}
+              />
             </div>
           </div>
         </Card>
@@ -143,6 +245,127 @@ const MyCalendar = () => {
             showWeeklyNorm
           />
         </Card>
+
+        {/* Busy Schedule Modal */}
+        <CustomDrawer
+          title="Create Busy Schedule"
+          open={isBusyScheduleModalOpen}
+          onCancel={handleCloseBusyScheduleModal}
+          onSubmit={busyScheduleForm.handleSubmit(onSubmitBusySchedule)}
+          loading={isCreatingBusySchedule}
+        >
+          <div className="flex flex-col gap-4">
+            <CustomInput
+              control={busyScheduleForm.control}
+              name="name"
+              label="Request Name"
+              placeholder="Enter request name"
+              size="large"
+              required
+            />
+
+            <CustomInput
+              control={busyScheduleForm.control}
+              name="description"
+              label="Description"
+              placeholder="Enter description (optional)"
+              size="large"
+            />
+
+            <CustomTextArea
+              control={busyScheduleForm.control}
+              name="reason"
+              label="Reason"
+              placeholder="Enter reason for busy schedule"
+              size="large"
+              required
+            />
+
+            <Divider orientation="left">Schedule Details</Divider>
+
+            {/* Date picker */}
+            <div className="flex flex-col gap-2">
+              <Typography.Text>
+                Date<span className="text-red-500">*</span>
+              </Typography.Text>
+              <DatePicker
+                style={{ width: "100%" }}
+                size="large"
+                value={busyScheduleForm.watch("date")}
+                onChange={(date) => busyScheduleForm.setValue("date", date)}
+                placeholder="Select date"
+                status={
+                  busyScheduleForm.formState.errors.date ? "error" : undefined
+                }
+              />
+              {busyScheduleForm.formState.errors.date && (
+                <Typography.Text type="danger">
+                  {busyScheduleForm.formState.errors.date.message as string}
+                </Typography.Text>
+              )}
+            </div>
+
+            {/* Time range */}
+            <div className="flex gap-2">
+              <div className="flex flex-1 flex-col gap-2">
+                <Typography.Text>
+                  Start Time<span className="text-red-500">*</span>
+                </Typography.Text>
+                <TimePicker
+                  style={{ width: "100%" }}
+                  size="large"
+                  format="HH:mm"
+                  value={busyScheduleForm.watch("startTime")}
+                  onChange={(time) =>
+                    busyScheduleForm.setValue("startTime", time)
+                  }
+                  placeholder="Start time"
+                  status={
+                    busyScheduleForm.formState.errors.startTime
+                      ? "error"
+                      : undefined
+                  }
+                />
+                {busyScheduleForm.formState.errors.startTime && (
+                  <Typography.Text type="danger">
+                    {
+                      busyScheduleForm.formState.errors.startTime
+                        .message as string
+                    }
+                  </Typography.Text>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <Typography.Text>
+                  End Time<span className="text-red-500">*</span>
+                </Typography.Text>
+                <TimePicker
+                  style={{ width: "100%" }}
+                  size="large"
+                  format="HH:mm"
+                  value={busyScheduleForm.watch("endTime")}
+                  onChange={(time) =>
+                    busyScheduleForm.setValue("endTime", time)
+                  }
+                  placeholder="End time"
+                  status={
+                    busyScheduleForm.formState.errors.endTime
+                      ? "error"
+                      : undefined
+                  }
+                />
+                {busyScheduleForm.formState.errors.endTime && (
+                  <Typography.Text type="danger">
+                    {
+                      busyScheduleForm.formState.errors.endTime
+                        .message as string
+                    }
+                  </Typography.Text>
+                )}
+              </div>
+            </div>
+          </div>
+        </CustomDrawer>
       </div>
     </PageLayout>
   );

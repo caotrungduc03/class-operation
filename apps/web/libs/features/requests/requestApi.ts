@@ -68,7 +68,7 @@ export const requestApi = createApi({
       { id: string; action: RequestAction }
     >({
       query: ({ id, action }) => ({
-        url: `/requests/weekly-norms/${id}/update-status`,
+        url: `/requests/weekly-norms/${id}/status`,
         method: "PATCH",
         body: { action },
       }),
@@ -120,7 +120,66 @@ export const requestApi = createApi({
       { id: string; action: RequestAction }
     >({
       query: ({ id, action }) => ({
-        url: `/requests/time-offs/${id}/update-status`,
+        url: `/requests/time-offs/${id}/status`,
+        method: "PATCH",
+        body: { action },
+      }),
+    }),
+
+    // Busy Schedule endpoints
+    getBusySchedules: builder.query<
+      CustomResponse<Pagination<IRequest[]>>,
+      {
+        search?: string;
+        status?: string;
+        page?: number;
+        limit?: number;
+        startDate?: string;
+        endDate?: string;
+      }
+    >({
+      query: (params) => ({
+        url: "/requests/busy-schedules",
+        method: "GET",
+        params,
+      }),
+    }),
+
+    getBusyScheduleById: builder.query<CustomResponse<IRequest>, string>({
+      query: (id) => ({
+        url: `/requests/busy-schedules/${id}`,
+        method: "GET",
+      }),
+    }),
+
+    createBusySchedule: builder.mutation<
+      CustomResponse<IRequest>,
+      CreateRequestBusyScheduleDto
+    >({
+      query: (body) => ({
+        url: "/requests/busy-schedules",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    updateBusySchedule: builder.mutation<
+      CustomResponse<IRequest>,
+      { id: string; data: Partial<CreateRequestBusyScheduleDto> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/requests/busy-schedules/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
+
+    updateBusyScheduleStatus: builder.mutation<
+      CustomResponse<IRequest>,
+      { id: string; action: RequestAction }
+    >({
+      query: ({ id, action }) => ({
+        url: `/requests/busy-schedules/${id}/status`,
         method: "PATCH",
         body: { action },
       }),
@@ -144,4 +203,12 @@ export const {
   useCreateTimeOffMutation,
   useUpdateTimeOffMutation,
   useUpdateTimeOffStatusMutation,
+
+  // Busy Schedule hooks
+  useGetBusySchedulesQuery,
+  useGetBusyScheduleByIdQuery,
+  useLazyGetBusyScheduleByIdQuery,
+  useCreateBusyScheduleMutation,
+  useUpdateBusyScheduleMutation,
+  useUpdateBusyScheduleStatusMutation,
 } = requestApi;

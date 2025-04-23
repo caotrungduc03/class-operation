@@ -7,6 +7,8 @@ export interface RequestState {
   selectedWeeklyNorm: IRequest | null;
   timeOffs: IRequest[];
   selectedTimeOff: IRequest | null;
+  busySchedules: IRequest[];
+  selectedBusySchedule: IRequest | null;
 }
 
 const initialState: RequestState = {
@@ -14,6 +16,8 @@ const initialState: RequestState = {
   selectedWeeklyNorm: null,
   timeOffs: [],
   selectedTimeOff: null,
+  busySchedules: [],
+  selectedBusySchedule: null,
 };
 
 export const requestSlice = createSlice({
@@ -25,6 +29,9 @@ export const requestSlice = createSlice({
     },
     clearSelectedTimeOff: (state) => {
       state.selectedTimeOff = null;
+    },
+    clearSelectedBusySchedule: (state) => {
+      state.selectedBusySchedule = null;
     },
   },
   extraReducers: (builder) => {
@@ -111,10 +118,55 @@ export const requestSlice = createSlice({
         );
       },
     );
+
+    // Busy Schedule reducers
+    builder.addMatcher(
+      requestApi.endpoints.getBusySchedules.matchFulfilled,
+      (state, { payload }) => {
+        state.busySchedules = payload.data.items;
+      },
+    );
+
+    builder.addMatcher(
+      requestApi.endpoints.getBusyScheduleById.matchFulfilled,
+      (state, { payload }) => {
+        state.selectedBusySchedule = payload.data;
+      },
+    );
+
+    builder.addMatcher(
+      requestApi.endpoints.createBusySchedule.matchFulfilled,
+      (state, { payload }) => {
+        state.busySchedules = [payload.data, ...state.busySchedules];
+      },
+    );
+
+    builder.addMatcher(
+      requestApi.endpoints.updateBusySchedule.matchFulfilled,
+      (state, { payload }) => {
+        state.selectedBusySchedule = payload.data;
+        state.busySchedules = state.busySchedules.map((request) =>
+          request.id === payload.data.id ? payload.data : request,
+        );
+      },
+    );
+
+    builder.addMatcher(
+      requestApi.endpoints.updateBusyScheduleStatus.matchFulfilled,
+      (state, { payload }) => {
+        state.selectedBusySchedule = payload.data;
+        state.busySchedules = state.busySchedules.map((request) =>
+          request.id === payload.data.id ? payload.data : request,
+        );
+      },
+    );
   },
 });
 
-export const { clearSelectedWeeklyNorm, clearSelectedTimeOff } =
-  requestSlice.actions;
+export const {
+  clearSelectedWeeklyNorm,
+  clearSelectedTimeOff,
+  clearSelectedBusySchedule,
+} = requestSlice.actions;
 
 export default requestSlice;

@@ -1,11 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateWeeklyNormDto {
   @IsNotEmpty()
@@ -21,8 +15,4 @@ export class CreateWeeklyNormDto {
   @IsNotEmpty()
   @IsNumber()
   quantity: number;
-
-  @IsUUID()
-  @IsOptional()
-  teacherId?: string;
 }

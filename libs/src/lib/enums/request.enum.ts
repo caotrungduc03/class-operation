@@ -1,6 +1,7 @@
 export enum RequestType {
   WEEKLY_NORM = 'WEEKLY_NORM',
   TIME_OFF = 'TIME_OFF',
+  BUSY_SCHEDULE = 'BUSY_SCHEDULE',
 }
 
 export enum RequestStatus {

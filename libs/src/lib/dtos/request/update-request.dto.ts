@@ -1,5 +1,16 @@
-import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
-import { RequestType } from '../../enums/request.enum';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { RequestAction } from '../../enums';
+import { UpdateWeeklyNormDto } from '../weekly-norm/update-weekly-norm.dto';
 
 export class UpdateRequestDto {
   @IsOptional()
@@ -10,10 +21,6 @@ export class UpdateRequestDto {
   @IsString()
   description?: string;
 
-  @IsOptional()
-  @IsEnum(RequestType)
-  type?: RequestType;
-
   @IsUUID()
   @IsOptional()
   requesterId?: string;
@@ -21,4 +28,78 @@ export class UpdateRequestDto {
   @IsUUID()
   @IsOptional()
   approverId?: string;
+}
+
+export class UpdateRequestStatusDto {
+  @IsNotEmpty()
+  @IsEnum(RequestAction)
+  action: RequestAction;
+}
+
+/**
+ * Weekly Norms Request Update DTOs
+ */
+export class UpdateWeeklyNormRequestDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  description?: string;
+
+  @IsOptional()
+  @IsUUID()
+  teacherId?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateWeeklyNormDto)
+  @IsOptional()
+  weeklyNorms?: UpdateWeeklyNormDto[];
+}
+
+/**
+ * Time-Offs Request Update DTOs
+ */
+export class UpdateTimeOffRequestDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
+  startDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
+  endDate: Date;
+}
+
+/**
+ * Busy Schedules Request Update DTOs
+ */
+export class UpdateBusySchedulesRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  startDate: Date;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  endDate: Date;
 }

@@ -1,11 +1,16 @@
 import {
-  CreateRequestWeeklyNormDto,
+  CreateBusySchedulesRequestDto,
+  CreateTimeOffRequestDto,
+  CreateWeeklyNormRequestDto,
   RequestAction,
   RequestEntity,
   RequestStatus,
   RequestType,
   RoleName,
   ScheduleType,
+  UpdateBusySchedulesRequestDto,
+  UpdateTimeOffRequestDto,
+  UpdateWeeklyNormRequestDto,
 } from '@class-operation/libs';
 import {
   BadRequestException,
@@ -31,7 +36,7 @@ export class RequestService extends BaseService<RequestEntity> {
   }
 
   async createWeeklyNorms(
-    createRequestDto: CreateRequestWeeklyNormDto,
+    createRequestDto: CreateWeeklyNormRequestDto,
     userId: string,
     role: RoleName,
   ) {
@@ -70,7 +75,7 @@ export class RequestService extends BaseService<RequestEntity> {
 
   async updateWeeklyNorm(
     id: string,
-    updateData: CreateRequestWeeklyNormDto,
+    updateData: UpdateWeeklyNormRequestDto,
     role: RoleName,
   ) {
     // Find the request to update
@@ -101,7 +106,7 @@ export class RequestService extends BaseService<RequestEntity> {
     }
 
     // Create new weekly norms
-    const weeklyNorms = updateData.weeklyNorms.map((norm) => {
+    const weeklyNorms = updateData?.weeklyNorms?.map((norm) => {
       return {
         ...pick(norm, ['startDate', 'endDate', 'quantity']),
         teacherId: updateData.teacherId,
@@ -208,13 +213,7 @@ export class RequestService extends BaseService<RequestEntity> {
   }
 
   async createTimeOffSchedule(
-    createScheduleDto: {
-      name: string;
-      description: string;
-      type: ScheduleType;
-      startDate: Date;
-      endDate: Date;
-    },
+    createScheduleDto: CreateTimeOffRequestDto,
     userId: string,
     role: RoleName,
   ) {
@@ -237,7 +236,7 @@ export class RequestService extends BaseService<RequestEntity> {
     const schedule = await this.scheduleService.store({
       name: createScheduleDto.name,
       description: createScheduleDto.description,
-      type: createScheduleDto.type,
+      type: ScheduleType.BUSY,
       startDate: createScheduleDto.startDate,
       endDate: createScheduleDto.endDate,
       teacherId: isAdmin ? null : userId,
@@ -261,16 +260,7 @@ export class RequestService extends BaseService<RequestEntity> {
     return request;
   }
 
-  async updateTimeOffSchedule(
-    id: string,
-    updateData: {
-      name: string;
-      description: string;
-      type: ScheduleType;
-      startDate: Date;
-      endDate: Date;
-    },
-  ) {
+  async updateTimeOffSchedule(id: string, updateData: UpdateTimeOffRequestDto) {
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
       relations: ['schedule'],
@@ -297,7 +287,6 @@ export class RequestService extends BaseService<RequestEntity> {
       await this.scheduleService.updateById(request.schedule.id, {
         name: updateData.name,
         description: updateData.description,
-        type: updateData.type,
         startDate: updateData.startDate,
         endDate: updateData.endDate,
       });
@@ -318,6 +307,174 @@ export class RequestService extends BaseService<RequestEntity> {
 
     if (!request) {
       throw new NotFoundException('Time off schedule request not found');
+    }
+
+    if (action === RequestAction.APPROVE) {
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending requests can be approved');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for approval');
+      }
+
+      // Check for overlapping schedules if needed
+      if (request.schedule && request.schedule.teacherId) {
+        const hasOverlap = await this.scheduleService.checkOverlappingSchedules(
+          request.schedule.teacherId,
+          request.schedule.startDate,
+          request.schedule.endDate,
+          request.id, // exclude current request's schedule
+        );
+
+        if (hasOverlap) {
+          throw new BadRequestException(
+            `Cannot approve request. There is already an active schedule for teacher ID ${request.schedule.teacherId} in the requested period.`,
+          );
+        }
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.APPROVED,
+        approverId: userId,
+      });
+
+      // Update schedule status using the service
+      if (request.schedule) {
+        await this.scheduleService.updateById(request.schedule.id, {
+          status: true,
+        });
+      }
+
+      return updatedRequest;
+    } else if (action === RequestAction.CANCEL) {
+      if (request.status !== RequestStatus.APPROVED) {
+        throw new BadRequestException('Only approved requests can be canceled');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.CANCELED,
+      });
+
+      // Update schedule status using the service
+      if (request.schedule) {
+        await this.scheduleService.updateById(request.schedule.id, {
+          status: false,
+        });
+      }
+
+      return updatedRequest;
+    }
+
+    throw new BadRequestException(
+      `Invalid action: ${action}. Must be one of: ${Object.values(
+        RequestAction,
+      ).join(', ')}`,
+    );
+  }
+
+  async createBusySchedule(
+    createScheduleDto: CreateBusySchedulesRequestDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    // Determine initial status based on role
+    const isAdmin = role === RoleName.ADMIN;
+    const status = isAdmin ? RequestStatus.APPROVED : RequestStatus.PENDING;
+    const scheduleStatus = isAdmin;
+
+    // Create request first
+    const request = await this.store({
+      name: createScheduleDto.name,
+      description: createScheduleDto.description,
+      creatorId: userId,
+      requesterId: isAdmin ? null : userId,
+      type: RequestType.BUSY_SCHEDULE,
+      status: status,
+    });
+
+    // Create schedule using the service
+    const schedule = await this.scheduleService.store({
+      name: createScheduleDto.name,
+      description: createScheduleDto.description,
+      type: ScheduleType.BUSY,
+      startDate: createScheduleDto.startDate,
+      endDate: createScheduleDto.endDate,
+      teacherId: isAdmin ? null : userId,
+      requestId: request.id,
+      status: scheduleStatus,
+    });
+
+    return { request, schedule };
+  }
+
+  async getBusyScheduleById(id: string) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.BUSY_SCHEDULE },
+      relations: ['schedule', 'creator', 'requester', 'approver'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Busy schedule request not found');
+    }
+
+    return request;
+  }
+
+  async updateBusySchedule(
+    id: string,
+    updateData: UpdateBusySchedulesRequestDto,
+  ) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.BUSY_SCHEDULE },
+      relations: ['schedule'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Busy schedule request not found');
+    }
+
+    // Only allow updates for PENDING requests
+    if (request.status !== RequestStatus.PENDING) {
+      throw new BadRequestException('Only pending requests can be updated');
+    }
+
+    // Update request
+    const updatedRequest = await this.store({
+      ...request,
+      name: updateData.name,
+      description: updateData.description,
+    });
+
+    // Update schedule using the service
+    if (request.schedule) {
+      await this.scheduleService.updateById(request.schedule.id, {
+        name: updateData.name,
+        description: updateData.description,
+        startDate: updateData.startDate,
+        endDate: updateData.endDate,
+      });
+    }
+
+    return updatedRequest;
+  }
+
+  async updateBusyScheduleStatus(
+    id: string,
+    action: RequestAction,
+    userId?: string,
+  ) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.BUSY_SCHEDULE },
+      relations: ['schedule'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Busy schedule request not found');
     }
 
     if (action === RequestAction.APPROVE) {

@@ -1,10 +1,13 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { RequestStatus, RequestType } from '../../enums/request.enum';
+import { RequestStatus, RequestType } from '../../enums';
 import { BaseDto } from '../common/base.dto';
 import { ScheduleDto } from '../schedule/schedule.dto';
 import { UserDto } from '../user/user.dto';
 import { WeeklyNormDto } from '../weekly-norm/weekly-norm.dto';
 
+/**
+ * Base Request DTO
+ */
 @Exclude()
 export class RequestDto extends BaseDto {
   @Expose()

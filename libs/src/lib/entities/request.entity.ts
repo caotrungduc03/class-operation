@@ -29,8 +29,8 @@ export class RequestEntity extends CustomBaseEntity {
   type: RequestType;
 
   @Column({
-    // type: 'enum',
-    // enum: RequestStatus,
+    type: 'enum',
+    enum: RequestStatus,
   })
   status: RequestStatus;
 

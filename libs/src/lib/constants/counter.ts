@@ -1,5 +1,4 @@
-import { CounterType } from '../enums/counter';
-import { RoleName } from '../enums/role';
+import { CounterType, RoleName } from '../enums';
 
 export const ROLE_COUNTER_TYPE_MAP: Record<RoleName, CounterType> = {
   [RoleName.ADMIN]: CounterType.AD,
