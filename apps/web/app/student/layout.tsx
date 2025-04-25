@@ -4,7 +4,7 @@ import { AccessRole } from "@web/libs/common";
 
 const Layout = ({ children }: React.PropsWithChildren) => {
   return (
-    <RouteGuard requiredAccess={AccessRole.LMS}>
+    <RouteGuard requiredAccess={AccessRole.STUDENT}>
       <MainLayout>{children}</MainLayout>
     </RouteGuard>
   );

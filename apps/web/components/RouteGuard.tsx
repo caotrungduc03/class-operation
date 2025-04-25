@@ -1,8 +1,10 @@
 "use client";
+import { AccessRole } from "@web/libs/common";
 import { NAV_LINK } from "@web/libs/nav";
 import {
   canAccessLMS,
   canAccessOPS,
+  canAccessStudent,
   getHomePathForUser,
 } from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
@@ -13,7 +15,7 @@ import { useSelector } from "react-redux";
 
 interface RouteGuardProps {
   children: React.ReactNode;
-  requiredAccess?: "LMS" | "OPS";
+  requiredAccess?: AccessRole;
 }
 
 const RouteGuard: React.FC<RouteGuardProps> = ({
@@ -43,8 +45,9 @@ const RouteGuard: React.FC<RouteGuardProps> = ({
     // If the user is authenticated, check for proper access
     if (isAuthenticated) {
       const hasAccess =
-        (requiredAccess === "LMS" && canAccessLMS(user)) ||
-        (requiredAccess === "OPS" && canAccessOPS(user));
+        (requiredAccess === AccessRole.LMS && canAccessLMS(user)) ||
+        (requiredAccess === AccessRole.OPS && canAccessOPS(user)) ||
+        (requiredAccess === AccessRole.STUDENT && canAccessStudent(user));
 
       if (!hasAccess) {
         const redirectPath = getHomePathForUser(user);

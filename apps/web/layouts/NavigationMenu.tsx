@@ -4,26 +4,23 @@ import {
   FormOutlined,
   HomeOutlined,
   ProfileOutlined,
+  ReadOutlined,
   ScheduleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { MenuItem, NavigationItem } from "@web/libs/common";
+import { AccessRole, MenuItem, NavigationItem } from "@web/libs/common";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
-import { canAccessLMS, canAccessOPS } from "@web/libs/permissions";
+import {
+  canAccessLMS,
+  canAccessOPS,
+  canAccessStudent,
+} from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
 import { Menu } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo, useMemo } from "react";
 import { useSelector } from "react-redux";
-
-// Shared profile item for both menus
-const myProfileItem: NavigationItem = {
-  key: NAV_LINK.MY_PROFILE,
-  icon: <ProfileOutlined />,
-  label: NAV_TITLE.MY_PROFILE,
-  url: NAV_LINK.MY_PROFILE,
-};
 
 const OPSNavigationItems: NavigationItem[] = [
   {
@@ -32,7 +29,12 @@ const OPSNavigationItems: NavigationItem[] = [
     label: NAV_TITLE.HOME,
     url: NAV_LINK.OPS,
   },
-  myProfileItem,
+  {
+    key: NAV_LINK.MY_PROFILE,
+    icon: <ProfileOutlined />,
+    label: NAV_TITLE.MY_PROFILE,
+    url: NAV_LINK.MY_PROFILE,
+  },
   {
     key: NAV_LINK.MANAGE_CALENDAR,
     icon: <CalendarOutlined />,
@@ -90,12 +92,23 @@ const LMSNavigationItems: NavigationItem[] = [
     label: NAV_TITLE.HOME,
     url: NAV_LINK.LMS,
   },
-  myProfileItem,
+  {
+    key: NAV_LINK.MY_PROFILE,
+    icon: <ProfileOutlined />,
+    label: NAV_TITLE.MY_PROFILE,
+    url: NAV_LINK.MY_PROFILE,
+  },
   {
     key: NAV_LINK.MY_CALENDAR,
     icon: <CalendarOutlined />,
     label: NAV_TITLE.MY_CALENDAR,
     url: NAV_LINK.MY_CALENDAR,
+  },
+  {
+    key: NAV_LINK.MY_CLASS,
+    icon: <ReadOutlined />,
+    label: NAV_TITLE.MY_CLASS,
+    url: `${NAV_LINK.LMS}${NAV_LINK.MY_CLASS}`,
   },
   {
     key: NAV_LINK.WEEKLY_NORM_REGISTRATION,
@@ -108,6 +121,27 @@ const LMSNavigationItems: NavigationItem[] = [
     icon: <FileTextOutlined />,
     label: NAV_TITLE.TIME_OFF_REGISTRATION,
     url: NAV_LINK.TIME_OFF_REGISTRATION,
+  },
+];
+
+const StudentNavigationItems: NavigationItem[] = [
+  {
+    key: NAV_LINK.STUDENT,
+    icon: <HomeOutlined />,
+    label: NAV_TITLE.HOME,
+    url: NAV_LINK.STUDENT,
+  },
+  {
+    key: NAV_LINK.MY_PROFILE,
+    icon: <ProfileOutlined />,
+    label: NAV_TITLE.MY_PROFILE,
+    url: NAV_LINK.MY_PROFILE,
+  },
+  {
+    key: NAV_LINK.MY_CLASS,
+    icon: <ReadOutlined />,
+    label: NAV_TITLE.MY_CLASS,
+    url: `${NAV_LINK.STUDENT}${NAV_LINK.MY_CLASS}`,
   },
 ];
 
@@ -140,11 +174,14 @@ const NavigationMenu = () => {
     if (!user) return [];
 
     // First determine which kind of menu to show based on user role
-    const userMenuType = canAccessOPS(user)
-      ? "OPS"
-      : canAccessLMS(user)
-        ? "LMS"
-        : null;
+    let userMenuType: AccessRole | null = null;
+    if (canAccessOPS(user)) {
+      userMenuType = AccessRole.OPS;
+    } else if (canAccessLMS(user)) {
+      userMenuType = AccessRole.LMS;
+    } else if (canAccessStudent(user)) {
+      userMenuType = AccessRole.STUDENT;
+    }
 
     // Return early if user has no valid menu type
     if (!userMenuType) return [];
@@ -153,12 +190,15 @@ const NavigationMenu = () => {
     const inMyProfileSection = pathname?.startsWith(NAV_LINK.MY_PROFILE);
     const inLMSSection = pathname?.startsWith(NAV_LINK.LMS);
     const inOPSSection = pathname?.startsWith(NAV_LINK.OPS);
+    const inStudentSection = pathname?.startsWith(NAV_LINK.STUDENT);
 
     // For My Profile, show menu based on user's role type
     if (inMyProfileSection) {
-      return userMenuType === "OPS"
-        ? transformToMenuItems(OPSNavigationItems)
-        : transformToMenuItems(LMSNavigationItems);
+      if (userMenuType === AccessRole.OPS)
+        return transformToMenuItems(OPSNavigationItems);
+      if (userMenuType === AccessRole.LMS)
+        return transformToMenuItems(LMSNavigationItems);
+      return transformToMenuItems(StudentNavigationItems);
     }
 
     // For other sections, only show if user has access
@@ -168,6 +208,10 @@ const NavigationMenu = () => {
 
     if (inOPSSection && canAccessOPS(user)) {
       return transformToMenuItems(OPSNavigationItems);
+    }
+
+    if (inStudentSection && canAccessStudent(user)) {
+      return transformToMenuItems(StudentNavigationItems);
     }
 
     return [];
