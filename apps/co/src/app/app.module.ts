@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { CounterModule } from './counter/counter.module';
+import { CourseModule } from './course/course.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
 import { RequestModule } from './request/request.module';
 import { RoleModule } from './role/role.module';
@@ -47,6 +48,7 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     WeeklyNormModule,
     ScheduleModule,
     RoomModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [

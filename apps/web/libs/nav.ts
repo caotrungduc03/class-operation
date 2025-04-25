@@ -21,6 +21,7 @@ export const NAV_LINK = {
   BUSY_SCHEDULE_LIST: "/ops/request/busy-schedule/list",
   TEACHING_MODE_LIST: "/ops/request/teaching-mode/list",
   MANAGE_CALENDAR: "/ops/calendar",
+  MANAGE_COURSES: "/ops/course/list",
 
   MY_CLASS: "/my-class",
 };
@@ -43,5 +44,6 @@ export const NAV_TITLE = {
   BUSY_SCHEDULE_LIST: "Đăng ký lịch bận",
   TEACHING_MODE_LIST: "Đổi hình thức dạy",
   MANAGE_CALENDAR: "Quản lý lịch",
+  MANAGE_COURSES: "Quản lý khoá học",
   MY_CLASS: "Lớp của tôi",
 };

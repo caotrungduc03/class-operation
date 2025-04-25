@@ -5,6 +5,11 @@ import { CustomBaseEntity } from './customBase.entity';
 
 @Entity({ name: 'courses' })
 export class CourseEntity extends CustomBaseEntity {
+  @Column({
+    unique: true,
+  })
+  code: string;
+
   @Column()
   name: string;
 

@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { apiErrorMiddleware } from "./apiErrorMiddleware";
 import { authApi } from "./features/auth/authApi";
 import { authSlice } from "./features/auth/authSlice";
+import { courseApi } from "./features/courses/courseApi";
 import layoutSlice from "./features/layout/layoutSlice";
 import { requestApi } from "./features/requests/requestApi";
 import requestSlice from "./features/requests/requestSlice";
@@ -28,6 +29,7 @@ export const makeStore = () => {
       [weeklyNormApi.reducerPath]: weeklyNormApi.reducer,
       [scheduleApi.reducerPath]: scheduleApi.reducer,
       [roomApi.reducerPath]: roomApi.reducer,
+      [courseApi.reducerPath]: courseApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -38,6 +40,7 @@ export const makeStore = () => {
           weeklyNormApi.middleware,
           scheduleApi.middleware,
           roomApi.middleware,
+          courseApi.middleware,
         )
         .concat(apiErrorMiddleware),
   });
