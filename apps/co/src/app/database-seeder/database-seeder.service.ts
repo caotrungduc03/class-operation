@@ -2,6 +2,7 @@ import {
   CounterEntity,
   CounterType,
   encodePassword,
+  ROLE_COUNTER_TYPE,
   RoleEntity,
   RoleName,
   UserEntity,
@@ -42,12 +43,10 @@ export class DatabaseSeederService {
   }
 
   private async seedCounters() {
-    const counters = [
-      { type: CounterType.AD, count: 0 },
-      { type: CounterType.GV, count: 0 },
-      { type: CounterType.NV, count: 0 },
-      { type: CounterType.HV, count: 0 },
-    ];
+    const counters = Object.values(CounterType).map((type) => ({
+      type,
+      count: 0,
+    }));
 
     for (const counterData of counters) {
       const existingCounter = await this.counterService.findOne({
@@ -79,7 +78,9 @@ export class DatabaseSeederService {
         throw new InternalServerErrorException('Admin role not found');
       }
 
-      const code = await this.counterService.getNextCode(role.roleName);
+      const code = await this.counterService.getNextCode(
+        ROLE_COUNTER_TYPE[role.roleName],
+      );
       const userDetail = await this.userDetailService.createUserDetail(code);
 
       user.role = role;

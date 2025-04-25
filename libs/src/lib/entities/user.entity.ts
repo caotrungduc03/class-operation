@@ -1,6 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
+import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { RoleEntity } from './role.entity';
+import { StudentClassEntity } from './student-class.entity';
 import { UserDetail } from './user-detail.entity';
 
 @Entity({ name: 'users' })
@@ -70,4 +79,16 @@ export class UserEntity extends CustomBaseEntity {
     name: 'detail_user_id',
   })
   detail: UserDetail;
+
+  @OneToMany(
+    () => ClassEntity,
+    (classEntity: ClassEntity) => classEntity.teacher,
+  )
+  taughtClasses: ClassEntity[];
+
+  @OneToMany(
+    () => StudentClassEntity,
+    (studentClass: StudentClassEntity) => studentClass.student,
+  )
+  enrolledClasses: StudentClassEntity[];
 }

@@ -1,6 +1,7 @@
 export enum CounterType {
-  AD = 'AD',
-  GV = 'GV',
-  NV = 'NV',
-  HV = 'HV',
+  AD = 'AD', // Admin
+  GV = 'GV', // Teacher (Giao vien)
+  NV = 'NV', // Receptionist (Nhan vien)
+  HV = 'HV', // Student (Hoc vien)
+  PH = 'PH', // Room (Phong hoc)
 }

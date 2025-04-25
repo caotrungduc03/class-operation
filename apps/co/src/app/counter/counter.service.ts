@@ -1,8 +1,4 @@
-import {
-  CounterEntity,
-  ROLE_COUNTER_TYPE_MAP,
-  RoleName,
-} from '@class-operation/libs';
+import { CounterEntity, CounterType } from '@class-operation/libs';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,15 +13,7 @@ export class CounterService extends BaseService<CounterEntity> {
     super(counterRepository);
   }
 
-  async getNextCode(roleName: RoleName): Promise<string> {
-    const counterType = ROLE_COUNTER_TYPE_MAP[roleName];
-
-    if (!counterType) {
-      throw new InternalServerErrorException(
-        `No counter type defined for role ${roleName}`,
-      );
-    }
-
+  async getNextCode(counterType: CounterType): Promise<string> {
     const counter = await this.findOne({
       where: {
         type: counterType,
@@ -34,7 +22,7 @@ export class CounterService extends BaseService<CounterEntity> {
 
     if (!counter) {
       throw new InternalServerErrorException(
-        `Counter not found for role ${roleName}`,
+        `Counter not found for type ${counterType}`,
       );
     }
 

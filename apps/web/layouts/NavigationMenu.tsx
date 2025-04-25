@@ -42,6 +42,12 @@ const OPSNavigationItems: NavigationItem[] = [
     url: NAV_LINK.MANAGE_CALENDAR,
   },
   {
+    key: NAV_LINK.MANAGE_ROOMS,
+    icon: <HomeOutlined />,
+    label: NAV_TITLE.MANAGE_ROOMS,
+    url: NAV_LINK.MANAGE_ROOMS,
+  },
+  {
     key: NAV_LINK.MANAGE_USERS,
     icon: <UserOutlined />,
     label: NAV_TITLE.MANAGE_USERS,
@@ -56,6 +62,7 @@ const OPSNavigationItems: NavigationItem[] = [
       },
     ],
   },
+
   {
     key: NAV_LINK.MANAGE_REQUESTS,
     icon: <FormOutlined />,

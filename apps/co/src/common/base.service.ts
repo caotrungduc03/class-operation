@@ -153,7 +153,7 @@ export abstract class BaseService<T extends BaseEntity>
     query: Record<string, any>,
     options?: QueryOptions,
   ): Promise<QueryResult<T>> {
-    let { page = 1, limit = 10, sort = 'createdAt:asc', ...filter } = query;
+    let { page = 1, limit = 10, sort = 'createdAt:desc', ...filter } = query;
     const { relations = [] } = options || {};
     page = Number(page);
     limit = Math.min(Number(limit), 100);

@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { ScheduleType } from '../enums/schedule.enum';
+import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { RequestEntity } from './request.entity';
 
@@ -50,4 +51,19 @@ export class ScheduleEntity extends CustomBaseEntity {
     nullable: true,
   })
   teacherId: string;
+
+  @Column({
+    name: 'class_id',
+    nullable: true,
+  })
+  classId: string;
+
+  @ManyToOne(
+    () => ClassEntity,
+    (classEntity: ClassEntity) => classEntity.schedules,
+  )
+  @JoinColumn({
+    name: 'class_id',
+  })
+  class: ClassEntity;
 }

@@ -106,8 +106,9 @@ const columnsTitles: TableColumn<IRequest>[] = [
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
-    title: "Actions",
+    title: "",
     dataIndex: "method",
+    fixed: "right",
   },
 ];
 

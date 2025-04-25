@@ -84,6 +84,7 @@ const Calendar = () => {
 
   // Update API queries to use teacherId from searchParams instead of selectedTeacher
   const {
+    isLoading: isLoadingWeeklyNorms,
     data: weeklyNorms,
     isFetching: isFetchingWeeklyNorms,
     refetch: refetchWeeklyNorms,
@@ -98,6 +99,7 @@ const Calendar = () => {
   );
 
   const {
+    isLoading: isLoadingSchedules,
     data: schedules,
     isFetching: isFetchingSchedules,
     refetch: refetchSchedules,
@@ -113,7 +115,7 @@ const Calendar = () => {
   );
 
   useEffect(() => {
-    if (!isRefetching) return;
+    if (!isRefetching || isLoadingWeeklyNorms || isLoadingSchedules) return;
 
     refetchWeeklyNorms();
     refetchSchedules();

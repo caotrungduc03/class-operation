@@ -2,6 +2,7 @@ import {
   CreateUserDto,
   encodePassword,
   FindOptions,
+  ROLE_COUNTER_TYPE,
   RoleName,
   UserEntity,
 } from '@class-operation/libs';
@@ -89,7 +90,9 @@ export class UserService extends BaseService<UserEntity> {
       throw new NotFoundException('Role not found');
     }
 
-    const code = await this.counterService.getNextCode(role.roleName);
+    const code = await this.counterService.getNextCode(
+      ROLE_COUNTER_TYPE[role.roleName],
+    );
     const userDetail = await this.userDetailService.createUserDetail(code);
 
     const encodedPassword = encodePassword(createUserDto.password);

@@ -12,6 +12,7 @@ import { CounterModule } from './counter/counter.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
 import { RequestModule } from './request/request.module';
 import { RoleModule } from './role/role.module';
+import { RoomModule } from './room/room.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { UserDetailModule } from './user-detail/user-detail.module';
 import { UserModule } from './user/user.module';
@@ -45,6 +46,7 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     RequestModule,
     WeeklyNormModule,
     ScheduleModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [

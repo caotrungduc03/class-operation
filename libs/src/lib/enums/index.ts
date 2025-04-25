@@ -1,4 +1,4 @@
-export * from './counter';
+export * from './counter.enum';
 export * from './request.enum';
-export * from './role';
+export * from './role.enum';
 export * from './schedule.enum';
