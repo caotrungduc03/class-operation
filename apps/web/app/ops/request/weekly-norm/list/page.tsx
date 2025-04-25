@@ -23,6 +23,7 @@ import {
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
   IRequest,
+  REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
   RequestStatusOptions,
@@ -71,25 +72,13 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator) => creator?.fullName || "N/A",
+    render: (creator) => creator?.fullName || "",
   },
   {
     title: "Status",
     dataIndex: "status",
     render: (status: RequestStatus) => (
-      <Tag
-        color={
-          status === RequestStatus.APPROVED
-            ? "success"
-            : status === RequestStatus.REJECTED
-              ? "error"
-              : status === RequestStatus.PENDING
-                ? "warning"
-                : "default"
-        }
-      >
-        {status}
-      </Tag>
+      <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
@@ -142,7 +131,7 @@ const WeeklyNormActions = ({
 
 const WeeklyNormList = () => {
   const [searchParams, setSearchParams] = useState<{
-    search?: string;
+    name?: string;
     status?: string;
     page?: number;
     limit?: number;
@@ -165,18 +154,14 @@ const WeeklyNormList = () => {
     isApproveModalOpen,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
-  const { selectedWeeklyNorm } = useSelector(
-    (state: RootState) => state.request,
-  );
 
   const {
     data: weeklyNormsData,
-    isLoading,
     isFetching,
     refetch,
   } = useGetWeeklyNormsQuery(searchParams);
 
-  const [fetchNormDetail, { data: normDetail, isLoading: isDetailLoading }] =
+  const [fetchNormDetail, { data: normDetail }] =
     useLazyGetWeeklyNormByIdQuery();
 
   const [updateWeeklyNormStatus, { isLoading: isUpdatingStatus }] =
@@ -217,12 +202,6 @@ const WeeklyNormList = () => {
     );
   }, [weeklyNormsData, current, pageSize]);
 
-  useEffect(() => {
-    if (!isLoading) return;
-
-    refetch();
-  }, [searchParams]);
-
   // Add this useEffect to update pagination when data changes
   useEffect(() => {
     if (weeklyNormsData?.data) {
@@ -235,7 +214,7 @@ const WeeklyNormList = () => {
     }
   }, [weeklyNormsData]);
 
-  const onSubmitSearch = (data: { search?: string; status?: string }) => {
+  const onSubmitSearch = (data: { name?: string; status?: string }) => {
     setSearchParams({
       ...searchParams,
       ...data,
@@ -248,6 +227,10 @@ const WeeklyNormList = () => {
     setSearchParams({
       page: 1,
       limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
     });
   };
 
@@ -317,7 +300,7 @@ const WeeklyNormList = () => {
             <FilterGrid>
               <CustomInput
                 control={searchForm.control}
-                name="search"
+                name="name"
                 size="large"
                 placeholder="Search by request name"
               />
@@ -406,21 +389,11 @@ const WeeklyNormList = () => {
 
             <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
-              <div className="mt-1">
-                <Tag
-                  color={
-                    normDetail.data.status === RequestStatus.APPROVED
-                      ? "success"
-                      : normDetail.data.status === RequestStatus.REJECTED
-                        ? "error"
-                        : normDetail.data.status === RequestStatus.PENDING
-                          ? "warning"
-                          : "default"
-                  }
-                >
+              <span className="ml-2">
+                <Tag color={REQUEST_STATUS_TAG[normDetail.data.status]}>
                   {normDetail.data.status}
                 </Tag>
-              </div>
+              </span>
             </div>
 
             <Divider orientation="left">Weekly Norms</Divider>

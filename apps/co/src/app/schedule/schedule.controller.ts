@@ -5,7 +5,7 @@ import {
   Roles,
   User,
 } from '@class-operation/libs';
-import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 
 @Controller('schedules')
@@ -28,6 +28,18 @@ export class ScheduleController {
     return new ResponseDto(
       HttpStatus.OK,
       'Schedules retrieved successfully',
+      result,
+    );
+  }
+
+  @Get('/:id')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async findById(@Param('id') id: string) {
+    const result = await this.scheduleService.findById(id);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Schedule retrieved successfully',
       result,
     );
   }

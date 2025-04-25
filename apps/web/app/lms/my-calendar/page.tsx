@@ -9,17 +9,31 @@ import CustomTextArea from "@web/components/common/CustomTextArea";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { useCreateBusyScheduleMutation } from "@web/libs/features/requests/requestApi";
+import { useGetSchedulesQuery } from "@web/libs/features/schedules/scheduleApi";
 import { useGetWeeklyNormsQuery } from "@web/libs/features/weekly-norms/weeklyNormApi";
 import { NAV_TITLE } from "@web/libs/nav";
-import { Card, DatePicker, Divider, TimePicker, Typography } from "antd";
+import {
+  SCHEDULE_TYPE_LABEL,
+  SCHEDULE_TYPE_OPTIONS,
+  SCHEDULE_TYPE_TAG,
+} from "@web/libs/schedule";
+import {
+  Card,
+  DatePicker,
+  Divider,
+  Modal,
+  Tag,
+  TimePicker,
+  Typography,
+} from "antd";
 import AntdCalendar from "antd-calendar";
+import { EventType } from "antd-calendar/dist/constants";
 import { IEvent } from "antd-calendar/dist/types";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
 import * as z from "zod";
 
 const breadcrumbs: ItemType[] = [
@@ -30,8 +44,8 @@ const breadcrumbs: ItemType[] = [
 
 // Define validation schemas
 const searchFormSchema = z.object({
-  eventName: z.string().optional(),
-  eventType: z.string().optional(),
+  name: z.string().optional(),
+  type: z.string().optional(),
 });
 
 const busyScheduleFormSchema = z.object({
@@ -48,29 +62,38 @@ type SearchFormValues = z.infer<typeof searchFormSchema>;
 type BusyScheduleFormValues = z.infer<typeof busyScheduleFormSchema>;
 
 const MyCalendar = () => {
-  const dispatch = useDispatch();
   const [isBusyScheduleModalOpen, setIsBusyScheduleModalOpen] = useState(false);
+  // Add state for detail modal
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedEvents, setSelectedEvents] = useState<IEvent[]>([]);
 
   const [dateRange, setDateRange] = useState({
-    startDate: dayjs().startOf("month").toISOString(),
-    endDate: dayjs().endOf("month").toISOString(),
+    startDate: dayjs()
+      .startOf("month")
+      .startOf("week")
+      .add(1, "day")
+      .toISOString(),
+    endDate: dayjs().endOf("month").endOf("week").add(1, "day").toISOString(),
   });
-  const [searchParams, setSearchParams] = useState({
-    eventName: "",
-    eventType: "",
+  const [searchParams, setSearchParams] = useState<SearchFormValues>({
+    name: undefined,
+    type: undefined,
   });
 
-  const { data: weeklyNorms, isFetching } = useGetWeeklyNormsQuery(dateRange);
+  const { data: weeklyNorms, isFetching: isFetchingNorms } =
+    useGetWeeklyNormsQuery(dateRange);
+  const { data: schedules, isFetching: isFetchingSchedules } =
+    useGetSchedulesQuery({
+      ...searchParams,
+      ...dateRange,
+    });
   const [createBusySchedule, { isLoading: isCreatingBusySchedule }] =
     useCreateBusyScheduleMutation();
 
   // Update forms with zod resolver
   const searchForm = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
-    defaultValues: {
-      eventName: "",
-      eventType: "",
-    },
   });
 
   const busyScheduleForm = useForm<BusyScheduleFormValues>({
@@ -85,9 +108,36 @@ const MyCalendar = () => {
     },
   });
 
+  const events = useMemo(() => {
+    if (!schedules?.data) return [];
+
+    return schedules.data.map((schedule) => ({
+      id: schedule.id,
+      title: schedule.name,
+      startDate: dayjs(schedule.startDate).toDate(),
+      endDate: dayjs(schedule.endDate).toDate(),
+      type: schedule.type as unknown as EventType,
+      description: schedule.description,
+    }));
+  }, [schedules]);
+
+  const norms = useMemo(() => {
+    if (!weeklyNorms?.data) return [];
+
+    return weeklyNorms.data.map((norm) => ({
+      id: norm.id,
+      startDate: dayjs(norm.startDate).toDate(),
+      endDate: dayjs(norm.endDate).toDate(),
+      maxShift: norm.quantity,
+    }));
+  }, [weeklyNorms]);
+
   const handleOpenDetail = useCallback((date: Date, events: IEvent[]) => {
-    // Handle opening event details
-    console.log("Open event details", date, events);
+    // Set the selected date and events
+    setSelectedDate(date);
+    setSelectedEvents(events);
+    // Open the detail modal
+    setIsDetailModalOpen(true);
   }, []);
 
   const handleOpenCreate = useCallback(
@@ -123,16 +173,17 @@ const MyCalendar = () => {
 
   const onSubmitSearch = (data: SearchFormValues) => {
     setSearchParams({
-      eventName: data.eventName || "",
-      eventType: data.eventType || "",
+      ...searchParams,
+      ...data,
     });
   };
 
   const handleReset = () => {
     searchForm.reset();
     setSearchParams({
-      eventName: "",
-      eventType: "",
+      ...searchParams,
+      name: undefined,
+      type: undefined,
     });
   };
 
@@ -190,16 +241,16 @@ const MyCalendar = () => {
             <FilterGrid>
               <CustomInput
                 control={searchForm.control}
-                name="eventName"
+                name="name"
                 size="large"
                 placeholder="Search by event name"
               />
               <CustomSelect
                 control={searchForm.control}
-                name="eventType"
+                name="type"
                 size="large"
                 placeholder="Filter by event type"
-                options={[]}
+                options={SCHEDULE_TYPE_OPTIONS}
               />
             </FilterGrid>
             <div className="flex justify-between">
@@ -229,19 +280,12 @@ const MyCalendar = () => {
 
         <Card>
           <AntdCalendar
-            events={[]}
-            norms={
-              weeklyNorms?.data?.map((norm) => ({
-                id: norm.id,
-                startDate: dayjs(norm.startDate).toDate(),
-                endDate: dayjs(norm.endDate).toDate(),
-                maxShift: norm.quantity,
-              })) || []
-            }
+            events={events}
+            norms={norms}
             onOpenDetail={handleOpenDetail}
             onOpenCreate={handleOpenCreate}
             onRefetchAPI={handleRefetchAPI}
-            loading={isFetching}
+            loading={isFetchingNorms || isFetchingSchedules}
             showWeeklyNorm
           />
         </Card>
@@ -366,6 +410,60 @@ const MyCalendar = () => {
             </div>
           </div>
         </CustomDrawer>
+
+        {/* Event Detail Modal */}
+        <Modal
+          title={dayjs(selectedDate).format("MMMM D, YYYY")}
+          open={isDetailModalOpen}
+          onCancel={() => setIsDetailModalOpen(false)}
+          footer={[
+            <CustomButton
+              key="close"
+              title="Close"
+              onClick={() => setIsDetailModalOpen(false)}
+            />,
+          ]}
+        >
+          {selectedEvents.length ? (
+            <div className="max-h-[60vh] overflow-y-auto">
+              {selectedEvents.map((event) => (
+                <Card key={event.id} className="mb-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Typography.Title level={5}>
+                        {event.title}
+                      </Typography.Title>
+                      <Typography.Text type="secondary">
+                        {dayjs(event.startDate).format("HH:mm")} -{" "}
+                        {dayjs(event.endDate).format("HH:mm")}
+                      </Typography.Text>
+                      {event.type && (
+                        <div className="mt-2">
+                          <Tag color={SCHEDULE_TYPE_TAG[event.type]}>
+                            {SCHEDULE_TYPE_LABEL[event.type]}
+                          </Tag>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {event.description && (
+                    <div className="mt-2">
+                      <Typography.Text type="secondary">
+                        {event.description}
+                      </Typography.Text>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="py-6 text-center">
+              <Typography.Text type="secondary">
+                No events for this day
+              </Typography.Text>
+            </div>
+          )}
+        </Modal>
       </div>
     </PageLayout>
   );

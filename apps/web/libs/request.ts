@@ -3,6 +3,7 @@ import { IUser } from "./user";
 export enum RequestType {
   WEEKLY_NORM = "WEEKLY_NORM",
   TIME_OFF = "TIME_OFF",
+  BUSY_SCHEDULE = "BUSY_SCHEDULE",
 }
 
 export enum RequestStatus {
@@ -48,7 +49,6 @@ export interface IRequest {
 export interface CreateRequestWeeklyNormDto {
   name: string;
   description: string;
-  type: RequestType;
   status?: RequestStatus;
   teacherId?: string;
   requesterId?: string;
@@ -59,7 +59,13 @@ export interface CreateRequestWeeklyNormDto {
 export interface CreateRequestTimeOffDto {
   name: string;
   description?: string;
-  type: RequestType;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface CreateRequestBusyScheduleDto {
+  name: string;
+  description?: string;
   startDate: Date;
   endDate: Date;
 }
@@ -87,3 +93,10 @@ export enum RequestAction {
   APPROVE = "APPROVE",
   CANCEL = "CANCEL",
 }
+
+export const REQUEST_STATUS_TAG = {
+  [RequestStatus.PENDING]: "warning",
+  [RequestStatus.APPROVED]: "success",
+  [RequestStatus.REJECTED]: "error",
+  [RequestStatus.CANCELED]: "default",
+} as const;

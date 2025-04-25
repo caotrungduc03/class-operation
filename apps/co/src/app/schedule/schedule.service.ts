@@ -5,7 +5,7 @@ import {
 } from '@class-operation/libs';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, ILike, Repository } from 'typeorm';
 import { BaseService } from '../../common';
 
 @Injectable()
@@ -68,29 +68,38 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
   }
 
   async findByRangeDate(query: GetScheduleDto, userId: string, role: RoleName) {
-    switch (role) {
-      case RoleName.ADMIN:
-        break;
-      case RoleName.TEACHER:
-        query.teacherId = userId;
-        break;
+    // Set teacherId based on role
+    if (role === RoleName.TEACHER) {
+      query.teacherId = userId;
     }
 
-    const { startDate, endDate, teacherId } = query;
-    if (!teacherId) {
-      throw new NotFoundException('Teacher ID is required');
+    const { startDate, endDate, teacherId, name, type } = query;
+
+    // Build query conditions
+    const conditions: any = {
+      startDate: Between(startDate, endDate),
+      endDate: Between(startDate, endDate),
+      status: true,
+    };
+
+    // Add teacherId condition if provided
+    if (teacherId) {
+      conditions.teacherId = teacherId;
+    }
+
+    // Add name filter if provided (case insensitive partial match)
+    if (name) {
+      conditions.name = ILike(`%${name}%`);
+    }
+
+    // Add type filter if provided
+    if (type) {
+      conditions.type = type;
     }
 
     return this.scheduleRepository.find({
-      where: {
-        teacherId,
-        startDate: Between(new Date(startDate), new Date(endDate)),
-        endDate: Between(new Date(startDate), new Date(endDate)),
-        status: true,
-      },
-      order: {
-        startDate: 'ASC',
-      },
+      where: conditions,
+      relations: ['request'],
     });
   }
 

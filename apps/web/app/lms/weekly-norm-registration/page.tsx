@@ -9,7 +9,7 @@ import CustomSelect from "@web/components/common/CustomSelect";
 import CustomRangePicker from "@web/components/common/CustomeRangePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { TableColumn } from "@web/libs/common";
+import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
   useCreateWeeklyNormMutation,
   useGetWeeklyNormsQuery,
@@ -30,6 +30,7 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
+  REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
   RequestStatusOptions,
@@ -80,30 +81,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     title: "Status",
     dataIndex: "status",
     render: (status: RequestStatus) => (
-      <Tag
-        color={
-          status === RequestStatus.APPROVED
-            ? "success"
-            : status === RequestStatus.REJECTED
-              ? "error"
-              : status === RequestStatus.PENDING
-                ? "warning"
-                : "default"
-        }
-      >
-        {status}
-      </Tag>
+      <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
     title: "Created At",
     dataIndex: "createdAt",
-    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
     title: "Updated At",
     dataIndex: "updatedAt",
-    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
     title: "Actions",
@@ -150,7 +139,7 @@ const WeeklyNormActions = ({
 
 const WeeklyNormRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
-    search?: string;
+    name?: string;
     status?: string;
     page?: number;
     limit?: number;
@@ -180,7 +169,6 @@ const WeeklyNormRegistration = () => {
 
   const {
     data: weeklyNormsData,
-    isLoading,
     isFetching,
     refetch,
   } = useGetWeeklyNormsQuery(searchParams);
@@ -248,12 +236,6 @@ const WeeklyNormRegistration = () => {
     );
   }, [weeklyNormsData, current, pageSize]);
 
-  useEffect(() => {
-    if (!isLoading) return;
-
-    refetch();
-  }, [searchParams]);
-
   // Add this useEffect to update pagination when data changes
   useEffect(() => {
     if (weeklyNormsData?.data) {
@@ -293,7 +275,7 @@ const WeeklyNormRegistration = () => {
     }
   };
 
-  const onSubmitSearch = (data: { search?: string; status?: string }) => {
+  const onSubmitSearch = (data: { name?: string; status?: string }) => {
     setSearchParams({
       ...searchParams,
       ...data,
@@ -306,6 +288,10 @@ const WeeklyNormRegistration = () => {
     setSearchParams({
       page: 1,
       limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
     });
   };
 
@@ -407,7 +393,7 @@ const WeeklyNormRegistration = () => {
             <FilterGrid>
               <CustomInput
                 control={searchForm.control}
-                name="search"
+                name="name"
                 size="large"
                 placeholder="Search by request name"
               />
@@ -495,21 +481,11 @@ const WeeklyNormRegistration = () => {
 
             <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
-              <div className="mt-1">
-                <Tag
-                  color={
-                    normDetail.data.status === RequestStatus.APPROVED
-                      ? "success"
-                      : normDetail.data.status === RequestStatus.REJECTED
-                        ? "error"
-                        : normDetail.data.status === RequestStatus.PENDING
-                          ? "warning"
-                          : "default"
-                  }
-                >
+              <span className="ml-2">
+                <Tag color={REQUEST_STATUS_TAG[normDetail.data.status]}>
                   {normDetail.data.status}
                 </Tag>
-              </div>
+              </span>
             </div>
 
             <Divider orientation="left">Weekly Norms</Divider>
@@ -524,8 +500,8 @@ const WeeklyNormRegistration = () => {
                     </Typography.Text>
                   </div>
                   <Typography.Text>
-                    {dayjs(norm.startDate).format("DD/MM/YYYY")} -{" "}
-                    {dayjs(norm.endDate).format("DD/MM/YYYY")}
+                    {dayjs(norm.startDate).format(DATE_FORMAT)} -{" "}
+                    {dayjs(norm.endDate).format(DATE_FORMAT)}
                   </Typography.Text>
                 </Card>
               ))}
@@ -534,14 +510,14 @@ const WeeklyNormRegistration = () => {
               <div>
                 <Typography.Text type="secondary">Created At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(normDetail.data.createdAt).format("DD/MM/YYYY HH:mm")}
+                  {dayjs(normDetail.data.createdAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
 
               <div>
                 <Typography.Text type="secondary">Updated At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(normDetail.data.updatedAt).format("DD/MM/YYYY HH:mm")}
+                  {dayjs(normDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
             </div>

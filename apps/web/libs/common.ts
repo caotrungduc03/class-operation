@@ -1,6 +1,11 @@
 import { MenuProps } from "antd";
 import { FixedType } from "rc-table/lib/interface";
 
+// Format constants
+export const DATE_FORMAT = "DD/MM/YYYY";
+export const DATE_TIME_FORMAT = "DD/MM/YYYY HH:mm";
+export const TIME_FORMAT = "HH:mm";
+
 // Types
 export type MenuItem = Required<MenuProps>["items"][number];
 

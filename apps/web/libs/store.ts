@@ -5,6 +5,7 @@ import { authSlice } from "./features/auth/authSlice";
 import layoutSlice from "./features/layout/layoutSlice";
 import { requestApi } from "./features/requests/requestApi";
 import requestSlice from "./features/requests/requestSlice";
+import { scheduleApi } from "./features/schedules/scheduleApi";
 import tableSlice from "./features/table/tableSlice";
 import { userApi } from "./features/users/userApi";
 import userSlice from "./features/users/userSlice";
@@ -24,6 +25,7 @@ export const makeStore = () => {
       [requestApi.reducerPath]: requestApi.reducer,
       weeklyNorm: weeklyNormSlice.reducer,
       [weeklyNormApi.reducerPath]: weeklyNormApi.reducer,
+      [scheduleApi.reducerPath]: scheduleApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -32,6 +34,7 @@ export const makeStore = () => {
           userApi.middleware,
           requestApi.middleware,
           weeklyNormApi.middleware,
+          scheduleApi.middleware,
         )
         .concat(apiErrorMiddleware),
   });

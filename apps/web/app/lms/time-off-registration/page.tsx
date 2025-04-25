@@ -7,7 +7,12 @@ import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { TableColumn } from "@web/libs/common";
+import {
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  TIME_FORMAT,
+  TableColumn,
+} from "@web/libs/common";
 import {
   useCreateTimeOffMutation,
   useGetTimeOffsQuery,
@@ -28,6 +33,7 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
+  REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
   RequestStatusOptions,
@@ -79,37 +85,25 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Date",
     dataIndex: "timeOff",
-    render: (timeOff) => dayjs(timeOff?.date).format("DD/MM/YYYY"),
+    render: (timeOff) => dayjs(timeOff?.date).format(DATE_FORMAT),
   },
   {
     title: "Time",
     dataIndex: "timeOff",
     render: (timeOff) =>
-      `${dayjs(timeOff?.startTime).format("HH:mm")} - ${dayjs(timeOff?.endTime).format("HH:mm")}`,
+      `${dayjs(timeOff?.startTime).format(TIME_FORMAT)} - ${dayjs(timeOff?.endTime).format(TIME_FORMAT)}`,
   },
   {
     title: "Status",
     dataIndex: "status",
     render: (status: RequestStatus) => (
-      <Tag
-        color={
-          status === RequestStatus.APPROVED
-            ? "success"
-            : status === RequestStatus.REJECTED
-              ? "error"
-              : status === RequestStatus.PENDING
-                ? "warning"
-                : "default"
-        }
-      >
-        {status}
-      </Tag>
+      <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
     title: "Created At",
     dataIndex: "createdAt",
-    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
     title: "Actions",
@@ -156,7 +150,7 @@ const TimeOffActions = ({
 
 const TimeOffRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
-    search?: string;
+    name?: string;
     status?: string;
     page?: number;
     limit?: number;
@@ -184,7 +178,6 @@ const TimeOffRegistration = () => {
 
   const {
     data: timeOffsData,
-    isLoading,
     isFetching,
     refetch,
   } = useGetTimeOffsQuery(searchParams);
@@ -244,12 +237,6 @@ const TimeOffRegistration = () => {
   }, [timeOffsData, current, pageSize]);
 
   useEffect(() => {
-    if (!isLoading) return;
-
-    refetch();
-  }, [searchParams]);
-
-  useEffect(() => {
     if (timeOffsData?.data) {
       setPagination((prev) => ({
         ...prev,
@@ -288,7 +275,7 @@ const TimeOffRegistration = () => {
     }
   };
 
-  const onSubmitSearch = (data: { search?: string; status?: string }) => {
+  const onSubmitSearch = (data: { name?: string; status?: string }) => {
     setSearchParams({
       ...searchParams,
       ...data,
@@ -301,6 +288,10 @@ const TimeOffRegistration = () => {
     setSearchParams({
       page: 1,
       limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
     });
   };
 
@@ -403,7 +394,7 @@ const TimeOffRegistration = () => {
             <FilterGrid>
               <CustomInput
                 control={searchForm.control}
-                name="search"
+                name="name"
                 size="large"
                 placeholder="Search by request name"
               />
@@ -491,21 +482,11 @@ const TimeOffRegistration = () => {
 
             <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
-              <div className="mt-1">
-                <Tag
-                  color={
-                    timeOffDetail.data.status === RequestStatus.APPROVED
-                      ? "success"
-                      : timeOffDetail.data.status === RequestStatus.REJECTED
-                        ? "error"
-                        : timeOffDetail.data.status === RequestStatus.PENDING
-                          ? "warning"
-                          : "default"
-                  }
-                >
+              <span className="ml-2">
+                <Tag color={REQUEST_STATUS_TAG[timeOffDetail.data.status]}>
                   {timeOffDetail.data.status}
                 </Tag>
-              </div>
+              </span>
             </div>
 
             <Divider orientation="left">Time Off Details</Divider>
@@ -517,7 +498,7 @@ const TimeOffRegistration = () => {
                     <Typography.Text type="secondary">Date:</Typography.Text>
                     <Typography.Text className="ml-2">
                       {dayjs(timeOffDetail.data.timeOff.date).format(
-                        "DD/MM/YYYY",
+                        DATE_FORMAT,
                       )}
                     </Typography.Text>
                   </div>
@@ -525,11 +506,11 @@ const TimeOffRegistration = () => {
                     <Typography.Text type="secondary">Time:</Typography.Text>
                     <Typography.Text className="ml-2">
                       {dayjs(timeOffDetail.data.timeOff.startTime).format(
-                        "HH:mm",
+                        TIME_FORMAT,
                       )}{" "}
                       -{" "}
                       {dayjs(timeOffDetail.data.timeOff.endTime).format(
-                        "HH:mm",
+                        TIME_FORMAT,
                       )}
                     </Typography.Text>
                   </div>
@@ -541,18 +522,14 @@ const TimeOffRegistration = () => {
               <div>
                 <Typography.Text type="secondary">Created At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(timeOffDetail.data.createdAt).format(
-                    "DD/MM/YYYY HH:mm",
-                  )}
+                  {dayjs(timeOffDetail.data.createdAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
 
               <div>
                 <Typography.Text type="secondary">Updated At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(timeOffDetail.data.updatedAt).format(
-                    "DD/MM/YYYY HH:mm",
-                  )}
+                  {dayjs(timeOffDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
             </div>

@@ -21,7 +21,8 @@
     "paths": {
       "@web/libs/*": ["libs/*"],
       "@web/components/*": ["components/*"],
-      "@web/layouts/*": ["layouts/*"]
+      "@web/layouts/*": ["layouts/*"],
+      "@web/hooks/*": ["hooks/*"]
     },
     "outDir": "dist",
     "rootDir": ".",
@@ -42,7 +43,8 @@
     "libs/**/*.ts",
     "components/**/*.ts",
     "components/**/*.tsx",
-    "layouts/**/*.tsx"
+    "layouts/**/*.tsx",
+    "hooks/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

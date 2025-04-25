@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { CustomResponse } from "@web/libs/common";
+import { ISchedule } from "@web/libs/schedule";
 import { RootState } from "@web/libs/store";
-import { IWeeklyNorm } from "@web/libs/weekly-norm";
 
-export const weeklyNormApi = createApi({
-  reducerPath: "weeklyNormApi",
+export const scheduleApi = createApi({
+  reducerPath: "scheduleApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL,
     prepareHeaders: (headers, { getState }) => {
@@ -15,21 +15,23 @@ export const weeklyNormApi = createApi({
       return headers;
     },
   }),
+
   endpoints: (builder) => ({
-    getWeeklyNorms: builder.query<
-      CustomResponse<IWeeklyNorm[]>,
-      { startDate: string; endDate: string; teacherId?: string }
+    getSchedules: builder.query<
+      CustomResponse<ISchedule[]>,
+      {
+        startDate: string;
+        endDate: string;
+        teacherId?: string;
+      }
     >({
-      query: ({ startDate, endDate, teacherId }) => ({
-        url: "/weekly-norms",
-        params: {
-          startDate,
-          endDate,
-          teacherId,
-        },
+      query: (params) => ({
+        url: "/schedules",
+        method: "GET",
+        params,
       }),
     }),
   }),
 });
 
-export const { useGetWeeklyNormsQuery } = weeklyNormApi;
+export const { useGetSchedulesQuery } = scheduleApi;

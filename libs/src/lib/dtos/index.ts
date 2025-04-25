@@ -5,6 +5,7 @@ export * from './common/base.dto';
 export * from './common/baseRequest.dto';
 export * from './common/response.dto';
 export * from './request/create-request.dto';
+export * from './request/get-request.dto';
 export * from './request/request.dto';
 export * from './request/update-request.dto';
 export * from './role/createRole.dto';

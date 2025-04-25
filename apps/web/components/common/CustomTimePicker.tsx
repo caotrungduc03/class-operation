@@ -1,10 +1,10 @@
-import { DatePicker } from "antd";
+import { TimePicker } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 import dayjs from "dayjs";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
 
-interface CustomDatePickerProps {
+interface CustomTimePickerProps {
   control: Control<any>;
   name: string;
   size?: SizeType;
@@ -16,7 +16,7 @@ interface CustomDatePickerProps {
   className?: string;
 }
 
-const CustomDatePicker = ({
+const CustomTimePicker = ({
   control,
   name,
   size = "large",
@@ -24,9 +24,9 @@ const CustomDatePicker = ({
   disabled,
   label,
   required,
-  format = "DD/MM/YYYY",
+  format = "HH:mm",
   className,
-}: CustomDatePickerProps) => {
+}: CustomTimePickerProps) => {
   return (
     <div className={`w-full ${className}`}>
       {label && <CustomLabel label={label} required={required} />}
@@ -37,14 +37,14 @@ const CustomDatePicker = ({
         render={({ field, fieldState: { error } }) => {
           return (
             <>
-              <DatePicker
+              <TimePicker
                 {...field}
                 size={size}
                 placeholder={placeholder}
                 disabled={disabled}
                 format={format}
                 style={{ width: "100%" }}
-                onChange={(date) => field.onChange(date ?? null)}
+                onChange={(time) => field.onChange(time ?? null)}
                 value={field.value ? dayjs(field.value) : null}
               />
 
@@ -59,4 +59,4 @@ const CustomDatePicker = ({
   );
 };
 
-export default CustomDatePicker;
+export default CustomTimePicker;

@@ -2,7 +2,7 @@ import {
   CreateBusySchedulesRequestDto,
   CreateTimeOffRequestDto,
   CreateWeeklyNormRequestDto,
-  Pagination,
+  GetRequestDto,
   RequestAction,
   RequestDto,
   RequestType,
@@ -59,7 +59,7 @@ export class RequestController {
 
   @Get('weekly-norms')
   @Roles(RoleName.ADMIN, RoleName.TEACHER)
-  async findWeeklyNorms(@Query() queryObj: Record<string, any>) {
+  async findWeeklyNorms(@Query() queryObj: GetRequestDto) {
     const { page, limit, total, data } = await this.requestService.query(
       {
         ...queryObj,
@@ -70,14 +70,12 @@ export class RequestController {
       },
     );
 
-    const results: Pagination<any> = {
+    return new ResponseDto(HttpStatus.OK, 'Success', {
       page,
       limit,
       total,
       items: RequestDto.plainToInstance(data, ['admin']),
-    };
-
-    return new ResponseDto(HttpStatus.OK, 'Success', results);
+    });
   }
 
   @Get('weekly-norms/:id')
@@ -169,7 +167,7 @@ export class RequestController {
 
   @Get('time-offs')
   @Roles(RoleName.ADMIN, RoleName.TEACHER)
-  async findTimeOff(@Query() queryObj: Object) {
+  async findTimeOff(@Query() queryObj: GetRequestDto) {
     const { page, limit, total, data } = await this.requestService.query(
       {
         ...queryObj,
@@ -180,14 +178,12 @@ export class RequestController {
       },
     );
 
-    const results: Pagination<any> = {
+    return new ResponseDto(HttpStatus.OK, 'Success', {
       page,
       limit,
       total,
       items: RequestDto.plainToInstance(data, ['admin']),
-    };
-
-    return new ResponseDto(HttpStatus.OK, 'Success', results);
+    });
   }
 
   @Get('time-offs/:id')
@@ -265,6 +261,27 @@ export class RequestController {
       'Busy schedule request created successfully',
       result.request,
     );
+  }
+
+  @Get('busy-schedules')
+  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  async findBusySchedule(@Query() queryObj: GetRequestDto) {
+    const { page, limit, total, data } = await this.requestService.query(
+      {
+        ...queryObj,
+        type: RequestType.BUSY_SCHEDULE,
+      },
+      {
+        relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
+      },
+    );
+
+    return new ResponseDto(HttpStatus.OK, 'Success', {
+      page,
+      limit,
+      total,
+      items: RequestDto.plainToInstance(data, ['admin']),
+    });
   }
 
   @Get('busy-schedules/:id')

@@ -23,7 +23,7 @@ import { IUser } from "@web/libs/user";
 import { Card, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -131,8 +131,7 @@ const Teachers = () => {
     },
   });
 
-  const { data, isLoading, isFetching, refetch } =
-    useGetTeachersQuery(searchParams);
+  const { data, isFetching, refetch } = useGetTeachersQuery(searchParams);
   const [createTeacher, { isLoading: isCreating }] = useCreateUserMutation();
   const { current, pageSize } = pagination;
 
@@ -152,12 +151,6 @@ const Teachers = () => {
       })) || []
     );
   }, [data, current, pageSize]);
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    refetch();
-  }, [searchParams]);
 
   const onSubmitSearch = (formData: { search?: string }) => {
     setSearchParams({
