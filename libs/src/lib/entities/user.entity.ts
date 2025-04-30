@@ -6,6 +6,7 @@ import {
   OneToMany,
   OneToOne,
 } from 'typeorm';
+import { UserStatus } from '../enums';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { RoleEntity } from './role.entity';
@@ -46,9 +47,11 @@ export class UserEntity extends CustomBaseEntity {
   avatar: string;
 
   @Column({
-    default: true,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
   })
-  status: boolean;
+  status: UserStatus;
 
   @Column({
     name: 'last_login',

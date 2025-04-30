@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { ClassModule } from './class/class.module';
 import { CounterModule } from './counter/counter.module';
 import { CourseModule } from './course/course.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
@@ -49,6 +50,7 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     ScheduleModule,
     RoomModule,
     CourseModule,
+    ClassModule,
   ],
   controllers: [AppController],
   providers: [

@@ -14,6 +14,7 @@ interface CustomInputProps {
   label?: string;
   required?: boolean;
   autoComplete?: string;
+  defaultValue?: string;
 }
 
 const CustomInput = ({
@@ -27,6 +28,7 @@ const CustomInput = ({
   label,
   required,
   autoComplete,
+  defaultValue,
 }: CustomInputProps) => {
   return (
     <div className="w-full">
@@ -35,6 +37,7 @@ const CustomInput = ({
       <Controller
         control={control}
         name={name}
+        defaultValue={defaultValue}
         render={({ field, fieldState: { error } }) => {
           return (
             <>

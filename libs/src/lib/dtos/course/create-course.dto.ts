@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { UserStatus } from '../../enums';
 import { CourseType } from '../../enums/course.enum';
 
 export class CreateCourseDto {
@@ -30,7 +31,7 @@ export class CreateCourseDto {
   })
   @IsOptional()
   @IsBoolean()
-  status?: boolean;
+  status?: UserStatus;
 
   @ApiProperty({
     description: 'Course type',

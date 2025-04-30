@@ -48,12 +48,17 @@ const OPSNavigationItems: NavigationItem[] = [
     url: NAV_LINK.MANAGE_COURSES,
   },
   {
+    key: NAV_LINK.MANAGE_CLASSES,
+    icon: <HomeOutlined />,
+    label: NAV_TITLE.MANAGE_CLASSES,
+    url: NAV_LINK.MANAGE_CLASSES,
+  },
+  {
     key: NAV_LINK.MANAGE_ROOMS,
     icon: <HomeOutlined />,
     label: NAV_TITLE.MANAGE_ROOMS,
     url: NAV_LINK.MANAGE_ROOMS,
   },
-
   {
     key: NAV_LINK.MANAGE_USERS,
     icon: <UserOutlined />,

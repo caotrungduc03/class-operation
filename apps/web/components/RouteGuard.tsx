@@ -48,7 +48,6 @@ const RouteGuard: React.FC<RouteGuardProps> = ({
         (requiredAccess === AccessRole.LMS && canAccessLMS(user)) ||
         (requiredAccess === AccessRole.OPS && canAccessOPS(user)) ||
         (requiredAccess === AccessRole.STUDENT && canAccessStudent(user));
-
       if (!hasAccess) {
         const redirectPath = getHomePathForUser(user);
         router.replace(redirectPath);

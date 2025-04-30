@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { UserStatus } from '../enums';
 import { CourseEntity } from './course.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { RoomEntity } from './room.entity';
@@ -8,6 +9,11 @@ import { UserEntity } from './user.entity';
 
 @Entity({ name: 'classes' })
 export class ClassEntity extends CustomBaseEntity {
+  @Column({
+    unique: true,
+  })
+  code: string;
+
   @Column()
   name: string;
 
@@ -36,9 +42,11 @@ export class ClassEntity extends CustomBaseEntity {
   quantity: number;
 
   @Column({
-    default: false,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
   })
-  status: boolean;
+  status: UserStatus;
 
   @Column({
     name: 'course_id',
@@ -53,6 +61,7 @@ export class ClassEntity extends CustomBaseEntity {
 
   @Column({
     name: 'teacher_id',
+    nullable: true,
   })
   teacherId: string;
 

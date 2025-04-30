@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { UserStatus } from '../enums';
 import { ScheduleType } from '../enums/schedule.enum';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
@@ -32,8 +33,12 @@ export class ScheduleEntity extends CustomBaseEntity {
   })
   endDate: Date;
 
-  @Column()
-  status: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @Column({
     name: 'request_id',

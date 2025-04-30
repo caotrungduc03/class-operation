@@ -1,10 +1,12 @@
 "use client";
 import { MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
+import Loading from "@web/components/common/Loading";
 import RouteGuard from "@web/components/RouteGuard";
 import MainLayout from "@web/layouts/MainLayout";
 import PageLayout from "@web/layouts/PageLayout";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
+import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Avatar, Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import Image from "next/image";
@@ -71,6 +73,11 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
     }
   }, [pathname]);
 
+  if (!user) {
+    router.replace(NAV_LINK.LOGIN);
+    return <Loading />;
+  }
+
   return (
     <RouteGuard>
       <MainLayout>
@@ -100,8 +107,8 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
                   </Typography.Title>
                   <div className="flex gap-6">
                     <div>
-                      <Tag color={user?.status ? "green" : "red"}>
-                        {user?.status ? "Active" : "Blocked"}
+                      <Tag color={STATUS_TAG[user.status]}>
+                        {STATUS_LABEL[user.status]}
                       </Tag>
                     </div>
                     <div>

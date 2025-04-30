@@ -10,7 +10,7 @@ export interface IUser extends ITimestamps {
   phoneNumber?: string;
   role: IRole;
   detail: IDetailUser;
-  status: boolean;
+  status: UserStatus;
   lastLogin?: Date;
   avatar?: string;
 }
@@ -39,18 +39,23 @@ export enum UserStatus {
   BLOCKED = "BLOCKED",
 }
 
-export const StatusTag = {
+export const STATUS_TAG = {
   [UserStatus.ACTIVE]: "green",
   [UserStatus.BLOCKED]: "red",
-};
+} as const;
+
+export const STATUS_LABEL = {
+  [UserStatus.ACTIVE]: "Active",
+  [UserStatus.BLOCKED]: "Blocked",
+} as const;
 
 export const StatusOptions = [
   {
-    label: "Active",
+    label: STATUS_LABEL[UserStatus.ACTIVE],
     value: UserStatus.ACTIVE,
   },
   {
-    label: "Blocked",
+    label: STATUS_LABEL[UserStatus.BLOCKED],
     value: UserStatus.BLOCKED,
   },
 ];

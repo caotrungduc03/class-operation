@@ -3,6 +3,7 @@ import CustomButton from "@web/components/common/CustomButton";
 import { NAV_LINK } from "@web/libs/nav";
 import { RoleTag } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
+import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Card, Tag, Typography } from "antd";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -74,8 +75,8 @@ const MyProfileOverview = () => {
           </div>
           <div className="w-3/4">
             <div>
-              <Tag color={user?.status ? "green" : "red"}>
-                {user?.status ? "Active" : "Blocked"}
+              <Tag color={STATUS_TAG[user.status]}>
+                {STATUS_LABEL[user.status]}
               </Tag>
             </div>
           </div>

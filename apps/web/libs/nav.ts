@@ -22,8 +22,14 @@ export const NAV_LINK = {
   TEACHING_MODE_LIST: "/ops/request/teaching-mode/list",
   MANAGE_CALENDAR: "/ops/calendar",
   MANAGE_COURSES: "/ops/course/list",
+  MANAGE_CLASSES: "/ops/class/list",
 
   MY_CLASS: "/my-class",
+
+  CLASS_DETAIL_OVERVIEW: (id: string) => `/ops/class/${id}/overview`,
+  CLASS_DETAIL_SETTINGS: (id: string) => `/ops/class/${id}/settings`,
+  CLASS_DETAIL_CALENDAR: (id: string) => `/ops/class/${id}/calendar`,
+  CLASS_DETAIL_STUDENTS: (id: string) => `/ops/class/${id}/students`,
 };
 
 export const NAV_TITLE = {
@@ -46,4 +52,6 @@ export const NAV_TITLE = {
   MANAGE_CALENDAR: "Quản lý lịch",
   MANAGE_COURSES: "Quản lý khoá học",
   MY_CLASS: "Lớp của tôi",
+  MANAGE_CLASSES: "Quản lý lớp học",
+  CLASS_DETAIL: "Chi tiết lớp học",
 };

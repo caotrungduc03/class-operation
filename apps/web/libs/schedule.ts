@@ -1,3 +1,5 @@
+import { UserStatus } from "./user";
+
 export enum ScheduleType {
   BUSY = "BUSY",
 }
@@ -9,7 +11,7 @@ export interface ISchedule {
   type: ScheduleType;
   startDate: string;
   endDate: string;
-  status: boolean;
+  status: UserStatus;
   requestId: string;
   teacherId: string;
   createdAt?: string;

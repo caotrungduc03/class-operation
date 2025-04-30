@@ -1,3 +1,5 @@
+import { UserStatus } from "./user";
+
 export interface IRoom {
   id: string;
   code: string;
@@ -5,7 +7,7 @@ export interface IRoom {
   quantity: number;
   location: string;
   description: string;
-  status: boolean;
+  status: UserStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -16,5 +18,5 @@ export interface CreateRoomDto {
   quantity?: number;
   location?: string;
   description?: string;
-  status?: boolean;
+  status?: UserStatus;
 }

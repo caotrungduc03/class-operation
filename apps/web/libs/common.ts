@@ -69,6 +69,6 @@ export interface TableColumn<T, O = OtherColumn> {
   dataIndex: keyof T | keyof O;
   key?: string | number;
   width?: number | string;
-  render?: (value: any) => React.ReactNode;
+  render?: (value: T[keyof T] | O[keyof O], record?: T) => React.ReactNode;
   fixed?: FixedType;
 }

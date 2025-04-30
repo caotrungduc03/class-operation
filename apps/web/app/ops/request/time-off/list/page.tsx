@@ -85,7 +85,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Time",
     dataIndex: "timeOff",
-    render: (timeOff) =>
+    render: (timeOff: ITimeOff) =>
       timeOff
         ? `${dayjs(timeOff.startTime).format(TIME_FORMAT)} - ${dayjs(timeOff.endTime).format(TIME_FORMAT)}`
         : "N/A",

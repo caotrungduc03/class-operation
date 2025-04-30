@@ -24,6 +24,7 @@ import {
 import { NAV_TITLE } from "@web/libs/nav";
 import { CreateRoomDto, IRoom } from "@web/libs/room";
 import { RootState } from "@web/libs/store";
+import { STATUS_LABEL, UserStatus } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -63,7 +64,7 @@ const columnsTitles: TableColumn<IRoom>[] = [
   {
     title: "Status",
     dataIndex: "status",
-    render: (status: boolean) => (status ? "Active" : "Inactive"),
+    render: (status: UserStatus) => STATUS_LABEL[status],
   },
   {
     title: "Created Date",
@@ -88,7 +89,7 @@ const roomFormSchema = z.object({
   quantity: z.number().optional(),
   location: z.string().optional(),
   description: z.string().optional(),
-  status: z.boolean().optional().default(true),
+  status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
 });
 
 // Create type from Zod schema and ensure it matches CreateRoomDto
@@ -151,7 +152,7 @@ const Rooms = () => {
       quantity: undefined,
       location: "",
       description: "",
-      status: true,
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -316,7 +317,7 @@ const Rooms = () => {
       quantity: undefined,
       location: "",
       description: "",
-      status: true,
+      status: UserStatus.ACTIVE,
     });
     dispatch(openCreateModal());
   };

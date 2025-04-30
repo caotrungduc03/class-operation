@@ -9,6 +9,7 @@ import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
 import CustomTimePicker from "@web/components/common/CustomTimePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
+import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
 import { useCreateBusyScheduleMutation } from "@web/libs/features/requests/requestApi";
 import { useGetSchedulesQuery } from "@web/libs/features/schedules/scheduleApi";
@@ -79,9 +80,6 @@ const Calendar = () => {
     teacherId: undefined,
   });
 
-  // Fetch teachers for the dropdown
-  const { data: teachers } = useGetTeachersQuery({});
-
   // Update API queries to use teacherId from searchParams instead of selectedTeacher
   const {
     isLoading: isLoadingWeeklyNorms,
@@ -130,6 +128,15 @@ const Calendar = () => {
     resolver: zodResolver(searchFormSchema),
   });
 
+  const {
+    selectProps: { options, onFocus, onPopupScroll },
+  } = useDebouncedSelect({
+    control: searchForm.control,
+    name: "teacherId",
+    useGetDataQuery: useGetTeachersQuery,
+    labelField: "fullName",
+  });
+
   const busyScheduleForm = useForm<BusyScheduleFormValues>({
     resolver: zodResolver(busyScheduleFormSchema),
     defaultValues: {
@@ -141,16 +148,6 @@ const Calendar = () => {
       endTime: null,
     },
   });
-
-  // Format teacher options for dropdown
-  const teacherOptions = useMemo(() => {
-    if (!teachers?.data) return [];
-
-    return teachers.data.items.map((teacher) => ({
-      label: teacher.fullName,
-      value: teacher.id,
-    }));
-  }, [teachers]);
 
   const events = useMemo(() => {
     if (!schedules?.data) return [];
@@ -307,7 +304,9 @@ const Calendar = () => {
                 name="teacherId"
                 size="large"
                 placeholder="Select Teacher"
-                options={teacherOptions}
+                options={options}
+                onFocus={onFocus}
+                onPopupScroll={onPopupScroll}
               />
             </FilterGrid>
             <div className="flex justify-between">

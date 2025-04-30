@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany } from 'typeorm';
+import { UserStatus } from '../enums';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 
@@ -28,9 +29,11 @@ export class RoomEntity extends CustomBaseEntity {
   description: string;
 
   @Column({
-    default: true,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
   })
-  status: boolean;
+  status: UserStatus;
 
   @OneToMany(() => ClassEntity, (classEntity: ClassEntity) => classEntity.room)
   classes: ClassEntity[];

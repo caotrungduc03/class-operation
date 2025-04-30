@@ -1,6 +1,6 @@
 import { Select } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
-import { BaseOptionType } from "antd/es/select";
+import { DefaultOptionType } from "antd/es/select";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
 
@@ -10,11 +10,13 @@ interface CustomSelectProps {
   size?: SizeType;
   prefix?: React.ReactNode;
   placeholder?: string;
-  options: BaseOptionType[];
+  options: DefaultOptionType[];
   disabled?: boolean;
   defaultValue?: string;
   label?: string;
   required?: boolean;
+  onFocus?: () => void;
+  onPopupScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
 }
 
 const CustomSelect = ({
@@ -28,6 +30,8 @@ const CustomSelect = ({
   defaultValue,
   label,
   required,
+  onFocus,
+  onPopupScroll,
 }: CustomSelectProps) => {
   return (
     <div className="w-full">
@@ -50,6 +54,8 @@ const CustomSelect = ({
                 }}
                 className="w-full"
                 disabled={disabled}
+                onFocus={onFocus}
+                onPopupScroll={onPopupScroll}
               />
 
               {error?.message && (

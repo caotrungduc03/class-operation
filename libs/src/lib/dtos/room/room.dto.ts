@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { UserStatus } from '../../enums';
 import { BaseDto } from '../common/base.dto';
 
 export class RoomDto extends BaseDto {
@@ -18,5 +19,5 @@ export class RoomDto extends BaseDto {
   description: string;
 
   @Expose()
-  status: boolean;
+  status: UserStatus;
 }

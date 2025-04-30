@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { UserStatus } from '../enums';
 import { CustomBaseEntity } from './customBase.entity';
 import { RequestEntity } from './request.entity';
 
@@ -33,9 +34,11 @@ export class WeeklyNormEntity extends CustomBaseEntity {
   teacherId: string;
 
   @Column({
-    default: false,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
   })
-  status: boolean;
+  status: UserStatus;
 
   @ManyToOne(
     () => RequestEntity,

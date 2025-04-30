@@ -1,6 +1,7 @@
 import {
   GetWeeklyNormDto,
   RoleName,
+  UserStatus,
   WeeklyNormEntity,
 } from '@class-operation/libs';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -90,7 +91,7 @@ export class WeeklyNormService extends BaseService<WeeklyNormEntity> {
         teacherId,
         startDate: Between(new Date(startDate), new Date(endDate)),
         endDate: Between(new Date(startDate), new Date(endDate)),
-        status: true,
+        status: UserStatus.ACTIVE,
       },
       order: {
         startDate: 'ASC',

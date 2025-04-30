@@ -33,6 +33,7 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
+  ITimeOff,
   REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
@@ -85,12 +86,12 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Date",
     dataIndex: "timeOff",
-    render: (timeOff) => dayjs(timeOff?.date).format(DATE_FORMAT),
+    render: (timeOff: ITimeOff) => dayjs(timeOff?.date).format(DATE_FORMAT),
   },
   {
     title: "Time",
     dataIndex: "timeOff",
-    render: (timeOff) =>
+    render: (timeOff: ITimeOff) =>
       `${dayjs(timeOff?.startTime).format(TIME_FORMAT)} - ${dayjs(timeOff?.endTime).format(TIME_FORMAT)}`,
   },
   {

@@ -11,6 +11,7 @@ import {
   UpdateBusySchedulesRequestDto,
   UpdateTimeOffRequestDto,
   UpdateWeeklyNormRequestDto,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   BadRequestException,
@@ -344,7 +345,7 @@ export class RequestService extends BaseService<RequestEntity> {
       // Update schedule status using the service
       if (request.schedule) {
         await this.scheduleService.updateById(request.schedule.id, {
-          status: true,
+          status: UserStatus.ACTIVE,
         });
       }
 
@@ -363,7 +364,7 @@ export class RequestService extends BaseService<RequestEntity> {
       // Update schedule status using the service
       if (request.schedule) {
         await this.scheduleService.updateById(request.schedule.id, {
-          status: false,
+          status: UserStatus.BLOCKED,
         });
       }
 
@@ -512,7 +513,7 @@ export class RequestService extends BaseService<RequestEntity> {
       // Update schedule status using the service
       if (request.schedule) {
         await this.scheduleService.updateById(request.schedule.id, {
-          status: true,
+          status: UserStatus.ACTIVE,
         });
       }
 
@@ -531,7 +532,7 @@ export class RequestService extends BaseService<RequestEntity> {
       // Update schedule status using the service
       if (request.schedule) {
         await this.scheduleService.updateById(request.schedule.id, {
-          status: false,
+          status: UserStatus.BLOCKED,
         });
       }
 

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { UserStatus } from '../enums';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { UserEntity } from './user.entity';
@@ -11,8 +12,12 @@ export class StudentClassEntity extends CustomBaseEntity {
   @Column({ name: 'student_id' })
   studentId: string;
 
-  @Column({ default: false })
-  active: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @ManyToOne(
     () => ClassEntity,

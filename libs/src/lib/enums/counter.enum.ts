@@ -5,4 +5,5 @@ export enum CounterType {
   HV = 'HV', // Student (Hoc vien)
   PH = 'PH', // Room (Phong hoc)
   KH = 'KH', // Course (Khoa hoc)
+  LH = 'LH', // Class (Lop hoc)
 }

@@ -29,6 +29,7 @@ import {
   RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
+import { IUser } from "@web/libs/user";
 import {
   Card,
   Divider,
@@ -72,7 +73,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator) => creator?.fullName || "",
+    render: (creator: IUser) => creator?.fullName || "",
   },
   {
     title: "Status",

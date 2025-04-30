@@ -1,3 +1,5 @@
+import { UserStatus } from "./user";
+
 export enum CourseType {
   TOEIC = "TOEIC",
   TOEFL = "TOEFL",
@@ -9,7 +11,7 @@ export interface ICourse {
   code: string;
   name: string;
   description: string;
-  status: boolean;
+  status: UserStatus;
   type: CourseType;
   createdAt: string;
   updatedAt: string;
@@ -19,6 +21,6 @@ export interface CreateCourseDto {
   code?: string;
   name?: string;
   description?: string;
-  status?: boolean;
+  status?: UserStatus;
   type?: CourseType;
 }

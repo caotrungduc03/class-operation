@@ -24,6 +24,7 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
+import { STATUS_LABEL, StatusOptions, UserStatus } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -35,7 +36,7 @@ import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
-    title: NAV_TITLE.MANAGE_COURSES || "Manage Courses",
+    title: NAV_TITLE.MANAGE_COURSES,
   },
 ];
 
@@ -63,7 +64,7 @@ const columnsTitles: TableColumn<ICourse>[] = [
   {
     title: "Status",
     dataIndex: "status",
-    render: (status: boolean) => (status ? "Active" : "Inactive"),
+    render: (status: UserStatus) => STATUS_LABEL[status],
   },
   {
     title: "Created Date",
@@ -87,7 +88,7 @@ const courseFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   type: z.nativeEnum(CourseType, { required_error: "Type is required" }),
-  status: z.boolean().optional().default(true),
+  status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
 });
 
 // Create type from Zod schema
@@ -154,7 +155,7 @@ const Courses = () => {
       name: "",
       description: "",
       type: undefined,
-      status: true,
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -316,7 +317,7 @@ const Courses = () => {
       name: "",
       description: "",
       type: undefined,
-      status: true,
+      status: UserStatus.ACTIVE,
     });
     dispatch(openCreateModal());
   };
@@ -411,10 +412,7 @@ const Courses = () => {
             name="status"
             label="Status"
             placeholder="Select status"
-            options={[
-              { label: "Active", value: true },
-              { label: "Inactive", value: false },
-            ]}
+            options={StatusOptions}
           />
         </div>
       </CustomDrawer>

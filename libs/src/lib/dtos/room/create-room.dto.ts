@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { UserStatus } from '../../enums';
 import { BaseRequestDto } from '../common/baseRequest.dto';
 
 export class CreateRoomDto extends BaseRequestDto {
@@ -31,6 +32,6 @@ export class CreateRoomDto extends BaseRequestDto {
 
   @ApiProperty({ required: false, description: 'Room status', default: true })
   @IsOptional()
-  @IsBoolean()
-  status?: boolean;
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 }
