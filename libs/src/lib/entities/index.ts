@@ -3,6 +3,7 @@ export * from './counter.entity';
 export * from './course.entity';
 export * from './customBase.entity';
 export * from './list-entity';
+export * from './notification.entity';
 export * from './request.entity';
 export * from './role.entity';
 export * from './room.entity';

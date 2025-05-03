@@ -30,6 +30,8 @@ export const NAV_LINK = {
   CLASS_DETAIL_SETTINGS: (id: string) => `/ops/class/${id}/settings`,
   CLASS_DETAIL_CALENDAR: (id: string) => `/ops/class/${id}/calendar`,
   CLASS_DETAIL_STUDENTS: (id: string) => `/ops/class/${id}/students`,
+
+  MY_NOTIFICATION: "/my-notification",
 };
 
 export const NAV_TITLE = {

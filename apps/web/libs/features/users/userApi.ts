@@ -1,21 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse, Pagination } from "@web/libs/common";
-import { RootState } from "@web/libs/store";
+import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { CreateUserDto, IUser } from "@web/libs/user";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-
+  baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
     createUser: builder.mutation<CustomResponse<IUser>, CreateUserDto>({
       query: (body) => ({

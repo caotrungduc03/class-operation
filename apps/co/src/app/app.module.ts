@@ -12,6 +12,8 @@ import { ClassModule } from './class/class.module';
 import { CounterModule } from './counter/counter.module';
 import { CourseModule } from './course/course.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
+import { NotificationModule } from './notification/notification.module';
+import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { RequestModule } from './request/request.module';
 import { RoleModule } from './role/role.module';
 import { RoomModule } from './room/room.module';
@@ -51,6 +53,8 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     RoomModule,
     CourseModule,
     ClassModule,
+    RabbitMQModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

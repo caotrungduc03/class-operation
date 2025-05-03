@@ -5,6 +5,8 @@ import { authSlice } from "./features/auth/authSlice";
 import { classApi } from "./features/classes/classApi";
 import { courseApi } from "./features/courses/courseApi";
 import layoutSlice from "./features/layout/layoutSlice";
+import { notificationApi } from "./features/notifications/notificationApi";
+import notificationSlice from "./features/notifications/notificationSlice";
 import { requestApi } from "./features/requests/requestApi";
 import requestSlice from "./features/requests/requestSlice";
 import { roomApi } from "./features/rooms/roomApi";
@@ -32,6 +34,8 @@ export const makeStore = () => {
       [roomApi.reducerPath]: roomApi.reducer,
       [courseApi.reducerPath]: courseApi.reducer,
       [classApi.reducerPath]: classApi.reducer,
+      notification: notificationSlice.reducer,
+      [notificationApi.reducerPath]: notificationApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -44,6 +48,7 @@ export const makeStore = () => {
           roomApi.middleware,
           courseApi.middleware,
           classApi.middleware,
+          notificationApi.middleware,
         )
         .concat(apiErrorMiddleware),
   });

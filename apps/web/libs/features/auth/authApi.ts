@@ -1,7 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse } from "@web/libs/common";
-import { RootState } from "@web/libs/store";
-import { getToken } from "@web/libs/tokens";
+import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { IUser } from "@web/libs/user";
 
 export interface LoginResponse {
@@ -17,18 +16,7 @@ export interface UpdateProfileRequest {
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      // Try to get the token from state first, then fall back to localStorage
-      const token = (getState() as RootState).auth.accessToken || getToken();
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-
+  baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
     login: builder.mutation<
       CustomResponse<LoginResponse>,

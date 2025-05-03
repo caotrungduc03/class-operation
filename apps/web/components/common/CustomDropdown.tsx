@@ -1,13 +1,14 @@
 import { MoreOutlined } from "@ant-design/icons";
 import { Placement } from "@web/libs/common";
-import { Dropdown } from "antd";
+import { Dropdown, MenuProps } from "antd";
 import React from "react";
 
 interface CustomDropdownProps {
-  children: React.ReactNode | React.ReactNode[];
+  children?: React.ReactNode | React.ReactNode[];
   icon?: React.ReactNode;
   trigger?: ("click" | "hover" | "contextMenu")[];
   placement?: Placement;
+  items?: MenuProps["items"];
 }
 
 const CustomDropdown = ({
@@ -15,16 +16,19 @@ const CustomDropdown = ({
   icon = <MoreOutlined />,
   trigger = ["click"],
   placement = "bottomLeft",
+  items,
 }: CustomDropdownProps) => {
-  const flattenedChildren = React.Children.toArray(children); // Flatten children
-  const items = flattenedChildren.map((child, index) => ({
-    key: index,
-    label: child,
-  }));
+  // Use provided items if available, otherwise generate from children
+  const menuItems =
+    items ||
+    React.Children.toArray(children).map((child, index) => ({
+      key: index,
+      label: child,
+    }));
 
   return (
     <Dropdown
-      menu={{ items }}
+      menu={{ items: menuItems }}
       trigger={trigger}
       placement={placement}
       overlayClassName="min-w-[150px]"

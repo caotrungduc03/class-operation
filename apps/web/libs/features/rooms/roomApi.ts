@@ -1,21 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse, Pagination } from "@web/libs/common";
+import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { CreateRoomDto, IRoom } from "@web/libs/room";
-import { RootState } from "@web/libs/store";
 
 export const roomApi = createApi({
   reducerPath: "roomApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-
+  baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
     getRooms: builder.query<
       CustomResponse<Pagination<IRoom[]>>,

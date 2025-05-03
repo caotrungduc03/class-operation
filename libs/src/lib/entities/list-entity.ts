@@ -1,6 +1,7 @@
 import { ClassEntity } from './class.entity';
 import { CounterEntity } from './counter.entity';
 import { CourseEntity } from './course.entity';
+import { NotificationEntity } from './notification.entity';
 import { RequestEntity } from './request.entity';
 import { RoleEntity } from './role.entity';
 import { RoomEntity } from './room.entity';
@@ -22,4 +23,5 @@ export const ListEntity = [
   CourseEntity,
   ClassEntity,
   StudentClassEntity,
+  NotificationEntity,
 ] as const;

@@ -65,7 +65,7 @@ export class ClassEntity extends CustomBaseEntity {
   })
   teacherId: string;
 
-  @ManyToOne(() => UserEntity, (user: UserEntity) => user.taughtClasses)
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.teachers)
   @JoinColumn({
     name: 'teacher_id',
   })

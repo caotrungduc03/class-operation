@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional, IsString } from 'class-validator';
+import { PaginationRequestDto } from '../common/pagination-request.dto';
 
-export class GetWeeklyNormDto {
+export class GetWeeklyNormDto extends PaginationRequestDto {
   @ApiProperty()
   @IsDateString()
   startDate: string;

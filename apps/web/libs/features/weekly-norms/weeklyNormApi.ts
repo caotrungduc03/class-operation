@@ -1,20 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse } from "@web/libs/common";
-import { RootState } from "@web/libs/store";
+import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { IWeeklyNorm } from "@web/libs/weekly-norm";
 
 export const weeklyNormApi = createApi({
   reducerPath: "weeklyNormApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
     getWeeklyNorms: builder.query<
       CustomResponse<IWeeklyNorm[]>,

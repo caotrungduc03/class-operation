@@ -26,7 +26,7 @@ export class StudentClassEntity extends CustomBaseEntity {
   @JoinColumn({ name: 'class_id' })
   class: ClassEntity;
 
-  @ManyToOne(() => UserEntity, (user: UserEntity) => user.enrolledClasses)
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.students)
   @JoinColumn({ name: 'student_id' })
   student: UserEntity;
 }

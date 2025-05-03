@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse, Pagination } from "@web/libs/common";
+import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import {
   CreateRequestBusyScheduleDto,
   CreateRequestTimeOffDto,
@@ -7,21 +8,10 @@ import {
   IRequest,
   RequestAction,
 } from "@web/libs/request";
-import { RootState } from "@web/libs/store";
 
 export const requestApi = createApi({
   reducerPath: "requestApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.accessToken;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-
+  baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
     // Weekly Norm endpoints
     getWeeklyNorms: builder.query<

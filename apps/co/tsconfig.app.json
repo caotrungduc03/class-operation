@@ -9,7 +9,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "../../libs/src/lib/dtos/weekly-norm/get-weekly-norm.dto.ts"
+    "../../libs/src/lib/dtos/notification/get-notifications.dto.ts"
   ],
   "exclude": ["eslint.config.js", "eslint.config.cjs", "eslint.config.mjs"]
 }

@@ -9,6 +9,7 @@ import {
 import { UserStatus } from '../enums';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
+import { NotificationEntity } from './notification.entity';
 import { RoleEntity } from './role.entity';
 import { StudentClassEntity } from './student-class.entity';
 import { UserDetail } from './user-detail.entity';
@@ -87,11 +88,14 @@ export class UserEntity extends CustomBaseEntity {
     () => ClassEntity,
     (classEntity: ClassEntity) => classEntity.teacher,
   )
-  taughtClasses: ClassEntity[];
+  teachers: ClassEntity[];
 
   @OneToMany(
     () => StudentClassEntity,
     (studentClass: StudentClassEntity) => studentClass.student,
   )
-  enrolledClasses: StudentClassEntity[];
+  students: StudentClassEntity[];
+
+  @OneToMany(() => NotificationEntity, (notification) => notification.user)
+  notifications: NotificationEntity[];
 }

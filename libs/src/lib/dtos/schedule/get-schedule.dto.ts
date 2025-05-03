@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ScheduleType } from '../../enums/schedule.enum';
+import { PaginationRequestDto } from '../common/pagination-request.dto';
 
-export class GetScheduleDto {
+export class GetScheduleDto extends PaginationRequestDto {
   @ApiProperty()
   @IsDateString()
   startDate: string;

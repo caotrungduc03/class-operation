@@ -16,5 +16,21 @@ services:
     env_file:
       - .env
 
+  rabbitmq:
+    container_name: rabbitmq_co
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - '${RABBITMQ_PORT}:5672'
+      - '${RABBITMQ_MANAGEMENT_PORT}:15672'
+    volumes:
+      - rabbitmq_co:/var/lib/rabbitmq
+    env_file:
+      - .env
+
 volumes:
   postgres_co:
+  rabbitmq_co:
