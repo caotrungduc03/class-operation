@@ -17,7 +17,6 @@ import {
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   HttpStatus,
   NotFoundException,
@@ -38,7 +37,12 @@ export class RequestController {
   ) {}
 
   @Post('weekly-norms')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async createWeekNorm(
     @User('userId') userId: string,
     @User('role') role: RoleName,
@@ -58,7 +62,12 @@ export class RequestController {
   }
 
   @Get('weekly-norms')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async findWeeklyNorms(@Query() queryObj: GetRequestDto) {
     const { page, limit, total, data } = await this.requestService.query(
       {
@@ -79,7 +88,12 @@ export class RequestController {
   }
 
   @Get('weekly-norms/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async findWeeklyNormById(@Param('id') id: string) {
     const request = await this.requestService.findOne({
       where: { id },
@@ -98,7 +112,12 @@ export class RequestController {
   }
 
   @Put('weekly-norms/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async updateWeeklyNormById(
     @Param('id') id: string,
     @Body() updateData: UpdateWeeklyNormRequestDto,
@@ -118,20 +137,13 @@ export class RequestController {
   }
 
   @Patch('weekly-norms/:id/status')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE)
   async updateWeeklyNormStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
     @User('role') role: RoleName,
     @Body('action') action: RequestAction,
   ) {
-    if (action === RequestAction.APPROVE) {
-      // Only admins can approve
-      if (role !== RoleName.ADMIN) {
-        throw new ForbiddenException('Only admins can approve requests');
-      }
-    }
-
     const updatedRequest = await this.requestService.updateWeeklyNormStatus(
       id,
       action,
@@ -146,7 +158,7 @@ export class RequestController {
   }
 
   @Post('time-offs')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.TEACHER_PART_TIME)
   async createTimeOff(
     @User('userId') userId: string,
     @User('role') role: RoleName,
@@ -166,7 +178,7 @@ export class RequestController {
   }
 
   @Get('time-offs')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.TEACHER_PART_TIME)
   async findTimeOff(@Query() queryObj: GetRequestDto) {
     const { page, limit, total, data } = await this.requestService.query(
       {
@@ -187,7 +199,7 @@ export class RequestController {
   }
 
   @Get('time-offs/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.TEACHER_PART_TIME)
   async findTimeOffById(@Param('id') id: string) {
     const request = await this.requestService.getTimeOffScheduleById(id);
     return new ResponseDto(
@@ -198,7 +210,7 @@ export class RequestController {
   }
 
   @Put('time-offs/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.TEACHER_PART_TIME)
   async updateTimeOffById(
     @Param('id') id: string,
     @Body() updateData: UpdateTimeOffRequestDto,
@@ -216,20 +228,12 @@ export class RequestController {
   }
 
   @Patch('time-offs/:id/status')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE)
   async updateTimeOffStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
-    @User('role') role: RoleName,
     @Body('action') action: RequestAction,
   ) {
-    if (action === RequestAction.APPROVE) {
-      // Only admins can approve
-      if (role !== RoleName.ADMIN) {
-        throw new ForbiddenException('Only admins can approve requests');
-      }
-    }
-
     const updatedRequest = await this.requestService.updateTimeOffStatus(
       id,
       action,
@@ -244,7 +248,12 @@ export class RequestController {
   }
 
   @Post('busy-schedules')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async createBusySchedule(
     @User('userId') userId: string,
     @User('role') role: RoleName,
@@ -264,7 +273,12 @@ export class RequestController {
   }
 
   @Get('busy-schedules')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async findBusySchedule(@Query() queryObj: GetRequestDto) {
     const { page, limit, total, data } = await this.requestService.query(
       {
@@ -285,7 +299,12 @@ export class RequestController {
   }
 
   @Get('busy-schedules/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.MANAGE,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async getBusyScheduleById(@Param('id') id: string) {
     const request = await this.requestService.getBusyScheduleById(id);
     return new ResponseDto(
@@ -296,7 +315,12 @@ export class RequestController {
   }
 
   @Put('busy-schedules/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async updateBusySchedule(
     @Param('id') id: string,
     @Body() updateData: UpdateBusySchedulesRequestDto,
@@ -313,20 +337,13 @@ export class RequestController {
   }
 
   @Patch('busy-schedules/:id/status')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE)
   async updateBusyScheduleStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
     @User('role') role: RoleName,
     @Body('action') action: RequestAction,
   ) {
-    if (action === RequestAction.APPROVE) {
-      // Only admins can approve
-      if (role !== RoleName.ADMIN) {
-        throw new ForbiddenException('Only admins can approve requests');
-      }
-    }
-
     const updatedRequest = await this.requestService.updateBusyScheduleStatus(
       id,
       action,

@@ -2,9 +2,9 @@
 import { AccessRole } from "@web/libs/common";
 import { NAV_LINK } from "@web/libs/nav";
 import {
-  canAccessLMS,
   canAccessOPS,
   canAccessStudent,
+  canAccessTeacher,
   getHomePathForUser,
 } from "@web/libs/permissions";
 import { RootState } from "@web/libs/store";
@@ -45,7 +45,7 @@ const RouteGuard: React.FC<RouteGuardProps> = ({
     // If the user is authenticated, check for proper access
     if (isAuthenticated) {
       const hasAccess =
-        (requiredAccess === AccessRole.LMS && canAccessLMS(user)) ||
+        (requiredAccess === AccessRole.TEACHER && canAccessTeacher(user)) ||
         (requiredAccess === AccessRole.OPS && canAccessOPS(user)) ||
         (requiredAccess === AccessRole.STUDENT && canAccessStudent(user));
       if (!hasAccess) {

@@ -11,10 +11,11 @@ import {
 import { AccessRole, MenuItem, NavigationItem } from "@web/libs/common";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-  canAccessLMS,
   canAccessOPS,
   canAccessStudent,
+  canAccessTeacher,
 } from "@web/libs/permissions";
+import { RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import { Menu } from "antd";
 import Link from "next/link";
@@ -40,24 +41,28 @@ const OPSNavigationItems: NavigationItem[] = [
     icon: <CalendarOutlined />,
     label: NAV_TITLE.MANAGE_CALENDAR,
     url: NAV_LINK.MANAGE_CALENDAR,
+    roles: [RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST],
   },
   {
     key: NAV_LINK.MANAGE_COURSES,
     icon: <ReadOutlined />,
     label: NAV_TITLE.MANAGE_COURSES,
     url: NAV_LINK.MANAGE_COURSES,
+    roles: [RoleName.ADMIN, RoleName.STAFF_ACADEMIC],
   },
   {
     key: NAV_LINK.MANAGE_CLASSES,
     icon: <HomeOutlined />,
     label: NAV_TITLE.MANAGE_CLASSES,
     url: NAV_LINK.MANAGE_CLASSES,
+    roles: [RoleName.ADMIN, RoleName.STAFF_ACADEMIC],
   },
   {
     key: NAV_LINK.MANAGE_ROOMS,
     icon: <HomeOutlined />,
     label: NAV_TITLE.MANAGE_ROOMS,
     url: NAV_LINK.MANAGE_ROOMS,
+    roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
   },
   {
     key: NAV_LINK.MANAGE_USERS,
@@ -67,10 +72,12 @@ const OPSNavigationItems: NavigationItem[] = [
       {
         label: NAV_TITLE.TEACHER_LIST,
         url: NAV_LINK.TEACHER_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE, RoleName.STAFF_GENERAL],
       },
       {
         label: NAV_TITLE.RECEPTIONIST_LIST,
         url: NAV_LINK.RECEPTIONIST_LIST,
+        roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
       },
     ],
   },
@@ -84,32 +91,36 @@ const OPSNavigationItems: NavigationItem[] = [
         key: NAV_LINK.WEEKLY_NORM_LIST,
         label: NAV_TITLE.WEEKLY_NORM_LIST,
         url: NAV_LINK.WEEKLY_NORM_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE],
       },
       {
         key: NAV_LINK.TIME_OFF_LIST,
         label: NAV_TITLE.TIME_OFF_LIST,
         url: NAV_LINK.TIME_OFF_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE],
       },
       {
         key: NAV_LINK.BUSY_SCHEDULE_LIST,
         label: NAV_TITLE.BUSY_SCHEDULE_LIST,
         url: NAV_LINK.BUSY_SCHEDULE_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE],
       },
       {
         key: NAV_LINK.TEACHING_MODE_LIST,
         label: NAV_TITLE.TEACHING_MODE_LIST,
         url: NAV_LINK.TEACHING_MODE_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE],
       },
     ],
   },
 ];
 
-const LMSNavigationItems: NavigationItem[] = [
+const TeacherNavigationItems: NavigationItem[] = [
   {
-    key: NAV_LINK.LMS,
+    key: NAV_LINK.TEACHER,
     icon: <HomeOutlined />,
     label: NAV_TITLE.HOME,
-    url: NAV_LINK.LMS,
+    url: NAV_LINK.TEACHER,
   },
   {
     key: NAV_LINK.MY_PROFILE,
@@ -127,7 +138,7 @@ const LMSNavigationItems: NavigationItem[] = [
     key: NAV_LINK.MY_CLASS,
     icon: <ReadOutlined />,
     label: NAV_TITLE.MY_CLASS,
-    url: `${NAV_LINK.LMS}${NAV_LINK.MY_CLASS}`,
+    url: `${NAV_LINK.TEACHER}${NAV_LINK.MY_CLASS}`,
   },
   {
     key: NAV_LINK.WEEKLY_NORM_REGISTRATION,
@@ -140,6 +151,7 @@ const LMSNavigationItems: NavigationItem[] = [
     icon: <FileTextOutlined />,
     label: NAV_TITLE.TIME_OFF_REGISTRATION,
     url: NAV_LINK.TIME_OFF_REGISTRATION,
+    roles: [RoleName.TEACHER_PART_TIME],
   },
 ];
 
@@ -165,11 +177,14 @@ const StudentNavigationItems: NavigationItem[] = [
 ];
 
 const transformToMenuItems = (
-  items?: NavigationItem[],
+  items: NavigationItem[] | undefined,
+  role: RoleName,
 ): MenuItem[] | undefined => {
   if (!items) return undefined;
 
   return items.map((item) => {
+    if (item.roles && !item?.roles?.includes(role)) return undefined;
+
     const labelNode = item.url ? (
       <Link href={item.url}>{item.label}</Link>
     ) : (
@@ -180,7 +195,7 @@ const transformToMenuItems = (
       key: item.key ?? item.url,
       icon: item.icon,
       label: labelNode,
-      children: items ? transformToMenuItems(item.children) : undefined,
+      children: items ? transformToMenuItems(item.children, role) : undefined,
     } as MenuItem;
   });
 };
@@ -196,8 +211,8 @@ const NavigationMenu = () => {
     let userMenuType: AccessRole | null = null;
     if (canAccessOPS(user)) {
       userMenuType = AccessRole.OPS;
-    } else if (canAccessLMS(user)) {
-      userMenuType = AccessRole.LMS;
+    } else if (canAccessTeacher(user)) {
+      userMenuType = AccessRole.TEACHER;
     } else if (canAccessStudent(user)) {
       userMenuType = AccessRole.STUDENT;
     }
@@ -207,30 +222,29 @@ const NavigationMenu = () => {
 
     // Now check the current path
     const inMyProfileSection = pathname?.startsWith(NAV_LINK.MY_PROFILE);
-    const inLMSSection = pathname?.startsWith(NAV_LINK.LMS);
+    const inTeacherSection = pathname?.startsWith(NAV_LINK.TEACHER);
     const inOPSSection = pathname?.startsWith(NAV_LINK.OPS);
     const inStudentSection = pathname?.startsWith(NAV_LINK.STUDENT);
 
     // For My Profile, show menu based on user's role type
     if (inMyProfileSection) {
       if (userMenuType === AccessRole.OPS)
-        return transformToMenuItems(OPSNavigationItems);
-      if (userMenuType === AccessRole.LMS)
-        return transformToMenuItems(LMSNavigationItems);
-      return transformToMenuItems(StudentNavigationItems);
+        return transformToMenuItems(OPSNavigationItems, user.role.roleName);
+      if (userMenuType === AccessRole.TEACHER)
+        return transformToMenuItems(TeacherNavigationItems, user.role.roleName);
+      return transformToMenuItems(StudentNavigationItems, user.role.roleName);
     }
 
-    // For other sections, only show if user has access
-    if (inLMSSection && canAccessLMS(user)) {
-      return transformToMenuItems(LMSNavigationItems);
+    if (inTeacherSection && canAccessTeacher(user)) {
+      return transformToMenuItems(TeacherNavigationItems, user.role.roleName);
     }
 
     if (inOPSSection && canAccessOPS(user)) {
-      return transformToMenuItems(OPSNavigationItems);
+      return transformToMenuItems(OPSNavigationItems, user.role.roleName);
     }
 
     if (inStudentSection && canAccessStudent(user)) {
-      return transformToMenuItems(StudentNavigationItems);
+      return transformToMenuItems(StudentNavigationItems, user.role.roleName);
     }
 
     return [];

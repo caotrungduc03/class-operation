@@ -12,7 +12,7 @@ const breadcrumbs: ItemType[] = [
   },
 ];
 
-const HomeLMS: React.FC = () => {
+const HomeTeacher: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   return (
@@ -26,4 +26,4 @@ const HomeLMS: React.FC = () => {
   );
 };
 
-export default HomeLMS;
+export default HomeTeacher;

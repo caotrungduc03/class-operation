@@ -1,3 +1,4 @@
+import { RoleName } from "@class-operation/libs";
 import { MenuProps } from "antd";
 import { FixedType } from "rc-table/lib/interface";
 
@@ -9,7 +10,7 @@ export const TIME_FORMAT = "HH:mm";
 // Enums
 export enum AccessRole {
   OPS = "OPS",
-  LMS = "LMS",
+  TEACHER = "TEACHER",
   STUDENT = "STUDENT",
 }
 
@@ -52,6 +53,7 @@ export interface NavigationItem {
   label: React.ReactNode;
   url?: string;
   children?: NavigationItem[];
+  roles?: RoleName[];
 }
 
 export interface BreadcrumbItem {

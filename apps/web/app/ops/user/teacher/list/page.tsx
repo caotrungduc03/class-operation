@@ -19,7 +19,7 @@ import {
 import { NAV_TITLE } from "@web/libs/nav";
 import { RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
-import { IUser } from "@web/libs/user";
+import { IDetailUser, IUser } from "@web/libs/user";
 import { Card, Table, TablePaginationConfig } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -47,6 +47,7 @@ const columnsTitles: TableColumn<IUser>[] = [
   {
     title: "Code",
     dataIndex: "detail",
+    render: (detail: IDetailUser) => detail.code,
   },
   {
     title: "Full Name",
@@ -127,7 +128,7 @@ const Teachers = () => {
       password: "",
       confirmPassword: "",
       phoneNumber: "",
-      roleName: RoleName.TEACHER,
+      roleName: RoleName.TEACHER_FULL_TIME,
     },
   });
 
@@ -180,7 +181,7 @@ const Teachers = () => {
     try {
       await createTeacher({
         ...data,
-        roleName: RoleName.TEACHER,
+        roleName: RoleName.TEACHER_FULL_TIME,
       }).unwrap();
 
       toast.success("Teacher created successfully");

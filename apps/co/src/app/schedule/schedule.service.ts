@@ -2,10 +2,11 @@ import {
   GetScheduleDto,
   RoleName,
   ScheduleEntity,
+  UserStatus,
 } from '@class-operation/libs';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, ILike, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { BaseService } from '../../common';
 
 @Injectable()
@@ -69,17 +70,17 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
 
   async findByRangeDate(query: GetScheduleDto, userId: string, role: RoleName) {
     // Set teacherId based on role
-    if (role === RoleName.TEACHER) {
+    if (role === RoleName.TEACHER_FULL_TIME) {
       query.teacherId = userId;
     }
 
     const { startDate, endDate, teacherId, name, type } = query;
 
     // Build query conditions
-    const conditions: any = {
-      startDate: Between(startDate, endDate),
-      endDate: Between(startDate, endDate),
-      status: true,
+    const conditions: FindOptionsWhere<ScheduleEntity> = {
+      startDate: Between(new Date(startDate), new Date(endDate)),
+      endDate: Between(new Date(startDate), new Date(endDate)),
+      status: UserStatus.ACTIVE,
     };
 
     // Add teacherId condition if provided

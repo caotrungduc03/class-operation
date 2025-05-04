@@ -76,7 +76,7 @@ export class WeeklyNormService extends BaseService<WeeklyNormEntity> {
     switch (role) {
       case RoleName.ADMIN:
         break;
-      case RoleName.TEACHER:
+      case RoleName.TEACHER_FULL_TIME:
         query.teacherId = userId;
         break;
     }

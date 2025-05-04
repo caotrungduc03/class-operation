@@ -1,13 +1,21 @@
 export enum RoleName {
   ADMIN = "ADMIN",
-  TEACHER = "TEACHER",
+  MANAGE = "MANAGE",
+  STAFF_ACADEMIC = "STAFF_ACADEMIC",
+  STAFF_GENERAL = "STAFF_GENERAL",
+  TEACHER_PART_TIME = "TEACHER_PART_TIME",
+  TEACHER_FULL_TIME = "TEACHER_FULL_TIME",
   RECEPTIONIST = "RECEPTIONIST",
   STUDENT = "STUDENT",
 }
 
 export const RoleTag = {
   [RoleName.ADMIN]: "red",
-  [RoleName.TEACHER]: "blue",
+  [RoleName.MANAGE]: "orange",
+  [RoleName.STAFF_ACADEMIC]: "cyan",
+  [RoleName.STAFF_GENERAL]: "magenta",
+  [RoleName.TEACHER_FULL_TIME]: "blue",
+  [RoleName.TEACHER_PART_TIME]: "geekblue",
   [RoleName.RECEPTIONIST]: "purple",
   [RoleName.STUDENT]: "green",
 };
@@ -19,7 +27,11 @@ export const RoleOptions = [
   },
   {
     label: "Teacher",
-    value: RoleName.TEACHER,
+    value: RoleName.TEACHER_PART_TIME,
+  },
+  {
+    label: "Teacher",
+    value: RoleName.TEACHER_FULL_TIME,
   },
   {
     label: "Receptionist",

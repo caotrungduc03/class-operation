@@ -13,7 +13,12 @@ export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async findByRangeDate(
     @Query() query: GetScheduleDto,
     @User('userId') userId: string,
@@ -33,7 +38,7 @@ export class ScheduleController {
   }
 
   @Get('/:id')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER)
+  @Roles(RoleName.ADMIN, RoleName.TEACHER_FULL_TIME)
   async findById(@Param('id') id: string) {
     const result = await this.scheduleService.findById(id);
 

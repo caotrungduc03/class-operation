@@ -48,7 +48,8 @@ export class RequestService extends BaseService<RequestEntity> {
         createRequestDto.status = RequestStatus.APPROVED;
         statusWeeklyNorm = true;
         break;
-      case RoleName.TEACHER:
+      case RoleName.TEACHER_FULL_TIME:
+      case RoleName.TEACHER_PART_TIME:
         createRequestDto.teacherId = userId;
         createRequestDto.creatorId = userId;
         createRequestDto.status = RequestStatus.PENDING;

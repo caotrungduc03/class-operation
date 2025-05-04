@@ -3,7 +3,7 @@ import RouteGuard from "@web/components/RouteGuard";
 import MainLayout from "@web/layouts/MainLayout";
 import { AccessRole } from "@web/libs/common";
 
-const Layout = ({ children }: React.PropsWithChildren) => {
+const LayoutOPS = ({ children }: React.PropsWithChildren) => {
   return (
     <RouteGuard requiredAccess={AccessRole.OPS}>
       <MainLayout>{children}</MainLayout>
@@ -11,4 +11,4 @@ const Layout = ({ children }: React.PropsWithChildren) => {
   );
 };
 
-export default Layout;
+export default LayoutOPS;

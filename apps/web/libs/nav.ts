@@ -1,15 +1,15 @@
 export const NAV_LINK = {
   OPS: "/ops",
-  LMS: "/lms",
+  TEACHER: "/teacher",
   STUDENT: "/student",
   MY_PROFILE: "/my-profile",
   MY_PROFILE_OVERVIEW: "/my-profile/overview",
   MY_PROFILE_SETTINGS: "/my-profile/settings",
   LOGIN: "/login",
 
-  WEEKLY_NORM_REGISTRATION: "/lms/weekly-norm-registration",
-  MY_CALENDAR: "/lms/my-calendar",
-  TIME_OFF_REGISTRATION: "/lms/time-off-registration",
+  WEEKLY_NORM_REGISTRATION: "/teacher/weekly-norm-registration",
+  MY_CALENDAR: "/teacher/my-calendar",
+  TIME_OFF_REGISTRATION: "/teacher/time-off-registration",
 
   MANAGE_USERS: "/ops/user",
   TEACHER_LIST: "/ops/user/teacher/list",
@@ -35,8 +35,6 @@ export const NAV_LINK = {
 };
 
 export const NAV_TITLE = {
-  OPS: "OPS",
-  LMS: "LMS",
   HOME: "Trang chủ",
   MANAGE_USERS: "Quản lý người dùng",
   TEACHER_LIST: "Quản lý giáo viên",
@@ -44,14 +42,14 @@ export const NAV_TITLE = {
   MANAGE_ROOMS: "Quản lý phòng học",
   MY_PROFILE: "Thông tin cá nhân",
   WEEKLY_NORM_REGISTRATION: "Đăng ký định mức tuần",
-  MY_CALENDAR: "Lịch của tôi",
+  MY_CALENDAR: "Thời khóa biểu",
   TIME_OFF_REGISTRATION: "Đăng ký lịch nghỉ cố định",
   MANAGE_REQUESTS: "Quản lý yêu cầu",
   WEEKLY_NORM_LIST: "Đăng ký định mức tuần",
   TIME_OFF_LIST: "Đăng ký lịch nghỉ cố định",
   BUSY_SCHEDULE_LIST: "Đăng ký lịch bận",
   TEACHING_MODE_LIST: "Đổi hình thức dạy",
-  MANAGE_CALENDAR: "Quản lý lịch",
+  MANAGE_CALENDAR: "Quản lý thời khóa biểu",
   MANAGE_COURSES: "Quản lý khoá học",
   MY_CLASS: "Lớp của tôi",
   MANAGE_CLASSES: "Quản lý lớp học",

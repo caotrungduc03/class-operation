@@ -1,26 +1,23 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
+import CustomInputNumber from "@web/components/common/CustomInputNumber";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomRangePicker from "@web/components/common/CustomeRangePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
+import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-  DATE_FORMAT,
-  DATE_TIME_FORMAT,
-  TIME_FORMAT,
-  TableColumn,
-} from "@web/libs/common";
-import {
-  useCreateTimeOffMutation,
-  useGetTimeOffsQuery,
-  useLazyGetTimeOffByIdQuery,
-  useUpdateTimeOffMutation,
-  useUpdateTimeOffStatusMutation,
+  useCreateWeeklyNormMutation,
+  useGetWeeklyNormsQuery,
+  useLazyGetWeeklyNormByIdQuery,
+  useUpdateWeeklyNormMutation,
+  useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedTimeOff } from "@web/libs/features/requests/requestSlice";
+import { clearSelectedWeeklyNorm } from "@web/libs/features/requests/requestSlice";
 import {
   closeCancelModal,
   closeCreateModal,
@@ -33,7 +30,6 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import {
   IRequest,
-  ITimeOff,
   REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
@@ -43,30 +39,28 @@ import {
 import { RootState } from "@web/libs/store";
 import {
   Card,
-  DatePicker,
   Divider,
   Modal,
   Spin,
   Table,
   TablePaginationConfig,
   Tag,
-  TimePicker,
   Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
 const breadcrumbs: ItemType[] = [
   {
     href: "#",
-    title: "LMS",
+    title: "TEACHER",
   },
   {
-    title: "Time Off Requests",
+    title: "Weekly Norms",
   },
 ];
 
@@ -84,17 +78,6 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "description",
   },
   {
-    title: "Date",
-    dataIndex: "timeOff",
-    render: (timeOff: ITimeOff) => dayjs(timeOff?.date).format(DATE_FORMAT),
-  },
-  {
-    title: "Time",
-    dataIndex: "timeOff",
-    render: (timeOff: ITimeOff) =>
-      `${dayjs(timeOff?.startTime).format(TIME_FORMAT)} - ${dayjs(timeOff?.endTime).format(TIME_FORMAT)}`,
-  },
-  {
     title: "Status",
     dataIndex: "status",
     render: (status: RequestStatus) => (
@@ -107,13 +90,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
+    title: "Updated At",
+    dataIndex: "updatedAt",
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
+  },
+  {
     title: "",
     dataIndex: "method",
     fixed: "right",
   },
 ];
 
-const TimeOffActions = ({
+const WeeklyNormActions = ({
   record,
   onOpenDetail,
   onStartEdit,
@@ -150,7 +138,7 @@ const TimeOffActions = ({
   );
 };
 
-const TimeOffRegistration = () => {
+const WeeklyNormRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
     status?: string;
@@ -176,33 +164,44 @@ const TimeOffRegistration = () => {
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
-  const { selectedTimeOff } = useSelector((state: RootState) => state.request);
+  const { selectedWeeklyNorm } = useSelector(
+    (state: RootState) => state.request,
+  );
 
   const {
-    data: timeOffsData,
+    data: weeklyNormsData,
     isFetching,
     refetch,
-  } = useGetTimeOffsQuery(searchParams);
+  } = useGetWeeklyNormsQuery(searchParams);
 
-  const [fetchTimeOffDetail, { data: timeOffDetail }] =
-    useLazyGetTimeOffByIdQuery();
+  const [fetchNormDetail, { data: normDetail }] =
+    useLazyGetWeeklyNormByIdQuery();
 
-  const [createTimeOff, { isLoading: isCreating }] = useCreateTimeOffMutation();
-  const [updateTimeOff, { isLoading: isUpdating }] = useUpdateTimeOffMutation();
-  const [updateTimeOffStatus, { isLoading: isCanceling }] =
-    useUpdateTimeOffStatusMutation();
+  const [createWeeklyNorm, { isLoading: isCreating }] =
+    useCreateWeeklyNormMutation();
+  const [updateWeeklyNorm, { isLoading: isUpdating }] =
+    useUpdateWeeklyNormMutation();
+  const [updateWeeklyNormStatus, { isLoading: isCanceling }] =
+    useUpdateWeeklyNormStatusMutation();
 
   const searchForm = useForm();
 
-  // Time off form has single date/time fields (not an array like weekly norm)
-  const timeOffForm = useForm({
+  const weeklyNormForm = useForm({
     defaultValues: {
       name: "",
       description: "",
-      date: null, // Single date field
-      startTime: null, // Single start time
-      endTime: null, // Single end time
+      weeklyNorms: [
+        {
+          rangeDate: [undefined, undefined],
+          quantity: 1,
+        },
+      ],
     },
+  });
+
+  const { fields, append, remove, replace } = useFieldArray({
+    control: weeklyNormForm.control,
+    name: "weeklyNorms",
   });
 
   const tableColumns = columnsTitles.map((item, index) => {
@@ -211,7 +210,7 @@ const TimeOffRegistration = () => {
         ...item,
         key: index,
         render: (record: IRequest) => (
-          <TimeOffActions
+          <WeeklyNormActions
             record={record}
             onOpenDetail={handleOpenDetail}
             onStartEdit={handleStartEdit}
@@ -230,24 +229,25 @@ const TimeOffRegistration = () => {
 
   const tableData = useMemo(() => {
     return (
-      timeOffsData?.data?.items.map((item, index) => ({
+      weeklyNormsData?.data?.items.map((item, index) => ({
         ...item,
         index: ((current || 1) - 1) * (pageSize || 10) + index + 1,
         method: item,
       })) || []
     );
-  }, [timeOffsData, current, pageSize]);
+  }, [weeklyNormsData, current, pageSize]);
 
+  // Add this useEffect to update pagination when data changes
   useEffect(() => {
-    if (timeOffsData?.data) {
+    if (weeklyNormsData?.data) {
       setPagination((prev) => ({
         ...prev,
-        current: timeOffsData.data.page || prev.current,
-        pageSize: timeOffsData.data.limit || prev.pageSize,
-        total: timeOffsData.data.total || 0,
+        current: weeklyNormsData.data.page || prev.current,
+        pageSize: weeklyNormsData.data.limit || prev.pageSize,
+        total: weeklyNormsData.data.total || 0,
       }));
     }
-  }, [timeOffsData]);
+  }, [weeklyNormsData]);
 
   const handleStartEdit = async (id: string) => {
     dispatch(setSelectedItemId(id));
@@ -255,19 +255,18 @@ const TimeOffRegistration = () => {
     dispatch(closeDetailModal());
 
     try {
-      const response = await fetchTimeOffDetail(id).unwrap();
+      const response = await fetchNormDetail(id).unwrap();
       if (response?.data) {
         // Populate form with fetched data
-        timeOffForm.setValue("name", response.data.name);
-        timeOffForm.setValue("description", response.data.description || "");
+        weeklyNormForm.setValue("name", response.data.name);
+        weeklyNormForm.setValue("description", response.data.description || "");
 
-        if (response.data.timeOff) {
-          timeOffForm.setValue("date", dayjs(response.data.timeOff.date));
-          timeOffForm.setValue(
-            "startTime",
-            dayjs(response.data.timeOff.startTime),
-          );
-          timeOffForm.setValue("endTime", dayjs(response.data.timeOff.endTime));
+        if (response.data.weeklyNorms && response.data.weeklyNorms.length > 0) {
+          const formattedNorms = response.data.weeklyNorms.map((norm) => ({
+            rangeDate: [dayjs(norm.startDate), dayjs(norm.endDate)],
+            quantity: norm.quantity,
+          }));
+          replace(formattedNorms);
         }
       }
       // Open the drawer after data is loaded
@@ -299,12 +298,12 @@ const TimeOffRegistration = () => {
 
   const handleOpenDetail = (id: string) => {
     dispatch(openDetailModal(id));
-    fetchTimeOffDetail(id);
+    fetchNormDetail(id);
   };
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedTimeOff());
+    dispatch(clearSelectedWeeklyNorm());
   };
 
   const handleOpenCancelModal = (id: string) => {
@@ -315,11 +314,11 @@ const TimeOffRegistration = () => {
     if (!selectedItemId) return;
 
     try {
-      await updateTimeOffStatus({
+      await updateWeeklyNormStatus({
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Time off request canceled successfully");
+      toast.success("Weekly norm request canceled successfully");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -328,42 +327,26 @@ const TimeOffRegistration = () => {
   };
 
   const onSubmitCreate = async (data) => {
-    // Create a date object for the selected date
-    const selectedDate = data.date.toDate();
-
-    // Create start and end datetime by combining the date with selected times
-    const startDateTime = data.startTime.toDate();
-    const endDateTime = data.endTime.toDate();
-
-    // Set the date component of startDateTime and endDateTime to match the selected date
-    startDateTime.setFullYear(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate(),
-    );
-    endDateTime.setFullYear(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate(),
-    );
-
     const formattedData = {
       name: data.name,
       description: data.description || "",
-      type: RequestType.TIME_OFF,
-      startDate: startDateTime,
-      endDate: endDateTime,
+      type: RequestType.WEEKLY_NORM,
+      weeklyNorms: data.weeklyNorms.map((norm) => ({
+        startDate: norm.rangeDate[0],
+        endDate: norm.rangeDate[1],
+        quantity: Number(norm.quantity),
+      })),
     };
 
     try {
       if (isEditMode && selectedItemId) {
-        const res = await updateTimeOff({
+        const res = await updateWeeklyNorm({
           id: selectedItemId,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
       } else {
-        const res = await createTimeOff(formattedData).unwrap();
+        const res = await createWeeklyNorm(formattedData).unwrap();
         toast.success(res.message);
       }
       refetch();
@@ -375,9 +358,24 @@ const TimeOffRegistration = () => {
 
   const handleCloseDrawer = () => {
     dispatch(closeCreateModal());
-    timeOffForm.reset();
+    weeklyNormForm.reset();
     dispatch(setEditMode(false));
     dispatch(setSelectedItemId(null));
+  };
+
+  const addNormEntry = () => {
+    append({
+      rangeDate: [undefined, undefined],
+      quantity: 1,
+    });
+  };
+
+  const removeNormEntry = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
+    } else {
+      toast.error("At least one weekly norm is required");
+    }
   };
 
   const handlePaginationChange = (newPagination: TablePaginationConfig) => {
@@ -389,8 +387,8 @@ const TimeOffRegistration = () => {
   };
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title="Time Off Requests">
-      <div id="time-off-container" className="flex flex-col gap-6">
+    <PageLayout breadcrumbs={breadcrumbs} title="Weekly Norms">
+      <div id="weekly-norms-container" className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">
             <FilterGrid>
@@ -424,7 +422,7 @@ const TimeOffRegistration = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Time Off Request"
+                title="Create Weekly Norm Request"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -446,7 +444,7 @@ const TimeOffRegistration = () => {
       </div>
       {/* Detail Modal */}
       <Modal
-        title="Time Off Request Details"
+        title="Weekly Norm Request Details"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
@@ -455,83 +453,72 @@ const TimeOffRegistration = () => {
             title="Close"
             onClick={handleCloseDetail}
           />,
-          selectedTimeOff?.status === RequestStatus.PENDING && (
+          selectedWeeklyNorm?.status === RequestStatus.PENDING && (
             <CustomButton
               key="edit"
               type="primary"
               title="Edit"
-              onClick={() => handleStartEdit(selectedTimeOff.id)}
+              onClick={() => handleStartEdit(selectedWeeklyNorm.id)}
             />
           ),
         ]}
         width={800}
       >
-        {timeOffDetail ? (
+        {normDetail ? (
           <div className="flex flex-col gap-4">
             <div>
               <Typography.Text type="secondary">Request Name:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
-                {timeOffDetail.data.name}
+                {normDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
               <Typography.Text type="secondary">Description:</Typography.Text>
               <Typography.Paragraph className="mt-1">
-                {timeOffDetail.data.description || ""}
+                {normDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
               <span className="ml-2">
-                <Tag color={REQUEST_STATUS_TAG[timeOffDetail.data.status]}>
-                  {timeOffDetail.data.status}
+                <Tag color={REQUEST_STATUS_TAG[normDetail.data.status]}>
+                  {normDetail.data.status}
                 </Tag>
               </span>
             </div>
 
-            <Divider orientation="left">Time Off Details</Divider>
+            <Divider orientation="left">Weekly Norms</Divider>
 
-            {timeOffDetail.data.timeOff && (
-              <Card size="small" className="mb-4">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <Typography.Text type="secondary">Date:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.timeOff.date).format(
-                        DATE_FORMAT,
-                      )}
+            {normDetail.data.weeklyNorms &&
+              normDetail.data.weeklyNorms.map((norm, index) => (
+                <Card key={index} size="small" className="mb-4">
+                  <div className="flex justify-between">
+                    <Typography.Text strong>Week #{index + 1}</Typography.Text>
+                    <Typography.Text strong>
+                      Quantity: {norm.quantity}
                     </Typography.Text>
                   </div>
-                  <div>
-                    <Typography.Text type="secondary">Time:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.timeOff.startTime).format(
-                        TIME_FORMAT,
-                      )}{" "}
-                      -{" "}
-                      {dayjs(timeOffDetail.data.timeOff.endTime).format(
-                        TIME_FORMAT,
-                      )}
-                    </Typography.Text>
-                  </div>
-                </div>
-              </Card>
-            )}
+                  <Typography.Text>
+                    {dayjs(norm.startDate).format(DATE_FORMAT)} -{" "}
+                    {dayjs(norm.endDate).format(DATE_FORMAT)}
+                  </Typography.Text>
+                </Card>
+              ))}
 
             <div className="flex justify-between">
               <div>
                 <Typography.Text type="secondary">Created At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(timeOffDetail.data.createdAt).format(DATE_TIME_FORMAT)}
+                  {dayjs(normDetail.data.createdAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
 
               <div>
                 <Typography.Text type="secondary">Updated At:</Typography.Text>
                 <Typography.Text className="ml-2">
-                  {dayjs(timeOffDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
+                  {dayjs(normDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
             </div>
@@ -542,17 +529,19 @@ const TimeOffRegistration = () => {
           </div>
         )}
       </Modal>
-      {/* Create/Edit Drawer - Notice there's no field array or add/remove buttons */}
+      {/* Create/Edit Drawer */}
       <CustomDrawer
-        title={isEditMode ? "Edit Time Off Request" : "Create Time Off Request"}
+        title={
+          isEditMode ? "Edit Weekly Norm Request" : "Create Weekly Norm Request"
+        }
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
-        onSubmit={timeOffForm.handleSubmit(onSubmitCreate)}
+        onSubmit={weeklyNormForm.handleSubmit(onSubmitCreate)}
         loading={isCreating || isUpdating}
       >
         <div className="flex flex-col gap-4">
           <CustomInput
-            control={timeOffForm.control}
+            control={weeklyNormForm.control}
             name="name"
             label="Request Name"
             placeholder="Enter request name"
@@ -561,57 +550,66 @@ const TimeOffRegistration = () => {
           />
 
           <CustomInput
-            control={timeOffForm.control}
+            control={weeklyNormForm.control}
             name="description"
             label="Description"
             placeholder="Enter description (optional)"
             size="large"
           />
 
-          <Divider orientation="left">Time Off Details</Divider>
+          <Divider orientation="left">Weekly Norms</Divider>
 
-          {/* Single date picker (not a repeatable field) */}
-          <div className="flex flex-col gap-2">
-            <Typography.Text>Date</Typography.Text>
-            <DatePicker
-              style={{ width: "100%" }}
-              size="large"
-              value={timeOffForm.watch("date")}
-              onChange={(date) => timeOffForm.setValue("date", date)}
-              placeholder="Select date"
-            />
-          </div>
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="flex flex-col gap-2 rounded-md border border-gray-200 p-4"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <Typography.Title level={5} className="m-0">
+                  Weekly Norm #{index + 1}
+                </Typography.Title>
+                <CustomButton
+                  type="text"
+                  color="danger"
+                  variant="text"
+                  icon={<DeleteOutlined />}
+                  onClick={() => removeNormEntry(index)}
+                  disabled={fields.length <= 1}
+                />
+              </div>
 
-          {/* Single time range (not repeatable) */}
-          <div className="flex gap-2">
-            <div className="flex flex-1 flex-col gap-2">
-              <Typography.Text>Start Time</Typography.Text>
-              <TimePicker
-                style={{ width: "100%" }}
+              <CustomRangePicker
+                control={weeklyNormForm.control}
+                name={`weeklyNorms.${index}.rangeDate`}
+                label="Date Range"
                 size="large"
-                format="HH:mm"
-                value={timeOffForm.watch("startTime")}
-                onChange={(time) => timeOffForm.setValue("startTime", time)}
-                placeholder="Start time"
+                required
+              />
+
+              <CustomInputNumber
+                control={weeklyNormForm.control}
+                name={`weeklyNorms.${index}.quantity`}
+                label="Quantity"
+                min={1}
+                size="large"
+                required
               />
             </div>
-            <div className="flex flex-1 flex-col gap-2">
-              <Typography.Text>End Time</Typography.Text>
-              <TimePicker
-                style={{ width: "100%" }}
-                size="large"
-                format="HH:mm"
-                value={timeOffForm.watch("endTime")}
-                onChange={(time) => timeOffForm.setValue("endTime", time)}
-                placeholder="End time"
-              />
-            </div>
-          </div>
+          ))}
+
+          <CustomButton
+            type="dashed"
+            title="Add Weekly Norm"
+            onClick={addNormEntry}
+            icon={<PlusOutlined />}
+            className="mt-2"
+            size="large"
+          />
         </div>
       </CustomDrawer>
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Time Off Request"
+        title="Cancel Weekly Norm Request"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
@@ -631,12 +629,12 @@ const TimeOffRegistration = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this time off request? This action
-          cannot be undone.
-        </Typography.Paragraph>
-      </Modal>
+          Are you sure you want to cancel this weekly norm request? This action
+          cannot be undone.{" "}
+        </Typography.Paragraph>{" "}
+      </Modal>{" "}
     </PageLayout>
   );
 };
 
-export default TimeOffRegistration;
+export default WeeklyNormRegistration;

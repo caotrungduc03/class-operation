@@ -25,7 +25,10 @@ export class UserController {
   @Roles(RoleName.ADMIN)
   async findTeachers(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
-      await this.userService.findUsersByRoleName(RoleName.TEACHER, query);
+      await this.userService.findUsersByRoleName(
+        RoleName.TEACHER_FULL_TIME,
+        query,
+      );
 
     const results: Pagination<UserDto> = {
       page,
