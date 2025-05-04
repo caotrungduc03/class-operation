@@ -17,7 +17,6 @@ import {
   useUpdateWeeklyNormMutation,
   useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedWeeklyNorm } from "@web/libs/features/requests/requestSlice";
 import {
   closeCancelModal,
   closeCreateModal,
@@ -164,9 +163,6 @@ const WeeklyNormRegistration = () => {
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
-  const { selectedWeeklyNorm } = useSelector(
-    (state: RootState) => state.request,
-  );
 
   const {
     data: weeklyNormsData,
@@ -303,7 +299,6 @@ const WeeklyNormRegistration = () => {
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedWeeklyNorm());
   };
 
   const handleOpenCancelModal = (id: string) => {
@@ -453,12 +448,12 @@ const WeeklyNormRegistration = () => {
             title="Close"
             onClick={handleCloseDetail}
           />,
-          selectedWeeklyNorm?.status === RequestStatus.PENDING && (
+          normDetail?.data?.status === RequestStatus.PENDING && (
             <CustomButton
               key="edit"
               type="primary"
               title="Edit"
-              onClick={() => handleStartEdit(selectedWeeklyNorm.id)}
+              onClick={() => handleStartEdit(normDetail.data.id)}
             />
           ),
         ]}

@@ -11,7 +11,6 @@ import {
   useLazyGetWeeklyNormByIdQuery,
   useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedWeeklyNorm } from "@web/libs/features/requests/requestSlice";
 import {
   closeApproveModal,
   closeCancelModal,
@@ -243,7 +242,6 @@ const WeeklyNormList = () => {
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedWeeklyNorm());
   };
 
   const handleOpenApproveModal = (id: string) => {

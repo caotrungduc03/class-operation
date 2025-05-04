@@ -7,9 +7,6 @@
     "emitDecoratorMetadata": true,
     "target": "es2021"
   },
-  "include": [
-    "src/**/*.ts",
-    "../../libs/src/lib/dtos/notification/get-notifications.dto.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["eslint.config.js", "eslint.config.cjs", "eslint.config.mjs"]
 }

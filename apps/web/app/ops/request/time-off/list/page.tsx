@@ -11,7 +11,6 @@ import {
   useLazyGetTimeOffByIdQuery,
   useUpdateTimeOffStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedTimeOff } from "@web/libs/features/requests/requestSlice";
 import {
   closeApproveModal,
   closeCancelModal,
@@ -258,7 +257,6 @@ const TimeOffList = () => {
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedTimeOff());
   };
 
   const handleOpenApproveModal = (id: string) => {

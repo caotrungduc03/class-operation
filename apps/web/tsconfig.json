@@ -29,7 +29,9 @@
     "isolatedModules": true,
     "target": "ES2017",
     "skipLibCheck": true,
-    "strict": false
+    "strict": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "../../apps/web/.next/types/**/*.ts",

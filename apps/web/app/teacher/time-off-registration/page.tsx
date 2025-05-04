@@ -20,7 +20,6 @@ import {
   useUpdateTimeOffMutation,
   useUpdateTimeOffStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedTimeOff } from "@web/libs/features/requests/requestSlice";
 import {
   closeCancelModal,
   closeCreateModal,
@@ -176,7 +175,6 @@ const TimeOffRegistration = () => {
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
-  const { selectedTimeOff } = useSelector((state: RootState) => state.request);
 
   const {
     data: timeOffsData,
@@ -304,7 +302,6 @@ const TimeOffRegistration = () => {
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedTimeOff());
   };
 
   const handleOpenCancelModal = (id: string) => {
@@ -455,12 +452,12 @@ const TimeOffRegistration = () => {
             title="Close"
             onClick={handleCloseDetail}
           />,
-          selectedTimeOff?.status === RequestStatus.PENDING && (
+          timeOffDetail?.data?.status === RequestStatus.PENDING && (
             <CustomButton
               key="edit"
               type="primary"
               title="Edit"
-              onClick={() => handleStartEdit(selectedTimeOff.id)}
+              onClick={() => handleStartEdit(timeOffDetail.data.id)}
             />
           ),
         ]}

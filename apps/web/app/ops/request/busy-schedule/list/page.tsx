@@ -11,7 +11,6 @@ import {
   useLazyGetBusyScheduleByIdQuery,
   useUpdateBusyScheduleStatusMutation,
 } from "@web/libs/features/requests/requestApi";
-import { clearSelectedBusySchedule } from "@web/libs/features/requests/requestSlice";
 import {
   closeApproveModal,
   closeCancelModal,
@@ -158,9 +157,6 @@ const BusyScheduleList = () => {
     isApproveModalOpen,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
-  const { selectedBusySchedule } = useSelector(
-    (state: RootState) => state.request,
-  );
 
   const {
     data: busySchedulesData,
@@ -247,7 +243,6 @@ const BusyScheduleList = () => {
 
   const handleCloseDetail = () => {
     dispatch(closeDetailModal());
-    dispatch(clearSelectedBusySchedule());
   };
 
   const handleOpenApproveModal = (id: string) => {

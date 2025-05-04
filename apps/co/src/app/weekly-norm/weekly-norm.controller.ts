@@ -1,6 +1,11 @@
-import { ResponseDto, RoleName, Roles, User } from '@class-operation/libs';
+import {
+  GetWeeklyNormDto,
+  ResponseDto,
+  RoleName,
+  Roles,
+  User,
+} from '@class-operation/libs';
 import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
-import { GetWeeklyNormDto } from '../../../../../libs/src/lib/dtos/weekly-norm/get-weekly-norm.dto';
 import { WeeklyNormService } from './weekly-norm.service';
 
 @Controller('weekly-norms')

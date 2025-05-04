@@ -8,14 +8,11 @@ import layoutSlice from "./features/layout/layoutSlice";
 import { notificationApi } from "./features/notifications/notificationApi";
 import notificationSlice from "./features/notifications/notificationSlice";
 import { requestApi } from "./features/requests/requestApi";
-import requestSlice from "./features/requests/requestSlice";
 import { roomApi } from "./features/rooms/roomApi";
 import { scheduleApi } from "./features/schedules/scheduleApi";
 import tableSlice from "./features/table/tableSlice";
 import { userApi } from "./features/users/userApi";
-import userSlice from "./features/users/userSlice";
 import { weeklyNormApi } from "./features/weekly-norms/weeklyNormApi";
-import weeklyNormSlice from "./features/weekly-norms/weeklyNormSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -24,11 +21,8 @@ export const makeStore = () => {
       [authApi.reducerPath]: authApi.reducer,
       layout: layoutSlice.reducer,
       table: tableSlice.reducer,
-      user: userSlice.reducer,
       [userApi.reducerPath]: userApi.reducer,
-      request: requestSlice.reducer,
       [requestApi.reducerPath]: requestApi.reducer,
-      weeklyNorm: weeklyNormSlice.reducer,
       [weeklyNormApi.reducerPath]: weeklyNormApi.reducer,
       [scheduleApi.reducerPath]: scheduleApi.reducer,
       [roomApi.reducerPath]: roomApi.reducer,
