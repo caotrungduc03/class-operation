@@ -1,6 +1,7 @@
+import { ITimestamps } from "./common";
 import { UserStatus } from "./user";
 
-export interface IRoom {
+export interface IRoom extends ITimestamps {
   id: string;
   code: string;
   name: string;
@@ -8,8 +9,6 @@ export interface IRoom {
   location: string;
   description: string;
   status: UserStatus;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateRoomDto {

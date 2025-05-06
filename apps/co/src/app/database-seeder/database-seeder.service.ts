@@ -81,7 +81,9 @@ export class DatabaseSeederService {
       const code = await this.counterService.getNextCode(
         ROLE_COUNTER_TYPE[role.roleName],
       );
-      const userDetail = await this.userDetailService.createUserDetail(code);
+      const userDetail = await this.userDetailService.createUserDetail({
+        code,
+      });
 
       user.role = role;
       user.detail = userDetail;

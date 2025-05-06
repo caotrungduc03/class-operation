@@ -5,6 +5,8 @@ import {
   IsEmpty,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
+  IsString,
   Matches,
   MinLength,
 } from 'class-validator';
@@ -54,4 +56,14 @@ export class CreateUserDto extends BaseRequestDto {
 
   @Type(() => Number)
   status: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  departmentId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  fieldId?: string;
 }

@@ -65,9 +65,24 @@ const OPSNavigationItems: NavigationItem[] = [
     roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
   },
   {
+    key: NAV_LINK.MANAGE_FIELDS,
+    icon: <HomeOutlined />,
+    label: NAV_TITLE.MANAGE_FIELDS,
+    url: NAV_LINK.MANAGE_FIELDS,
+    roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
+  },
+  {
+    key: NAV_LINK.MANAGE_DEPARTMENTS,
+    icon: <HomeOutlined />,
+    label: NAV_TITLE.MANAGE_DEPARTMENTS,
+    url: NAV_LINK.MANAGE_DEPARTMENTS,
+    roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
+  },
+  {
     key: NAV_LINK.MANAGE_USERS,
     icon: <UserOutlined />,
     label: NAV_TITLE.MANAGE_USERS,
+    roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
     children: [
       {
         label: NAV_TITLE.TEACHER_LIST,
@@ -75,8 +90,18 @@ const OPSNavigationItems: NavigationItem[] = [
         roles: [RoleName.ADMIN, RoleName.MANAGE, RoleName.STAFF_GENERAL],
       },
       {
-        label: NAV_TITLE.RECEPTIONIST_LIST,
-        url: NAV_LINK.RECEPTIONIST_LIST,
+        label: NAV_TITLE.STUDENT_LIST,
+        url: NAV_LINK.STUDENT_LIST,
+        roles: [RoleName.ADMIN, RoleName.MANAGE, RoleName.STAFF_GENERAL],
+      },
+      {
+        label: NAV_TITLE.MANAGER_LIST,
+        url: NAV_LINK.MANAGER_LIST,
+        roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
+      },
+      {
+        label: NAV_TITLE.STAFF_LIST,
+        url: NAV_LINK.STAFF_LIST,
         roles: [RoleName.ADMIN, RoleName.STAFF_GENERAL],
       },
     ],

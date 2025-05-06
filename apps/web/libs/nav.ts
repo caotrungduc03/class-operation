@@ -13,8 +13,12 @@ export const NAV_LINK = {
 
   MANAGE_USERS: "/ops/user",
   TEACHER_LIST: "/ops/user/teacher/list",
-  RECEPTIONIST_LIST: "/ops/user/receptionist/list",
+  STUDENT_LIST: "/ops/user/student/list",
+  STAFF_LIST: "/ops/user/staff/list",
+  MANAGER_LIST: "/ops/user/manager/list",
   MANAGE_ROOMS: "/ops/room/list",
+  MANAGE_FIELDS: "/ops/field/list",
+  MANAGE_DEPARTMENTS: "/ops/department/list",
   MANAGE_REQUESTS: "/ops/request",
   WEEKLY_NORM_LIST: "/ops/request/weekly-norm/list",
   TIME_OFF_LIST: "/ops/request/time-off/list",
@@ -32,14 +36,21 @@ export const NAV_LINK = {
   CLASS_DETAIL_STUDENTS: (id: string) => `/ops/class/${id}/students`,
 
   MY_NOTIFICATION: "/my-notification",
+
+  USER_DETAIL_OVERVIEW: (id: string) => `/ops/user/${id}/overview`,
+  USER_DETAIL_SETTINGS: (id: string) => `/ops/user/${id}/settings`,
 };
 
 export const NAV_TITLE = {
   HOME: "Trang chủ",
   MANAGE_USERS: "Quản lý người dùng",
   TEACHER_LIST: "Quản lý giáo viên",
-  RECEPTIONIST_LIST: "Quản lý lễ tân",
+  STUDENT_LIST: "Quản lý học viên",
+  STAFF_LIST: "Quản lý nhân viên",
+  MANAGER_LIST: "Quản lý người quản lý",
   MANAGE_ROOMS: "Quản lý phòng học",
+  MANAGE_FIELDS: "Quản lý loại chứng chỉ",
+  MANAGE_DEPARTMENTS: "Quản lý phòng ban",
   MY_PROFILE: "Thông tin cá nhân",
   WEEKLY_NORM_REGISTRATION: "Đăng ký định mức tuần",
   MY_CALENDAR: "Thời khóa biểu",
@@ -54,4 +65,5 @@ export const NAV_TITLE = {
   MY_CLASS: "Lớp của tôi",
   MANAGE_CLASSES: "Quản lý lớp học",
   CLASS_DETAIL: "Chi tiết lớp học",
+  USER_DETAIL: "Chi tiết người dùng",
 };

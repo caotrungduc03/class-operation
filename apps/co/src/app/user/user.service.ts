@@ -4,6 +4,7 @@ import {
   FindOptions,
   ROLE_COUNTER_TYPE,
   RoleName,
+  UpdateUserDto,
   UserEntity,
 } from '@class-operation/libs';
 import {
@@ -15,6 +16,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseService } from '../../common';
 import { CounterService } from '../counter/counter.service';
+import { DepartmentService } from '../department/department.service';
+import { FieldService } from '../field/field.service';
 import { RoleService } from '../role/role.service';
 import { UserDetailService } from '../user-detail/user-detail.service';
 
@@ -26,6 +29,8 @@ export class UserService extends BaseService<UserEntity> {
     private readonly roleService: RoleService,
     private readonly counterService: CounterService,
     private readonly userDetailService: UserDetailService,
+    private readonly departmentService: DepartmentService,
+    private readonly fieldService: FieldService,
   ) {
     super(userRepository);
   }
@@ -93,7 +98,38 @@ export class UserService extends BaseService<UserEntity> {
     const code = await this.counterService.getNextCode(
       ROLE_COUNTER_TYPE[role.roleName],
     );
-    const userDetail = await this.userDetailService.createUserDetail(code);
+
+    // Create user detail with department and field associations if provided
+    const userDetailData: any = {
+      code,
+    };
+
+    // Associate with department if departmentId is provided
+    if (createUserDto.departmentId) {
+      const department = await this.departmentService.findById(
+        createUserDto.departmentId,
+      );
+      if (!department) {
+        throw new NotFoundException('Department not found');
+      }
+      userDetailData.department = department;
+    }
+
+    // Associate with field if fieldId is provided and user is a teacher
+    if (
+      createUserDto.fieldId &&
+      (role.roleName === RoleName.TEACHER_FULL_TIME ||
+        role.roleName === RoleName.TEACHER_PART_TIME)
+    ) {
+      const field = await this.fieldService.findById(createUserDto.fieldId);
+      if (!field) {
+        throw new NotFoundException('Field not found');
+      }
+      userDetailData.field = field;
+    }
+
+    const userDetail =
+      await this.userDetailService.createUserDetail(userDetailData);
 
     const encodedPassword = encodePassword(createUserDto.password);
 
@@ -105,14 +141,16 @@ export class UserService extends BaseService<UserEntity> {
     });
   }
 
-  async findUsersByRoleName(roleName: RoleName, query: Record<string, any>) {
+  async findUsersByRoleName(roleNames: RoleName[], query: Record<string, any>) {
     const { page = 1, limit = 10, sort = 'id:desc', search } = query;
 
     const queryBuilder = this.repository
       .createQueryBuilder('entity')
       .innerJoinAndSelect('entity.role', 'role')
       .innerJoinAndSelect('entity.detail', 'detail')
-      .where('role.roleName = :roleName', { roleName });
+      .leftJoinAndSelect('detail.department', 'department')
+      .leftJoinAndSelect('detail.field', 'field')
+      .where('role.roleName IN (:...roleNames)', { roleNames });
 
     if (search) {
       queryBuilder.andWhere(
@@ -133,5 +171,96 @@ export class UserService extends BaseService<UserEntity> {
       total,
       data,
     };
+  }
+
+  async updateById(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
+    const user = await this.findById(id, {
+      relations: ['role', 'detail'],
+    });
+
+    // Handle role change
+    if (
+      updateUserDto.roleName &&
+      updateUserDto.roleName !== user.role.roleName
+    ) {
+      const newRole = await this.roleService.findByName(updateUserDto.roleName);
+      if (!newRole) {
+        throw new NotFoundException('Role not found');
+      }
+      user.role = newRole;
+    }
+
+    // Handle department update
+    if (updateUserDto.departmentId) {
+      const department = await this.departmentService.findById(
+        updateUserDto.departmentId,
+      );
+      if (!department) {
+        throw new NotFoundException('Department not found');
+      }
+
+      if (!user.detail) {
+        user.detail = await this.userDetailService.createUserDetail({
+          code: await this.counterService.getNextCode(
+            ROLE_COUNTER_TYPE[user.role.roleName],
+          ),
+        });
+      }
+
+      await this.userDetailService.update(user.detail.id, {
+        departmentId: updateUserDto.departmentId,
+      });
+    }
+
+    // Handle field update for teacher roles
+    if (
+      updateUserDto.fieldId &&
+      (user.role.roleName === RoleName.TEACHER_FULL_TIME ||
+        user.role.roleName === RoleName.TEACHER_PART_TIME)
+    ) {
+      const field = await this.fieldService.findById(updateUserDto.fieldId);
+      if (!field) {
+        throw new NotFoundException('Field not found');
+      }
+
+      if (!user.detail) {
+        user.detail = await this.userDetailService.createUserDetail({
+          code: await this.counterService.getNextCode(
+            ROLE_COUNTER_TYPE[user.role.roleName],
+          ),
+        });
+      }
+
+      await this.userDetailService.update(user.detail.id, {
+        fieldId: updateUserDto.fieldId,
+      });
+    }
+
+    // Update basic user information
+    const dataToUpdate: any = {
+      ...(updateUserDto.firstName && { firstName: updateUserDto.firstName }),
+      ...(updateUserDto.lastName && { lastName: updateUserDto.lastName }),
+      ...(updateUserDto.phoneNumber && {
+        phoneNumber: updateUserDto.phoneNumber,
+      }),
+      ...(updateUserDto.status && { status: updateUserDto.status }),
+    };
+
+    // Update password if provided
+    if (updateUserDto.password) {
+      if (updateUserDto.password !== updateUserDto.confirmPassword) {
+        throw new BadRequestException('Passwords do not match');
+      }
+      dataToUpdate.password = encodePassword(updateUserDto.password);
+    }
+
+    await this.userRepository.update(id, dataToUpdate);
+
+    return this.findById(id, {
+      relations: ['role', 'detail', 'detail.department', 'detail.field'],
+    });
   }
 }

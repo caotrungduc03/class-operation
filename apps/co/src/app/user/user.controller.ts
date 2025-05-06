@@ -4,6 +4,7 @@ import {
   ResponseDto,
   RoleName,
   Roles,
+  UpdateUserDto,
   UserDto,
 } from '@class-operation/libs';
 import {
@@ -11,7 +12,9 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
+  Put,
   Query,
   ValidationPipe,
 } from '@nestjs/common';
@@ -22,11 +25,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/teachers')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async findTeachers(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
       await this.userService.findUsersByRoleName(
-        RoleName.TEACHER_FULL_TIME,
+        [RoleName.TEACHER_FULL_TIME, RoleName.TEACHER_PART_TIME],
         query,
       );
 
@@ -40,11 +43,53 @@ export class UserController {
     return new ResponseDto(HttpStatus.OK, 'Success', results);
   }
 
-  @Get('/receptionists')
-  @Roles(RoleName.ADMIN)
-  async findReceptionists(@Query() query: Record<string, any>) {
+  @Get('/staffs')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async findStaffs(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
-      await this.userService.findUsersByRoleName(RoleName.RECEPTIONIST, query);
+      await this.userService.findUsersByRoleName(
+        [
+          RoleName.STAFF_ACADEMIC,
+          RoleName.STAFF_GENERAL,
+          RoleName.RECEPTIONIST,
+        ],
+        query,
+      );
+
+    const results: Pagination<UserDto> = {
+      page,
+      limit,
+      total,
+      items: UserDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Get('/managers')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async findManagers(@Query() query: Record<string, any>) {
+    const { page, limit, total, data } =
+      await this.userService.findUsersByRoleName(
+        [RoleName.ADMIN, RoleName.MANAGE],
+        query,
+      );
+
+    const results: Pagination<UserDto> = {
+      page,
+      limit,
+      total,
+      items: UserDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Get('/students')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async findStudents(@Query() query: Record<string, any>) {
+    const { page, limit, total, data } =
+      await this.userService.findUsersByRoleName([RoleName.STUDENT], query);
 
     const results: Pagination<UserDto> = {
       page,
@@ -57,13 +102,39 @@ export class UserController {
   }
 
   @Post('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async createUser(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
 
     return new ResponseDto(
       HttpStatus.CREATED,
       'User created successfully',
+      UserDto.plainToInstance(user, ['admin']),
+    );
+  }
+
+  @Get('/:id')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async findById(@Param('id') id: string) {
+    const user = await this.userService.findById(id, {
+      relations: ['role', 'detail', 'detail.department', 'detail.field'],
+    });
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'User retrieved successfully',
+      UserDto.plainToInstance(user, ['admin']),
+    );
+  }
+
+  @Put('/:id')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const user = await this.userService.updateById(id, updateUserDto);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'User updated successfully',
       UserDto.plainToInstance(user, ['admin']),
     );
   }

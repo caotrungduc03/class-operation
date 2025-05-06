@@ -1,0 +1,383 @@
+"use client";
+import { PlusOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import CustomButton from "@web/components/common/CustomButton";
+import CustomDrawer from "@web/components/common/CustomDrawer";
+import CustomDropdown from "@web/components/common/CustomDropdown";
+import CustomInput from "@web/components/common/CustomInput";
+import CustomTextArea from "@web/components/common/CustomTextArea";
+import FilterGrid from "@web/components/common/FilterGrid";
+import PageLayout from "@web/layouts/PageLayout";
+import { TableColumn } from "@web/libs/common";
+import { CreateDepartmentDto, IDepartment } from "@web/libs/department";
+import {
+  useCreateDepartmentMutation,
+  useDeleteDepartmentMutation,
+  useGetDepartmentsQuery,
+  useLazyGetDepartmentByIdQuery,
+  useUpdateDepartmentMutation,
+} from "@web/libs/features/departments/departmentApi";
+import {
+  closeCreateModal,
+  openCreateModal,
+} from "@web/libs/features/table/tableSlice";
+import { NAV_TITLE } from "@web/libs/nav";
+import { RootState } from "@web/libs/store";
+import { Card, Modal, Table, TablePaginationConfig } from "antd";
+import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
+import dayjs from "dayjs";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
+
+const breadcrumbs: ItemType[] = [
+  {
+    title: NAV_TITLE.MANAGE_DEPARTMENTS,
+  },
+];
+
+const columnsTitles: TableColumn<IDepartment>[] = [
+  {
+    title: "#",
+    dataIndex: "index",
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    render: (_, record: IDepartment) => (
+      <div className="flex flex-col">
+        <span className="font-bold text-blue-500">{record.code}</span>
+        <span>{record.name}</span>
+      </div>
+    ),
+  },
+  {
+    title: "Description",
+    dataIndex: "description",
+  },
+  {
+    title: "Created Date",
+    dataIndex: "createdAt",
+    render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
+  },
+  {
+    title: "Updated Date",
+    dataIndex: "updatedAt",
+    render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
+  },
+  {
+    title: "",
+    dataIndex: "method",
+    fixed: "right",
+  },
+];
+
+// Define Zod schema for department form validation
+const departmentFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+});
+
+// Create type from Zod schema
+type DepartmentFormValues = z.infer<typeof departmentFormSchema>;
+
+const DepartmentActions = ({
+  record,
+  onEdit,
+  onDelete,
+}: {
+  record: IDepartment;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+}) => {
+  return (
+    <CustomDropdown>
+      <CustomButton
+        type="link"
+        title="Edit"
+        onClick={() => onEdit(record.id)}
+      />
+      <CustomButton
+        type="link"
+        title="Delete"
+        color="danger"
+        onClick={() => onDelete(record.id)}
+      />
+    </CustomDropdown>
+  );
+};
+
+const Departments = () => {
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    defaultCurrent: 1,
+    defaultPageSize: 10,
+    showSizeChanger: true,
+    showQuickJumper: true,
+  });
+  const [searchParams, setSearchParams] = useState<{
+    search?: string;
+    page?: number;
+    limit?: number;
+  }>({
+    page: 1,
+    limit: 10,
+  });
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<
+    string | null
+  >(null);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const { isOpenCreateModal } = useSelector((state: RootState) => state.table);
+  const dispatch = useDispatch();
+
+  // Search form
+  const searchForm = useForm();
+
+  // Department form with validation
+  const departmentForm = useForm<DepartmentFormValues>({
+    resolver: zodResolver(departmentFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
+
+  const { data, isFetching, refetch } = useGetDepartmentsQuery(searchParams);
+  const [createDepartment, { isLoading: isCreating }] =
+    useCreateDepartmentMutation();
+  const [updateDepartment, { isLoading: isUpdating }] =
+    useUpdateDepartmentMutation();
+  const [deleteDepartment, { isLoading: isDeleting }] =
+    useDeleteDepartmentMutation();
+  const [getDepartmentById, { isFetching: isLoadingDepartment }] =
+    useLazyGetDepartmentByIdQuery();
+
+  const { current, pageSize } = pagination;
+
+  const tableColumns = useMemo(() => {
+    return columnsTitles.map((item, index) => {
+      if (item.dataIndex === "method") {
+        return {
+          ...item,
+          render: (record: IDepartment) => {
+            return (
+              <DepartmentActions
+                record={record}
+                onEdit={handleEditDepartment}
+                onDelete={handleDeleteDepartment}
+              />
+            );
+          },
+          key: index,
+        };
+      }
+      return {
+        ...item,
+        key: index,
+      };
+    });
+  }, []);
+
+  const tableData = useMemo(() => {
+    return (
+      data?.data?.items.map((item, index) => ({
+        ...item,
+        index: ((current || 1) - 1) * (pageSize || 10) + index + 1,
+        method: item,
+      })) || []
+    );
+  }, [data, current, pageSize]);
+
+  const onSubmitSearch = (formData: { search?: string }) => {
+    setSearchParams({
+      ...searchParams,
+      search: formData.search,
+      page: 1,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+  };
+
+  const handleReset = () => {
+    searchForm.reset();
+    setSearchParams({
+      page: 1,
+      limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+  };
+
+  const handleEditDepartment = (id: string) => {
+    setSelectedDepartmentId(id);
+    setIsEditMode(true);
+
+    getDepartmentById(id)
+      .unwrap()
+      .then((response) => {
+        if (response?.data) {
+          const department = response.data;
+          departmentForm.reset({
+            name: department.name,
+            description: department.description,
+          });
+          dispatch(openCreateModal());
+        }
+      })
+      .catch((error) => {
+        // Error handling
+      });
+  };
+
+  const handleDeleteDepartment = (id: string) => {
+    Modal.confirm({
+      title: "Delete Department",
+      content: "Are you sure you want to delete this department?",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          await deleteDepartment(id).unwrap();
+          toast.success("Department deleted successfully");
+          refetch();
+        } catch (error) {
+          // Handled by the apiErrorMiddleware
+        }
+      },
+    });
+  };
+
+  const onSubmitDepartment = async (formData: DepartmentFormValues) => {
+    try {
+      const departmentData: CreateDepartmentDto = {
+        name: formData.name,
+        description: formData.description,
+      };
+
+      if (isEditMode && selectedDepartmentId) {
+        await updateDepartment({
+          id: selectedDepartmentId,
+          data: departmentData,
+        }).unwrap();
+        toast.success("Department updated successfully");
+      } else {
+        await createDepartment(departmentData).unwrap();
+        toast.success("Department created successfully");
+      }
+      handleCloseDrawer();
+      refetch();
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  const handleCloseDrawer = () => {
+    dispatch(closeCreateModal());
+    departmentForm.reset();
+    setIsEditMode(false);
+    setSelectedDepartmentId(null);
+  };
+
+  const handlePaginationChange = (newPagination: TablePaginationConfig) => {
+    setPagination(newPagination);
+    setSearchParams({
+      ...searchParams,
+      page: newPagination.current,
+      limit: newPagination.pageSize,
+    });
+  };
+
+  const handleAddDepartment = () => {
+    setIsEditMode(false);
+    departmentForm.reset({
+      name: "",
+      description: "",
+    });
+    dispatch(openCreateModal());
+  };
+
+  return (
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MANAGE_DEPARTMENTS}>
+      <div className="flex flex-col gap-6">
+        <Card>
+          <div className="flex flex-col gap-4">
+            <FilterGrid>
+              <CustomInput
+                control={searchForm.control}
+                name="search"
+                size="large"
+                placeholder="Search by name"
+              />
+            </FilterGrid>
+            <div className="flex justify-between">
+              <div className="flex gap-4">
+                <CustomButton
+                  title="Reset"
+                  size="large"
+                  onClick={handleReset}
+                />
+                <CustomButton
+                  type="primary"
+                  title="Search"
+                  size="large"
+                  onClick={searchForm.handleSubmit(onSubmitSearch)}
+                />
+              </div>
+              <CustomButton
+                type="primary"
+                title="Add Department"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={handleAddDepartment}
+              />
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <Table
+            loading={isFetching}
+            rowKey={(record) => record.id}
+            columns={tableColumns}
+            dataSource={tableData}
+            scroll={{ x: "max-content" }}
+            pagination={pagination}
+            onChange={handlePaginationChange}
+          />
+        </Card>
+      </div>
+
+      <CustomDrawer
+        title={isEditMode ? "Edit Department" : "Add Department"}
+        open={isOpenCreateModal}
+        onCancel={handleCloseDrawer}
+        onSubmit={departmentForm.handleSubmit(onSubmitDepartment)}
+        loading={isCreating || isUpdating || isLoadingDepartment}
+      >
+        <div className="flex flex-col gap-4">
+          <CustomInput
+            control={departmentForm.control}
+            name="name"
+            label="Department Name"
+            placeholder="Enter department name"
+            required
+          />
+
+          <CustomTextArea
+            control={departmentForm.control}
+            name="description"
+            label="Description"
+            placeholder="Enter department description"
+          />
+        </div>
+      </CustomDrawer>
+    </PageLayout>
+  );
+};
+
+export default Departments;

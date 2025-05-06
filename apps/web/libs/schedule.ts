@@ -1,10 +1,11 @@
+import { ITimestamps } from "./common";
 import { UserStatus } from "./user";
 
 export enum ScheduleType {
   BUSY = "BUSY",
 }
 
-export interface ISchedule {
+export interface ISchedule extends ITimestamps {
   id: string;
   name: string;
   description: string;
@@ -14,8 +15,6 @@ export interface ISchedule {
   status: UserStatus;
   requestId: string;
   teacherId: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export const SCHEDULE_TYPE_LABEL = {

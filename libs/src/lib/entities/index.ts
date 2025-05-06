@@ -2,6 +2,8 @@ export * from './class.entity';
 export * from './counter.entity';
 export * from './course.entity';
 export * from './customBase.entity';
+export * from './department.entity';
+export * from './field.entity';
 export * from './list-entity';
 export * from './notification.entity';
 export * from './request.entity';

@@ -13,9 +13,7 @@ export class UserDetailService extends BaseService<UserDetail> {
     super(userDetailRepository);
   }
 
-  async createUserDetail(code: string): Promise<UserDetail> {
-    const userDetail = new UserDetail();
-    userDetail.code = code;
-    return this.store(userDetail);
+  async createUserDetail(detailData: any): Promise<UserDetail> {
+    return this.store(detailData);
   }
 }

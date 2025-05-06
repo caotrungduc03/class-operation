@@ -4,6 +4,8 @@ import { authApi } from "./features/auth/authApi";
 import { authSlice } from "./features/auth/authSlice";
 import { classApi } from "./features/classes/classApi";
 import { courseApi } from "./features/courses/courseApi";
+import { departmentApi } from "./features/departments/departmentApi";
+import { fieldApi } from "./features/fields/fieldApi";
 import layoutSlice from "./features/layout/layoutSlice";
 import { notificationApi } from "./features/notifications/notificationApi";
 import notificationSlice from "./features/notifications/notificationSlice";
@@ -30,6 +32,8 @@ export const makeStore = () => {
       [classApi.reducerPath]: classApi.reducer,
       notification: notificationSlice.reducer,
       [notificationApi.reducerPath]: notificationApi.reducer,
+      [fieldApi.reducerPath]: fieldApi.reducer,
+      [departmentApi.reducerPath]: departmentApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -43,6 +47,8 @@ export const makeStore = () => {
           courseApi.middleware,
           classApi.middleware,
           notificationApi.middleware,
+          fieldApi.middleware,
+          departmentApi.middleware,
         )
         .concat(apiErrorMiddleware),
   });

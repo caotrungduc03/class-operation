@@ -9,9 +9,12 @@ import { AppService } from './app.service';
 import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { ClassModule } from './class/class.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CounterModule } from './counter/counter.module';
 import { CourseModule } from './course/course.module';
 import { DatabaseSeederService } from './database-seeder/database-seeder.service';
+import { DepartmentModule } from './department/department.module';
+import { FieldModule } from './field/field.module';
 import { NotificationModule } from './notification/notification.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { RequestModule } from './request/request.module';
@@ -42,6 +45,7 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
     }),
+    CloudinaryModule,
     AuthModule,
     UserModule,
     RoleModule,
@@ -55,6 +59,8 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     ClassModule,
     RabbitMQModule,
     NotificationModule,
+    FieldModule,
+    DepartmentModule,
   ],
   controllers: [AppController],
   providers: [

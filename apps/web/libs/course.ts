@@ -1,3 +1,4 @@
+import { ITimestamps } from "./common";
 import { UserStatus } from "./user";
 
 export enum CourseType {
@@ -6,15 +7,13 @@ export enum CourseType {
   IELTS = "IELTS",
 }
 
-export interface ICourse {
+export interface ICourse extends ITimestamps {
   id: string;
   code: string;
   name: string;
   description: string;
   status: UserStatus;
   type: CourseType;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateCourseDto {

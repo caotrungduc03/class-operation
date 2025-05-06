@@ -1,3 +1,4 @@
+import { ITimestamps } from "./common";
 import { IUser } from "./user";
 
 export enum RequestType {
@@ -27,7 +28,7 @@ export interface ITimeOff {
   endTime: Date;
 }
 
-export interface IRequest {
+export interface IRequest extends ITimestamps {
   id: string;
   name: string;
   description: string;
@@ -42,8 +43,6 @@ export interface IRequest {
   teacherId?: string;
   weeklyNorms?: WeeklyNormDto[];
   timeOff?: ITimeOff;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateRequestWeeklyNormDto {

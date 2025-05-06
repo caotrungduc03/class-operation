@@ -1,8 +1,9 @@
+import { ITimestamps } from "./common";
 import { ICourse } from "./course";
 import { IRoom } from "./room";
 import { IUser, UserStatus } from "./user";
 
-export interface IClass {
+export interface IClass extends ITimestamps {
   id: string;
   code: string;
   name: string;
@@ -14,8 +15,6 @@ export interface IClass {
   courseId: string;
   teacherId: string;
   roomId: string;
-  createdAt: string;
-  updatedAt: string;
   course?: ICourse;
   teacher?: IUser;
   room?: IRoom;

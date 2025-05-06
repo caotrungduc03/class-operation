@@ -1,5 +1,7 @@
 import { RoleName } from "@web/libs/role";
 import { ITimestamps } from "./common";
+import { IDepartment } from "./department";
+import { IField } from "./field";
 
 export interface IUser extends ITimestamps {
   id: string;
@@ -16,13 +18,15 @@ export interface IUser extends ITimestamps {
 }
 
 export interface CreateUserDto {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
   phoneNumber?: string;
-  roleName: RoleName;
+  roleName?: RoleName;
+  departmentId?: string;
+  fieldId?: string;
 }
 
 export interface IRole {
@@ -32,6 +36,9 @@ export interface IRole {
 
 export interface IDetailUser {
   code: string;
+  teacherLevel: string;
+  field?: IField;
+  department?: IDepartment;
 }
 
 export enum UserStatus {

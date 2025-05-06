@@ -9,6 +9,7 @@ import {
 import { UserStatus } from '../enums';
 import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
+import { FieldEntity } from './field.entity';
 import { NotificationEntity } from './notification.entity';
 import { RoleEntity } from './role.entity';
 import { StudentClassEntity } from './student-class.entity';
@@ -98,4 +99,7 @@ export class UserEntity extends CustomBaseEntity {
 
   @OneToMany(() => NotificationEntity, (notification) => notification.user)
   notifications: NotificationEntity[];
+
+  @OneToOne(() => FieldEntity, (field) => field.leader)
+  leaderOfField: FieldEntity;
 }

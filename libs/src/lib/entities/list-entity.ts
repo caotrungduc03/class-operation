@@ -1,6 +1,8 @@
 import { ClassEntity } from './class.entity';
 import { CounterEntity } from './counter.entity';
 import { CourseEntity } from './course.entity';
+import { DepartmentEntity } from './department.entity';
+import { FieldEntity } from './field.entity';
 import { NotificationEntity } from './notification.entity';
 import { RequestEntity } from './request.entity';
 import { RoleEntity } from './role.entity';
@@ -24,4 +26,6 @@ export const ListEntity = [
   ClassEntity,
   StudentClassEntity,
   NotificationEntity,
+  DepartmentEntity,
+  FieldEntity,
 ] as const;
