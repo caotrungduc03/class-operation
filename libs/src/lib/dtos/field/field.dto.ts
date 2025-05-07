@@ -12,10 +12,9 @@ export class FieldDto extends BaseDto {
   @Expose()
   description: string;
 
-  @Expose()
   leaderId: string;
 
-  @Expose({ groups: ['admin'] })
+  @Expose()
   @Type(() => UserDto)
   leader: UserDto;
 }

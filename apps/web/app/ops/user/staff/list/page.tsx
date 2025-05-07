@@ -364,42 +364,33 @@ const StaffList = () => {
               <CustomInput
                 control={searchForm.control}
                 name="search"
-                size="large"
                 placeholder="Search by name, email or code"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="roleName"
-                size="large"
                 placeholder="Filter by role"
                 options={StaffRoleOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
-                size="large"
                 placeholder="Filter by status"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
-                <CustomButton
-                  title="Reset"
-                  size="large"
-                  onClick={handleReset}
-                />
+                <CustomButton title="Reset" onClick={handleReset} />
                 <CustomButton
                   type="primary"
                   title="Search"
-                  size="large"
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
               <CustomButton
                 type="primary"
                 title="Add Staff"
-                size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
               />

@@ -36,6 +36,8 @@ import {
   STATUS_LABEL,
   STATUS_TAG,
   StatusOptions,
+  TeacherLevel,
+  TeacherLevelOptions,
   UserStatus,
 } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
@@ -138,6 +140,9 @@ const teacherFormSchema = z
     status: z.nativeEnum(UserStatus).optional(),
     departmentId: z.string().optional(),
     fieldId: z.string().optional(),
+    teacherLevel: z.nativeEnum(TeacherLevel, {
+      required_error: "Teacher level is required",
+    }),
   })
   .refine((data) => !data.password || data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -218,6 +223,7 @@ const Teachers = () => {
       status: UserStatus.ACTIVE,
       departmentId: "",
       fieldId: "",
+      teacherLevel: TeacherLevel.A1,
     },
   });
 
@@ -358,6 +364,7 @@ const Teachers = () => {
       status: UserStatus.ACTIVE,
       departmentId: "",
       fieldId: "",
+      teacherLevel: TeacherLevel.A1,
     });
   };
 
@@ -514,6 +521,16 @@ const Teachers = () => {
             options={fieldSelectProps.options}
             onFocus={fieldSelectProps.onFocus}
             onPopupScroll={fieldSelectProps.onPopupScroll}
+          />
+
+          {/* Teacher level selection */}
+          <CustomSelect
+            control={teacherForm.control}
+            name="teacherLevel"
+            label="Teacher Level"
+            placeholder="Select teacher level"
+            options={TeacherLevelOptions}
+            required
           />
 
           <CustomSelect

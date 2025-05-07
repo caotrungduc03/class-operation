@@ -1,7 +1,7 @@
 "use client";
 import CustomButton from "@web/components/common/CustomButton";
 import { NAV_LINK } from "@web/libs/nav";
-import { ROLE_TAG } from "@web/libs/role";
+import { ROLE_LABEL, ROLE_TAG } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Card, Tag, Typography } from "antd";
@@ -64,7 +64,7 @@ const MyProfileOverview = () => {
           <div className="w-3/4">
             <div>
               <Tag color={ROLE_TAG[user?.role?.roleName]}>
-                {user?.role?.roleName}
+                {ROLE_LABEL[user?.role?.roleName]}
               </Tag>
             </div>
           </div>

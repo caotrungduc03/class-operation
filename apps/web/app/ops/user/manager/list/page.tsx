@@ -121,12 +121,10 @@ const managerFormSchema = z
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Invalid email address"),
-    password: z
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .optional()
-      .or(z.literal("")),
-    confirmPassword: z.string().optional().or(z.literal("")),
+      .min(8, "Confirm password must be at least 8 characters"),
     phoneNumber: z.string().optional(),
     roleName: z.nativeEnum(RoleName, { required_error: "Role is required" }),
     status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
@@ -431,6 +429,7 @@ const ManagerList = () => {
               label="First Name"
               size="large"
               placeholder="Enter first name"
+              required
             />
             <CustomInput
               control={managerForm.control}
@@ -438,6 +437,7 @@ const ManagerList = () => {
               label="Last Name"
               size="large"
               placeholder="Enter last name"
+              required
             />
             <CustomInput
               control={managerForm.control}
@@ -445,6 +445,8 @@ const ManagerList = () => {
               label="Email"
               size="large"
               placeholder="Enter email"
+              required
+              autoComplete="off"
             />
             <CustomInput
               control={managerForm.control}
@@ -453,6 +455,8 @@ const ManagerList = () => {
               size="large"
               placeholder="Enter password"
               type="password"
+              required
+              autoComplete="new-password"
             />
             <CustomInput
               control={managerForm.control}
@@ -461,6 +465,8 @@ const ManagerList = () => {
               size="large"
               placeholder="Confirm password"
               type="password"
+              required
+              autoComplete="new-password"
             />
             <CustomInput
               control={managerForm.control}
@@ -489,6 +495,7 @@ const ManagerList = () => {
               size="large"
               placeholder="Select role"
               options={ManagerRoleOptions}
+              required
             />
             <CustomSelect
               control={managerForm.control}
@@ -497,6 +504,7 @@ const ManagerList = () => {
               size="large"
               placeholder="Select status"
               options={StatusOptions}
+              required
             />
           </form>
         </CustomDrawer>

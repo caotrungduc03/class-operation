@@ -62,7 +62,7 @@ export const NAV_TITLE = {
   TEACHING_MODE_LIST: "Đổi hình thức dạy",
   MANAGE_CALENDAR: "Quản lý thời khóa biểu",
   MANAGE_COURSES: "Quản lý khoá học",
-  MY_CLASS: "Lớp của tôi",
+  MY_CLASS: "Các lớp được giao",
   MANAGE_CLASSES: "Quản lý lớp học",
   CLASS_DETAIL: "Chi tiết lớp học",
   USER_DETAIL: "Chi tiết người dùng",

@@ -17,6 +17,8 @@ interface CustomSelectProps {
   required?: boolean;
   onFocus?: () => void;
   onPopupScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+  loading?: boolean;
+  showSearch?: boolean;
 }
 
 const CustomSelect = ({
@@ -32,6 +34,8 @@ const CustomSelect = ({
   required,
   onFocus,
   onPopupScroll,
+  loading,
+  showSearch,
 }: CustomSelectProps) => {
   return (
     <div className="w-full">
@@ -56,6 +60,8 @@ const CustomSelect = ({
                 disabled={disabled}
                 onFocus={onFocus}
                 onPopupScroll={onPopupScroll}
+                loading={loading}
+                showSearch={showSearch}
               />
 
               {error?.message && (

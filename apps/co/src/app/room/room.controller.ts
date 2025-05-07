@@ -26,7 +26,7 @@ export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async find(@Query() queryParams: QueryRoomDto) {
     const {
       page,
@@ -46,7 +46,7 @@ export class RoomController {
   }
 
   @Get('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async findById(@Param('id') id: string) {
     const room = await this.roomService.findById(id);
 
@@ -58,7 +58,7 @@ export class RoomController {
   }
 
   @Post('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async create(@Body() createRoomDto: CreateRoomDto) {
     const room = await this.roomService.create(
       CreateRoomDto.plainToClass(createRoomDto),
@@ -72,7 +72,7 @@ export class RoomController {
   }
 
   @Put('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
   async updateById(
     @Param('id') id: string,
     @Body() updateRoomDto: UpdateRoomDto,

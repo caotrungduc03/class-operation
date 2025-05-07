@@ -27,9 +27,13 @@ export class FieldController {
 
   @Get('/')
   @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
-  async find(@Query() queryParams: QueryFieldDto) {
-    const { page, limit, total, data } =
-      await this.fieldService.query(queryParams);
+  async find(@Query() queryFieldDto: QueryFieldDto) {
+    const { page, limit, total, data } = await this.fieldService.query(
+      queryFieldDto,
+      {
+        relations: ['leader', 'leader.detail'],
+      },
+    );
 
     const results: Pagination<FieldDto> = {
       page,

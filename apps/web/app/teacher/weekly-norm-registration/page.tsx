@@ -27,6 +27,7 @@ import {
   setEditMode,
   setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
+import { NAV_TITLE } from "@web/libs/nav";
 import {
   IRequest,
   REQUEST_STATUS_TAG,
@@ -55,11 +56,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 const breadcrumbs: ItemType[] = [
   {
-    href: "#",
-    title: "TEACHER",
-  },
-  {
-    title: "Weekly Norms",
+    title: NAV_TITLE.WEEKLY_NORM_REGISTRATION,
   },
 ];
 
@@ -382,7 +379,10 @@ const WeeklyNormRegistration = () => {
   };
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title="Weekly Norms">
+    <PageLayout
+      breadcrumbs={breadcrumbs}
+      title={NAV_TITLE.WEEKLY_NORM_REGISTRATION}
+    >
       <div id="weekly-norms-container" className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">

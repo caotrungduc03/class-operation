@@ -8,6 +8,7 @@ import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
 import FilterGrid from "@web/components/common/FilterGrid";
+import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import {
@@ -21,6 +22,7 @@ import {
   closeCreateModal,
   openCreateModal,
 } from "@web/libs/features/table/tableSlice";
+import { useGetManagersQuery } from "@web/libs/features/users/userApi";
 import { CreateFieldDto, IField } from "@web/libs/field";
 import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
@@ -50,7 +52,7 @@ const columnsTitles: TableColumn<IField>[] = [
     dataIndex: "name",
     render: (_, record: IField) => (
       <div className="flex flex-col">
-        <span className="font-medium text-blue-500">{record.code}</span>
+        <span className="font-bold text-blue-500">{record.code}</span>
         <span>{record.name}</span>
       </div>
     ),
@@ -156,6 +158,16 @@ const Fields = () => {
       description: "",
       leaderId: null,
     },
+  });
+
+  // Add the useDebouncedSelect hook for managers
+  const { selectProps: leaderSelectProps } = useDebouncedSelect({
+    control: fieldForm.control,
+    name: "leaderId",
+    useGetDataQuery: useGetManagersQuery,
+    labelField: "fullName",
+    valueField: "id",
+    queryArgs: { roleName: "manager" },
   });
 
   const { data, isFetching, refetch } = useGetFieldsQuery(searchParams);
@@ -392,7 +404,11 @@ const Fields = () => {
             name="leaderId"
             label="Leader"
             placeholder="Select leader"
-            options={[]}
+            options={leaderSelectProps.options}
+            onFocus={leaderSelectProps.onFocus}
+            onPopupScroll={leaderSelectProps.onPopupScroll}
+            loading={leaderSelectProps.loading}
+            showSearch
           />
         </div>
       </CustomDrawer>

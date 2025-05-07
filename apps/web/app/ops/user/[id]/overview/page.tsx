@@ -115,6 +115,18 @@ const UserOverview = () => {
           </div>
         )}
 
+        {/* Teacher Level - show only for teachers */}
+        {isTeacher && user?.detail?.teacherLevel && (
+          <div className="flex">
+            <div className="w-1/4">
+              <Typography.Text strong>Teacher Level:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <Typography.Text>{user?.detail?.teacherLevel}</Typography.Text>
+            </div>
+          </div>
+        )}
+
         <div className="mb-4 flex">
           <div className="w-1/4">
             <Typography.Text strong>Status:</Typography.Text>

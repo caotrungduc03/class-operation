@@ -111,6 +111,7 @@ const OPSNavigationItems: NavigationItem[] = [
     key: NAV_LINK.MANAGE_REQUESTS,
     icon: <FormOutlined />,
     label: NAV_TITLE.MANAGE_REQUESTS,
+    roles: [RoleName.ADMIN, RoleName.MANAGE],
     children: [
       {
         key: NAV_LINK.WEEKLY_NORM_LIST,

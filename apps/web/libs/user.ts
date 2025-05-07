@@ -27,6 +27,7 @@ export interface CreateUserDto {
   roleName?: RoleName;
   departmentId?: string;
   fieldId?: string;
+  teacherLevel?: TeacherLevel;
 }
 
 export interface IRole {
@@ -36,7 +37,7 @@ export interface IRole {
 
 export interface IDetailUser {
   code: string;
-  teacherLevel: string;
+  teacherLevel: TeacherLevel;
   field?: IField;
   department?: IDepartment;
 }
@@ -65,4 +66,24 @@ export const StatusOptions = [
     label: STATUS_LABEL[UserStatus.BLOCKED],
     value: UserStatus.BLOCKED,
   },
+];
+
+// Enum for teacher levels
+export enum TeacherLevel {
+  A1 = "A1",
+  A2 = "A2",
+  B1 = "B1",
+  B2 = "B2",
+  C1 = "C1",
+  C2 = "C2",
+}
+
+// Options for teacher level select
+export const TeacherLevelOptions = [
+  { label: TeacherLevel.A1, value: TeacherLevel.A1 },
+  { label: TeacherLevel.A2, value: TeacherLevel.A2 },
+  { label: TeacherLevel.B1, value: TeacherLevel.B1 },
+  { label: TeacherLevel.B2, value: TeacherLevel.B2 },
+  { label: TeacherLevel.C1, value: TeacherLevel.C1 },
+  { label: TeacherLevel.C2, value: TeacherLevel.C2 },
 ];

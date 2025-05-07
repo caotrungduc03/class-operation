@@ -30,6 +30,7 @@ import {
   setEditMode,
   setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
+import { NAV_TITLE } from "@web/libs/nav";
 import {
   IRequest,
   ITimeOff,
@@ -61,11 +62,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 const breadcrumbs: ItemType[] = [
   {
-    href: "#",
-    title: "TEACHER",
-  },
-  {
-    title: "Time Off Requests",
+    title: NAV_TITLE.TIME_OFF_REGISTRATION,
   },
 ];
 
@@ -386,7 +383,10 @@ const TimeOffRegistration = () => {
   };
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title="Time Off Requests">
+    <PageLayout
+      breadcrumbs={breadcrumbs}
+      title={NAV_TITLE.TIME_OFF_REGISTRATION}
+    >
       <div id="time-off-container" className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">
