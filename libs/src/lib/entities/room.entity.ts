@@ -14,7 +14,8 @@ export class RoomEntity extends CustomBaseEntity {
   name: string;
 
   @Column({
-    nullable: true,
+    type: 'integer',
+    default: 0,
   })
   quantity: number;
 

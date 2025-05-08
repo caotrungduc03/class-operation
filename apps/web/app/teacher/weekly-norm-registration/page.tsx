@@ -1,5 +1,6 @@
 "use client";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
@@ -12,6 +13,7 @@ import PageLayout from "@web/layouts/PageLayout";
 import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
   useCreateWeeklyNormMutation,
+  useDeleteWeeklyNormMutation,
   useGetWeeklyNormsQuery,
   useLazyGetWeeklyNormByIdQuery,
   useUpdateWeeklyNormMutation,
@@ -48,11 +50,12 @@ import {
   Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -102,11 +105,13 @@ const WeeklyNormActions = ({
   onOpenDetail,
   onStartEdit,
   onOpenCancelModal,
+  onOpenDeleteModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
   onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
+  onOpenDeleteModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -122,6 +127,14 @@ const WeeklyNormActions = ({
           onClick={() => onStartEdit(record.id)}
         />
       )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Delete"
+          color="danger"
+          onClick={() => onOpenDeleteModal(record.id)}
+        />
+      )}
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
@@ -133,6 +146,25 @@ const WeeklyNormActions = ({
     </CustomDropdown>
   );
 };
+
+// Zod validation schema
+const weeklyNormSchema = z.object({
+  name: z.string().min(1, "Request name is required"),
+  description: z.string().optional(),
+  weeklyNorms: z
+    .array(
+      z.object({
+        rangeDate: z.tuple([
+          z.any().refine((val) => !!val, "Start date is required"),
+          z.any().refine((val) => !!val, "End date is required"),
+        ]),
+        quantity: z.number().min(1, "Quantity must be at least 1"),
+      }),
+    )
+    .min(1, "At least one weekly norm is required"),
+});
+
+type WeeklyNormFormValues = z.infer<typeof weeklyNormSchema>;
 
 const WeeklyNormRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
@@ -176,10 +208,13 @@ const WeeklyNormRegistration = () => {
     useUpdateWeeklyNormMutation();
   const [updateWeeklyNormStatus, { isLoading: isCanceling }] =
     useUpdateWeeklyNormStatusMutation();
+  const [deleteWeeklyNorm, { isLoading: isDeleting }] =
+    useDeleteWeeklyNormMutation();
 
   const searchForm = useForm();
 
-  const weeklyNormForm = useForm({
+  const weeklyNormForm = useForm<WeeklyNormFormValues>({
+    resolver: zodResolver(weeklyNormSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -208,6 +243,7 @@ const WeeklyNormRegistration = () => {
             onOpenDetail={handleOpenDetail}
             onStartEdit={handleStartEdit}
             onOpenCancelModal={handleOpenCancelModal}
+            onOpenDeleteModal={handleOpenDeleteModal}
           />
         ),
       };
@@ -256,7 +292,10 @@ const WeeklyNormRegistration = () => {
 
         if (response.data.weeklyNorms && response.data.weeklyNorms.length > 0) {
           const formattedNorms = response.data.weeklyNorms.map((norm) => ({
-            rangeDate: [dayjs(norm.startDate), dayjs(norm.endDate)],
+            rangeDate: [
+              dayjs(norm.startDate).toDate(),
+              dayjs(norm.endDate).toDate(),
+            ] as [Date, Date],
             quantity: norm.quantity,
           }));
           replace(formattedNorms);
@@ -318,7 +357,7 @@ const WeeklyNormRegistration = () => {
     }
   };
 
-  const onSubmitCreate = async (data) => {
+  const onSubmitCreate = async (data: WeeklyNormFormValues) => {
     const formattedData = {
       name: data.name,
       description: data.description || "",
@@ -376,6 +415,38 @@ const WeeklyNormRegistration = () => {
       page: newPagination.current,
       limit: newPagination.pageSize,
     });
+  };
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+
+  const handleOpenDeleteModal = (id: string) => {
+    dispatch(setSelectedItemId(id));
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    dispatch(setSelectedItemId(null));
+  };
+
+  const handleDelete = async () => {
+    if (!selectedItemId) return;
+
+    try {
+      await deleteWeeklyNorm(selectedItemId).unwrap();
+      toast.success("Weekly norm request deleted successfully");
+      refetch();
+      handleCloseDeleteModal();
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  // Function to disable Tuesday through Saturday (days 2-6 in JS, where Sunday is 0)
+  const disableDate = (current: Dayjs) => {
+    const day = current.day();
+    // Disable Tuesday(2) through Saturday(6)
+    return day >= 2 && day <= 6;
   };
 
   return (
@@ -578,6 +649,7 @@ const WeeklyNormRegistration = () => {
                 name={`weeklyNorms.${index}.rangeDate`}
                 label="Date Range"
                 size="large"
+                disableDate={disableDate}
                 required
               />
 
@@ -628,6 +700,32 @@ const WeeklyNormRegistration = () => {
           cannot be undone.{" "}
         </Typography.Paragraph>{" "}
       </Modal>{" "}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Weekly Norm Request"
+        open={isDeleteModalOpen}
+        onCancel={handleCloseDeleteModal}
+        footer={[
+          <CustomButton
+            key="back"
+            title="Cancel"
+            onClick={handleCloseDeleteModal}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Delete"
+            loading={isDeleting}
+            onClick={handleDelete}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to delete this weekly norm request? This action
+          cannot be undone.
+        </Typography.Paragraph>
+      </Modal>
     </PageLayout>
   );
 };

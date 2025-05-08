@@ -1,6 +1,10 @@
+import { NotificationEntity } from '@class-operation/libs';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, connect, Connection } from 'amqplib';
+import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
+import { SocketService } from '../socket/socket.service';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit {
@@ -8,7 +12,12 @@ export class RabbitMQService implements OnModuleInit {
   private channel: Channel;
   private readonly logger = new Logger(RabbitMQService.name);
 
-  constructor(private readonly emailService: EmailService) {}
+  constructor(
+    private readonly emailService: EmailService,
+    @InjectRepository(NotificationEntity)
+    private readonly notificationRepository: Repository<NotificationEntity>,
+    private readonly socketService: SocketService,
+  ) {}
 
   async onModuleInit() {
     try {
@@ -56,6 +65,23 @@ export class RabbitMQService implements OnModuleInit {
               );
               break;
             case 'web-notification':
+              // Store notification in database
+              const notification = await this.notificationRepository.save({
+                userId: content.data.userId,
+                title: content.data.title,
+                content: content.data.content,
+                read: false,
+              });
+
+              // Send real-time notification via Socket.IO
+              this.socketService.sendNotificationToUser(content.data.userId, {
+                id: notification.id,
+                title: notification.title,
+                content: notification.content,
+                createdAt: notification.createdAt,
+                read: notification.read,
+              });
+              break;
             default:
               this.logger.warn(`Unknown message type: ${content.type}`);
           }

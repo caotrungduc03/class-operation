@@ -4,11 +4,12 @@ import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import { useUpdateProfileMutation } from "@web/libs/features/auth/authApi";
-import { RoleOptions } from "@web/libs/role";
+import { RoleName, RoleOptions } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
-import { StatusOptions, UserStatus } from "@web/libs/user";
+import { StatusOptions, TeacherLevelOptions, UserStatus } from "@web/libs/user";
 import { Card, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
@@ -18,23 +19,55 @@ const MyProfileSettings = () => {
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
   const router = useRouter();
 
-  const { control, handleSubmit, reset } = useForm({
+  // Check if user is a teacher
+  const isTeacher = [
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  ].includes(user?.role?.roleName);
+
+  // Check if user is a student
+  const isStudent = user?.role?.roleName === RoleName.STUDENT;
+
+  const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       code: user?.detail?.code ?? "",
       firstName: user?.firstName ?? "",
       lastName: user?.lastName ?? "",
       email: user?.email ?? "",
       phoneNumber: user?.phoneNumber ?? "",
+      departmentId: user?.detail?.department?.id ?? "",
+      fieldId: user?.detail?.field?.id ?? "",
+      teacherLevel: user?.detail?.teacherLevel ?? "",
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      reset({
+        code: user?.detail?.code ?? "",
+        firstName: user?.firstName ?? "",
+        lastName: user?.lastName ?? "",
+        email: user?.email ?? "",
+        phoneNumber: user?.phoneNumber ?? "",
+        departmentId: user?.detail?.department?.id ?? "",
+        fieldId: user?.detail?.field?.id ?? "",
+        teacherLevel: user?.detail?.teacherLevel ?? "",
+      });
+    }
+  }, [user, reset]);
+
   const onSubmit = async (data: any) => {
     try {
-      const res = await updateProfile({
+      const updateData = {
         firstName: data.firstName,
         lastName: data.lastName,
         phoneNumber: data.phoneNumber,
-      });
+        departmentId: !isStudent ? data.departmentId : undefined,
+        fieldId: isTeacher ? data.fieldId : undefined,
+        teacherLevel: isTeacher ? data.teacherLevel : undefined,
+      };
+
+      const res = await updateProfile(updateData);
       if (res.data.statusCode === 200) {
         toast.success(res.data.message);
       } else {
@@ -52,6 +85,9 @@ const MyProfileSettings = () => {
       lastName: user?.lastName ?? "",
       email: user?.email ?? "",
       phoneNumber: user?.phoneNumber ?? "",
+      departmentId: user?.detail?.department?.id ?? "",
+      fieldId: user?.detail?.field?.id ?? "",
+      teacherLevel: user?.detail?.teacherLevel ?? "",
     });
     router.push("/my-profile");
   };
@@ -123,6 +159,74 @@ const MyProfileSettings = () => {
             />
           </div>
         </div>
+
+        {/* Department field - show for all roles except STUDENT */}
+        {!isStudent && (
+          <div className="flex items-center">
+            <div className="w-1/4">
+              <Typography.Text strong>Department:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <CustomSelect
+                control={control}
+                name="departmentId"
+                placeholder="Select department"
+                size="large"
+                options={[
+                  {
+                    label: user?.detail?.department?.name,
+                    value: user?.detail?.department?.id,
+                  },
+                ]}
+                disabled
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Field field - show only for teachers */}
+        {isTeacher && (
+          <div className="flex items-center">
+            <div className="w-1/4">
+              <Typography.Text strong>Field:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <CustomSelect
+                control={control}
+                name="fieldId"
+                placeholder="Select field"
+                size="large"
+                options={[
+                  {
+                    label: user?.detail?.field?.name,
+                    value: user?.detail?.field?.id,
+                  },
+                ]}
+                disabled
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Teacher Level - show only for teachers */}
+        {isTeacher && (
+          <div className="flex items-center">
+            <div className="w-1/4">
+              <Typography.Text strong>Teacher Level:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <CustomSelect
+                name="teacherLevel"
+                control={control}
+                size="large"
+                options={TeacherLevelOptions}
+                placeholder="Select teacher level"
+                disabled
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center">
           <div className="w-1/4">
             <Typography.Text strong>Status:</Typography.Text>

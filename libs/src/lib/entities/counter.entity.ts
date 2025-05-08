@@ -12,6 +12,7 @@ export class CounterEntity extends CustomBaseEntity {
   type: CounterType;
 
   @Column({
+    type: 'integer',
     default: 0,
   })
   count: number;

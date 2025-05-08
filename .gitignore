@@ -47,3 +47,5 @@ out
 
 # Env
 .env
+
+.VSCodeCounter

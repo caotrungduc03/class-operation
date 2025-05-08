@@ -65,6 +65,13 @@ export const requestApi = createApi({
       }),
     }),
 
+    deleteWeeklyNorm: builder.mutation<CustomResponse<void>, string>({
+      query: (id) => ({
+        url: `/requests/weekly-norms/${id}`,
+        method: "DELETE",
+      }),
+    }),
+
     // Time Off endpoints
     getTimeOffs: builder.query<
       CustomResponse<Pagination<IRequest[]>>,
@@ -114,6 +121,13 @@ export const requestApi = createApi({
         url: `/requests/time-offs/${id}/status`,
         method: "PATCH",
         body: { action },
+      }),
+    }),
+
+    deleteTimeOff: builder.mutation<CustomResponse<void>, string>({
+      query: (id) => ({
+        url: `/requests/time-offs/${id}`,
+        method: "DELETE",
       }),
     }),
 
@@ -175,6 +189,13 @@ export const requestApi = createApi({
         body: { action },
       }),
     }),
+
+    deleteBusySchedule: builder.mutation<CustomResponse<void>, string>({
+      query: (id) => ({
+        url: `/requests/busy-schedules/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -186,6 +207,7 @@ export const {
   useCreateWeeklyNormMutation,
   useUpdateWeeklyNormMutation,
   useUpdateWeeklyNormStatusMutation,
+  useDeleteWeeklyNormMutation,
 
   // Time Off hooks
   useGetTimeOffsQuery,
@@ -194,6 +216,7 @@ export const {
   useCreateTimeOffMutation,
   useUpdateTimeOffMutation,
   useUpdateTimeOffStatusMutation,
+  useDeleteTimeOffMutation,
 
   // Busy Schedule hooks
   useGetBusySchedulesQuery,
@@ -202,4 +225,5 @@ export const {
   useCreateBusyScheduleMutation,
   useUpdateBusyScheduleMutation,
   useUpdateBusyScheduleStatusMutation,
+  useDeleteBusyScheduleMutation,
 } = requestApi;

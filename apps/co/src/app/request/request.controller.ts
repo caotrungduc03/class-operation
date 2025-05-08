@@ -17,6 +17,7 @@ import {
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   NotFoundException,
@@ -68,16 +69,13 @@ export class RequestController {
     RoleName.TEACHER_PART_TIME,
     RoleName.TEACHER_FULL_TIME,
   )
-  async findWeeklyNorms(@Query() queryObj: GetRequestDto) {
-    const { page, limit, total, data } = await this.requestService.query(
-      {
-        ...queryObj,
-        type: RequestType.WEEKLY_NORM,
-      },
-      {
-        relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
-      },
-    );
+  async findWeeklyNorms(
+    @Query() getRequestDto: GetRequestDto,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+  ) {
+    const { page, limit, total, data } =
+      await this.requestService.queryWeeklyNorms(getRequestDto, userId, role);
 
     return new ResponseDto(HttpStatus.OK, 'Success', {
       page,
@@ -155,6 +153,16 @@ export class RequestController {
       `Weekly norm request ${action} successfully`,
       updatedRequest,
     );
+  }
+
+  @Delete('weekly-norms/:id')
+  async deleteWeeklyNorm(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+  ) {
+    await this.requestService.deleteWeeklyNorm(id, userId);
+
+    return new ResponseDto(HttpStatus.OK, 'Weekly norm request deleted');
   }
 
   @Post('time-offs')
@@ -245,6 +253,13 @@ export class RequestController {
       `Time off schedule request ${action} successfully`,
       updatedRequest,
     );
+  }
+
+  @Delete('time-offs/:id')
+  async deleteTimeOff(@Param('id') id: string, @User('userId') userId: string) {
+    await this.requestService.deleteTimeOff(id, userId);
+
+    return new ResponseDto(HttpStatus.OK, 'Time off schedule request deleted');
   }
 
   @Post('busy-schedules')
@@ -355,5 +370,15 @@ export class RequestController {
       `Busy schedule request ${action} successfully`,
       updatedRequest,
     );
+  }
+
+  @Delete('busy-schedules/:id')
+  async deleteBusySchedule(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+  ) {
+    await this.requestService.deleteBusySchedule(id, userId);
+
+    return new ResponseDto(HttpStatus.OK, 'Busy schedule request deleted');
   }
 }

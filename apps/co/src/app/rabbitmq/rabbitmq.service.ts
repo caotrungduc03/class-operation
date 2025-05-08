@@ -46,11 +46,18 @@ export class RabbitMQService implements OnModuleInit {
     this.logger.log(`Email notification sent to queue for ${email}`);
   }
 
-  async sendWebNotification(userId: string, message: string) {
+  async sendWebNotification(
+    userId: string,
+    notification: { title: string; content: string },
+  ) {
     const queue = process.env.RABBITMQ_QUEUE || 'notifications';
     const messageData = {
       type: 'web-notification',
-      data: { userId, message },
+      data: {
+        userId,
+        title: notification.title,
+        content: notification.content,
+      },
     };
     this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(messageData)));
     this.logger.log(`Web notification sent to queue for user ${userId}`);

@@ -28,7 +28,7 @@ export class AuthController {
   @Get('/my-profile')
   async getProfile(@User('userId') userId: string) {
     const user = await this.userService.findById(userId, {
-      relations: ['role', 'detail'],
+      relations: ['role', 'detail', 'detail.department', 'detail.field'],
     });
 
     return new ResponseDto(

@@ -108,7 +108,9 @@ export class WeeklyNormService extends BaseService<WeeklyNormEntity> {
     const query = this.weeklyNormRepository
       .createQueryBuilder('weeklyNorm')
       .where('weeklyNorm.teacherId = :teacherId', { teacherId })
-      .andWhere('weeklyNorm.status = TRUE')
+      .andWhere('weeklyNorm.status = :status', {
+        status: UserStatus.ACTIVE,
+      })
       .andWhere(
         '(weeklyNorm.startDate <= :endDate AND weeklyNorm.endDate >= :startDate)',
         { startDate, endDate },

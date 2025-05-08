@@ -18,7 +18,6 @@ const CustomDropdown = ({
   placement = "bottomLeft",
   items,
 }: CustomDropdownProps) => {
-  // Use provided items if available, otherwise generate from children
   const menuItems =
     items ||
     React.Children.toArray(children).map((child, index) => ({
@@ -28,7 +27,9 @@ const CustomDropdown = ({
 
   return (
     <Dropdown
-      menu={{ items: menuItems }}
+      menu={{
+        items: menuItems,
+      }}
       trigger={trigger}
       placement={placement}
       overlayClassName="min-w-[150px]"

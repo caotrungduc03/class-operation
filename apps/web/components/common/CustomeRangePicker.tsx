@@ -1,5 +1,6 @@
 import { DatePicker } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
+import { Dayjs } from "dayjs";
 import { isEmpty } from "lodash";
 import { Control, Controller } from "react-hook-form";
 import CustomLabel from "./CustomLabel";
@@ -16,6 +17,7 @@ interface CustomRangePickerProps {
   required?: boolean;
   format?: string;
   className?: string;
+  disableDate?: (current: Dayjs) => boolean;
 }
 
 const CustomRangePicker = ({
@@ -28,6 +30,7 @@ const CustomRangePicker = ({
   required,
   format = "DD/MM/YYYY",
   className,
+  disableDate,
 }: CustomRangePickerProps) => {
   return (
     <div className={`w-full ${className}`}>
@@ -37,7 +40,6 @@ const CustomRangePicker = ({
         control={control}
         name={name}
         render={({ field, fieldState: { error } }) => {
-          console.log({ error });
           return (
             <>
               <RangePicker
@@ -48,6 +50,10 @@ const CustomRangePicker = ({
                 format={format}
                 style={{ width: "100%" }}
                 value={[field.value?.[0], field.value?.[1]]}
+                onChange={(dates) => {
+                  field.onChange(dates);
+                }}
+                disabledDate={disableDate}
               />
 
               {!isEmpty(error) && (

@@ -18,7 +18,8 @@ export class WeeklyNormEntity extends CustomBaseEntity {
   endDate: Date;
 
   @Column({
-    type: 'numeric',
+    type: 'integer',
+    default: 0,
   })
   quantity: number;
 

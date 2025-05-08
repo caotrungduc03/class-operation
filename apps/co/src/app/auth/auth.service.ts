@@ -5,8 +5,10 @@ import {
   LoginResponseDto,
   UpdateProfileDto,
   UserDto,
+  UserStatus,
 } from '@class-operation/libs';
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -22,15 +24,14 @@ export class AuthService {
   ) {}
 
   async login(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-    let { email, password } = loginRequestDto;
-    email = email.toLowerCase();
-    const user = await this.userService.findByEmail(loginRequestDto.email);
+    const { email, password } = loginRequestDto;
+    const user = await this.userService.findByEmail(email.toLocaleLowerCase());
     if (!user) {
       throw new UnauthorizedException('Email or password is incorrect');
     }
 
-    if (!user.status) {
-      throw new UnauthorizedException('Your account is not active');
+    if (user.status === UserStatus.BLOCKED) {
+      throw new ForbiddenException('Your account is blocked');
     }
     const isMatch = comparePassword(password, user.password);
     if (!isMatch) {

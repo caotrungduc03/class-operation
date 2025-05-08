@@ -13,7 +13,7 @@ export class WeeklyNormController {
   constructor(private readonly weeklyNormService: WeeklyNormService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN, RoleName.TEACHER_FULL_TIME)
+  @Roles(RoleName.ADMIN, RoleName.TEACHER_FULL_TIME, RoleName.TEACHER_PART_TIME)
   async findByRangeDate(
     @Query() query: GetWeeklyNormDto,
     @User('userId') userId: string,

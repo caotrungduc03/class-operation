@@ -1,7 +1,7 @@
 "use client";
 import CustomButton from "@web/components/common/CustomButton";
 import { NAV_LINK } from "@web/libs/nav";
-import { ROLE_LABEL, ROLE_TAG } from "@web/libs/role";
+import { ROLE_LABEL, ROLE_TAG, RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Card, Tag, Typography } from "antd";
@@ -10,6 +10,15 @@ import { useSelector } from "react-redux";
 
 const MyProfileOverview = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+
+  // Check if user is a teacher
+  const isTeacher = [
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  ].includes(user?.role?.roleName);
+
+  // Check if user is a student
+  const isStudent = user?.role?.roleName === RoleName.STUDENT;
 
   return (
     <Card
@@ -69,6 +78,49 @@ const MyProfileOverview = () => {
             </div>
           </div>
         </div>
+
+        {/* Department - show for all roles except STUDENT */}
+        {!isStudent && user?.detail?.department && (
+          <div className="flex">
+            <div className="w-1/4">
+              <Typography.Text strong>Department:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <Typography.Text>
+                {user?.detail?.department?.name || ""}
+              </Typography.Text>
+            </div>
+          </div>
+        )}
+
+        {/* Field - show only for teachers */}
+        {isTeacher && user?.detail?.field && (
+          <div className="flex">
+            <div className="w-1/4">
+              <Typography.Text strong>Field:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <Typography.Text>
+                {user?.detail?.field?.name || ""}
+              </Typography.Text>
+            </div>
+          </div>
+        )}
+
+        {/* Teacher Level - show only for teachers */}
+        {isTeacher && user?.detail?.teacherLevel && (
+          <div className="flex">
+            <div className="w-1/4">
+              <Typography.Text strong>Teacher Level:</Typography.Text>
+            </div>
+            <div className="w-3/4">
+              <Typography.Text>
+                {user?.detail?.teacherLevel || ""}
+              </Typography.Text>
+            </div>
+          </div>
+        )}
+
         <div className="mb-4 flex">
           <div className="w-1/4">
             <Typography.Text strong>Status:</Typography.Text>

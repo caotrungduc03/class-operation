@@ -51,9 +51,13 @@ export class SocketService implements OnModuleInit {
     const clientId = this.connectedClients.get(userId);
     if (clientId) {
       this.server.to(clientId).emit('notification', notification);
-      this.logger.log(`Notification sent to user ${userId}`);
+      this.logger.log(
+        `Notification sent to user ${userId}: ${notification.title}`,
+      );
     } else {
-      this.logger.warn(`User ${userId} is not connected`);
+      this.logger.warn(
+        `User ${userId} is not connected, notification queued for next login`,
+      );
     }
   }
 

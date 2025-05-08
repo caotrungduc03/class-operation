@@ -4,10 +4,12 @@ import {
   RequestWithUser,
   RoleName,
   ROLES_KEY,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -94,15 +96,15 @@ export class AuthGuard implements CanActivate {
     const user = await this.userService.findById(payload.userId, {
       relations: ['role'],
     });
-    if (!user.status) {
-      throw new UnauthorizedException('Your account is not active');
+    if (user.status === UserStatus.BLOCKED) {
+      throw new ForbiddenException('Your account is blocked');
     }
 
     const roleName = user.role?.roleName;
 
     request.role = roleName;
 
-    return requiredRoles.includes(roleName);
+    return requiredRoles?.includes(roleName);
   }
 
   private extractTokenFromHeader(request: RequestWithUser): string | undefined {

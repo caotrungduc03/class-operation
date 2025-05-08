@@ -90,6 +90,8 @@ export class FieldService extends BaseService<FieldEntity> {
   ): Promise<FieldEntity> {
     const field = await this.findById(id);
 
+    console.log('Running');
+
     // Don't allow code to be changed if specified
     if (updateFieldDto.code && updateFieldDto.code !== field.code) {
       const existingField = await this.findByCode(updateFieldDto.code);
@@ -106,9 +108,10 @@ export class FieldService extends BaseService<FieldEntity> {
       }
     }
 
+    let leader = null;
     // Validate leader exists if being updated
     if (updateFieldDto.leaderId && updateFieldDto.leaderId !== field.leaderId) {
-      const leader = await this.userRepository.findOne({
+      leader = await this.userRepository.findOne({
         where: { id: updateFieldDto.leaderId },
       });
 
@@ -117,9 +120,15 @@ export class FieldService extends BaseService<FieldEntity> {
       }
     }
 
+    console.log(field, updateFieldDto, {
+      ...field,
+      ...updateFieldDto,
+    });
+
     return this.store({
       ...field,
       ...updateFieldDto,
+      leader,
     });
   }
 
