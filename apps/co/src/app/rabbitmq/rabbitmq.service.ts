@@ -19,11 +19,13 @@ export class RabbitMQService implements OnModuleInit {
   }
 
   private async connectToRabbitMQ() {
+    const defaultUrl = process.env.RABBITMQ_URL;
+    const http = process.env.RABBITMQ_HTTP;
     const user = process.env.RABBITMQ_USER;
     const password = process.env.RABBITMQ_PASSWORD;
     const host = process.env.RABBITMQ_HOST;
     const port = process.env.RABBITMQ_PORT;
-    const url = `amqp://${user}:${password}@${host}:${port}`;
+    const url = defaultUrl ?? `${http}://${user}:${password}@${host}:${port}`;
 
     this.connection = await connect(url);
     this.channel = await this.connection.createChannel();
