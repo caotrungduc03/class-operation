@@ -24,10 +24,77 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - '${RABBITMQ_PORT}:5672'
-      - '${RABBITMQ_MANAGEMENT_PORT}:15672'
+      - ${RABBITMQ_PORT}:5672
+      - ${RABBITMQ_MANAGEMENT_PORT}:15672
     volumes:
       - rabbitmq_co:/var/lib/rabbitmq
+    env_file:
+      - .env
+
+  co:
+    container_name: co_app
+    build:
+      context: .
+      dockerfile: ./apps/co/Dockerfile
+    restart: always
+    ports:
+      - ${CO_PORT}:${CO_PORT}
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - RABBITMQ_HTTP=${RABBITMQ_HTTP}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+    # depends_on:
+    #   - postgres
+    #   - rabbitmq
+    env_file:
+      - .env
+
+  noti:
+    container_name: noti_app
+    build:
+      context: .
+      dockerfile: ./apps/noti/Dockerfile
+    restart: always
+    ports:
+      - '${NOTI_PORT}:${NOTI_PORT}'
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - RABBITMQ_HTTP=${RABBITMQ_HTTP}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+    depends_on:
+      - postgres
+      - rabbitmq
+    env_file:
+      - .env
+
+  web:
+    container_name: web_app
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL_SOCKET=${NEXT_PUBLIC_API_URL_SOCKET}
+    depends_on:
+      - co
+      - noti
     env_file:
       - .env
 
