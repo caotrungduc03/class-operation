@@ -4029,12 +4029,13 @@ ansis@^3.9.0:
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.17.0.tgz#fa8d9c2a93fe7d1177e0c17f9eeb562a58a832d7"
   integrity sha512-0qWUglt9JEqLFr3w1I1pbrChn1grhaiAR2ocX1PP/flRmxgtwTzPFFFnfIlD6aMOLQZgSuCRlidD70lvx8yhzg==
 
-antd-calendar@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/antd-calendar/-/antd-calendar-1.4.1.tgz#76a4ada58a484a368c61e6f8cb66f52389f23e6e"
-  integrity sha512-c59EsitmJG0KZn3QktqxNoInHyg6OGLKt1NnsDNZ00G0yunpci2ADjjloce441Yj0U6ygZBNZEd+Rql+gwxS8Q==
+antd-calendar@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/antd-calendar/-/antd-calendar-1.5.0.tgz#08d35ac9e29fa8c1f6e622729280e5bbd9c706cf"
+  integrity sha512-qp58E7GvyikgQx1qJPO5R9ylwSj+4uvBkjSkJRRxO6QWjLQyOxRBDspZfHd/73XcxfCe1b/ilV5WLFORdc7q7g==
   dependencies:
     antd "^5.22.3"
+    clsx "^2.1.1"
     dayjs "^1.11.7"
     react "^18.0.0"
     react-dom "^18.0.0"
