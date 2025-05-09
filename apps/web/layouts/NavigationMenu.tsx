@@ -1,5 +1,6 @@
 import {
   CalendarOutlined,
+  CarryOutOutlined,
   FileTextOutlined,
   FormOutlined,
   HomeOutlined,
@@ -131,12 +132,6 @@ const OPSNavigationItems: NavigationItem[] = [
         url: NAV_LINK.BUSY_SCHEDULE_LIST,
         roles: [RoleName.ADMIN, RoleName.MANAGE],
       },
-      {
-        key: NAV_LINK.TEACHING_MODE_LIST,
-        label: NAV_TITLE.TEACHING_MODE_LIST,
-        url: NAV_LINK.TEACHING_MODE_LIST,
-        roles: [RoleName.ADMIN, RoleName.MANAGE],
-      },
     ],
   },
 ];
@@ -165,6 +160,12 @@ const TeacherNavigationItems: NavigationItem[] = [
     icon: <ReadOutlined />,
     label: NAV_TITLE.MY_CLASS,
     url: `${NAV_LINK.TEACHER}${NAV_LINK.MY_CLASS}`,
+  },
+  {
+    key: NAV_LINK.BUSY_SCHEDULE_REGISTRATION,
+    icon: <CarryOutOutlined />,
+    label: NAV_TITLE.BUSY_SCHEDULE_REGISTRATION,
+    url: NAV_LINK.BUSY_SCHEDULE_REGISTRATION,
   },
   {
     key: NAV_LINK.WEEKLY_NORM_REGISTRATION,

@@ -73,7 +73,7 @@ export class RequestService extends BaseService<RequestEntity> {
       page = 1,
       limit = 10,
       sort = 'createdAt:desc',
-      name,
+      ...filter
     } = getRequestDto;
 
     const queryBuilder = this.requestRepository
@@ -99,15 +99,12 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
       case RoleName.TEACHER_FULL_TIME:
       case RoleName.TEACHER_PART_TIME:
-        console.log({ userId });
         queryBuilder.andWhere('entity.creatorId = :userId', { userId });
         break;
     }
 
     const metadata = this.repository.metadata;
-    if (name) {
-      this.applySearch(queryBuilder, name, ['name'], metadata);
-    }
+    this.applyFiltering(queryBuilder, filter, metadata);
     this.applyPagination(queryBuilder, page, limit);
     this.applySorting(queryBuilder, sort, metadata);
 
@@ -289,6 +286,54 @@ export class RequestService extends BaseService<RequestEntity> {
       }
 
       return updatedRequest;
+    } else if (action === RequestAction.REJECT) {
+      // Check if request can be rejected
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending requests can be rejected');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for rejection');
+      }
+
+      // Update request status and approverId
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.REJECTED,
+        approverId: userId,
+      });
+
+      // Keep weekly norms as BLOCKED
+      if (request.weeklyNorms?.length > 0) {
+        await Promise.all(
+          request.weeklyNorms.map((norm) =>
+            this.weeklyNormService.update(norm.id, {
+              status: UserStatus.BLOCKED,
+            }),
+          ),
+        );
+      }
+
+      // Send notification via RabbitMQ
+      if (request.requester) {
+        const notificationTitle = 'Weekly Norm Request Rejected';
+        const notificationContent = `Your request "${request.name}" has been rejected.`;
+
+        // Send email notification
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+
+        // Send web notification
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
+      return updatedRequest;
     } else if (action === RequestAction.CANCEL) {
       // Check if request can be canceled
       if (request.status !== RequestStatus.APPROVED) {
@@ -341,6 +386,59 @@ export class RequestService extends BaseService<RequestEntity> {
     );
   }
 
+  async queryTimeOffRequests(
+    getRequestDto: GetRequestDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'createdAt:desc',
+      ...filter
+    } = getRequestDto;
+
+    const queryBuilder = this.requestRepository
+      .createQueryBuilder('entity')
+      .leftJoinAndSelect('entity.schedule', 'schedule')
+      .leftJoinAndSelect('entity.creator', 'creator')
+      .leftJoinAndSelect('entity.requester', 'requester')
+      .leftJoinAndSelect('entity.approver', 'approver')
+      .where('entity.type = :type', { type: RequestType.TIME_OFF });
+
+    switch (role) {
+      case RoleName.ADMIN:
+        break;
+      case RoleName.MANAGE:
+        const teacherIds = await this.getFieldTeacherIds(userId);
+        queryBuilder.andWhere(
+          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+          {
+            teacherIds,
+            userId,
+          },
+        );
+        break;
+      case RoleName.TEACHER_PART_TIME:
+        queryBuilder.andWhere('entity.creatorId = :userId', { userId });
+        break;
+    }
+
+    const metadata = this.repository.metadata;
+    this.applyFiltering(queryBuilder, filter, metadata);
+    this.applyPagination(queryBuilder, page, limit);
+    this.applySorting(queryBuilder, sort, metadata);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
+  }
+
   async createTimeOffSchedule(
     createScheduleDto: CreateTimeOffRequestDto,
     userId: string,
@@ -349,7 +447,7 @@ export class RequestService extends BaseService<RequestEntity> {
     // Determine initial status based on role
     const isAdmin = role === RoleName.ADMIN;
     const status = isAdmin ? RequestStatus.APPROVED : RequestStatus.PENDING;
-    const scheduleStatus = isAdmin;
+    const scheduleStatus = isAdmin ? UserStatus.ACTIVE : UserStatus.BLOCKED;
 
     // Create request first
     const request = await this.store({
@@ -429,16 +527,15 @@ export class RequestService extends BaseService<RequestEntity> {
     action: RequestAction,
     userId?: string,
   ) {
+    // Modified to include 'requester' relation
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
-      relations: ['schedule'],
+      relations: ['schedule', 'requester'],
     });
 
     if (!request) {
       throw new NotFoundException('Time off schedule request not found');
     }
-
-    console.log({ request });
 
     if (action === RequestAction.APPROVE) {
       if (request.status !== RequestStatus.PENDING) {
@@ -479,6 +576,60 @@ export class RequestService extends BaseService<RequestEntity> {
         });
       }
 
+      // Added notification for Time Off approval
+      if (request.requester) {
+        const notificationTitle = 'Time Off Request Approved';
+        const notificationContent = `Your request "${request.name}" has been approved.`;
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
+      return updatedRequest;
+    } else if (action === RequestAction.REJECT) {
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending requests can be rejected');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for rejection');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.REJECTED,
+        approverId: userId,
+      });
+
+      // Keep schedule as BLOCKED
+      if (request.schedule) {
+        await this.scheduleService.updateById(request.schedule.id, {
+          status: UserStatus.BLOCKED,
+        });
+      }
+
+      // Send notification for Time Off rejection
+      if (request.requester) {
+        const notificationTitle = 'Time Off Request Rejected';
+        const notificationContent = `Your request "${request.name}" has been rejected.`;
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
       return updatedRequest;
     } else if (action === RequestAction.CANCEL) {
       if (request.status !== RequestStatus.APPROVED) {
@@ -498,14 +649,80 @@ export class RequestService extends BaseService<RequestEntity> {
         });
       }
 
+      // Added notification for Time Off cancellation
+      if (request.requester) {
+        const notificationTitle = 'Time Off Request Canceled';
+        const notificationContent = `Your request "${request.name}" has been canceled.`;
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
       return updatedRequest;
     }
 
     throw new BadRequestException(
-      `Invalid action: ${action}. Must be one of: ${Object.values(
-        RequestAction,
-      ).join(', ')}`,
+      `Invalid action: ${action}. Must be one of: ${Object.values(RequestAction).join(', ')}`,
     );
+  }
+
+  async queryBusyScheduleRequests(
+    getRequestDto: GetRequestDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'createdAt:desc',
+      ...filter
+    } = getRequestDto;
+
+    const queryBuilder = this.requestRepository
+      .createQueryBuilder('entity')
+      .leftJoinAndSelect('entity.schedule', 'schedule')
+      .leftJoinAndSelect('entity.creator', 'creator')
+      .leftJoinAndSelect('entity.requester', 'requester')
+      .leftJoinAndSelect('entity.approver', 'approver')
+      .where('entity.type = :type', { type: RequestType.BUSY_SCHEDULE });
+
+    switch (role) {
+      case RoleName.ADMIN:
+        break;
+      case RoleName.MANAGE:
+        const teacherIds = await this.getFieldTeacherIds(userId);
+        queryBuilder.andWhere(
+          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+          {
+            teacherIds,
+            userId,
+          },
+        );
+        break;
+      case RoleName.TEACHER_PART_TIME:
+        queryBuilder.andWhere('entity.creatorId = :userId', { userId });
+        break;
+    }
+
+    const metadata = this.repository.metadata;
+    this.applyFiltering(queryBuilder, filter, metadata);
+    this.applyPagination(queryBuilder, page, limit);
+    this.applySorting(queryBuilder, sort, metadata);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
   }
 
   async createBusySchedule(
@@ -516,7 +733,7 @@ export class RequestService extends BaseService<RequestEntity> {
     // Determine initial status based on role
     const isAdmin = role === RoleName.ADMIN;
     const status = isAdmin ? RequestStatus.APPROVED : RequestStatus.PENDING;
-    const scheduleStatus = isAdmin;
+    const scheduleStatus = isAdmin ? UserStatus.ACTIVE : UserStatus.BLOCKED;
 
     // Create request first
     const request = await this.store({
@@ -601,7 +818,7 @@ export class RequestService extends BaseService<RequestEntity> {
   ) {
     const request = await this.findOne({
       where: { id, type: RequestType.BUSY_SCHEDULE },
-      relations: ['schedule'],
+      relations: ['schedule', 'requester'],
     });
 
     if (!request) {
@@ -644,6 +861,45 @@ export class RequestService extends BaseService<RequestEntity> {
       if (request.schedule) {
         await this.scheduleService.updateById(request.schedule.id, {
           status: UserStatus.ACTIVE,
+        });
+      }
+
+      return updatedRequest;
+    } else if (action === RequestAction.REJECT) {
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending requests can be rejected');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for rejection');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.REJECTED,
+        approverId: userId,
+      });
+
+      // Keep schedule as BLOCKED
+      if (request.schedule) {
+        await this.scheduleService.updateById(request.schedule.id, {
+          status: UserStatus.BLOCKED,
+        });
+      }
+
+      // Send notification for Busy Schedule rejection
+      if (request.requester) {
+        const notificationTitle = 'Busy Schedule Request Rejected';
+        const notificationContent = `Your request "${request.name}" has been rejected.`;
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
         });
       }
 

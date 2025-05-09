@@ -1,10 +1,13 @@
 "use client";
 import { PlusOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
+import CustomDatePicker from "@web/components/common/CustomDatePicker";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTimePicker from "@web/components/common/CustomTimePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import {
@@ -33,7 +36,7 @@ import {
 import { NAV_TITLE } from "@web/libs/nav";
 import {
   IRequest,
-  ITimeOff,
+  ISchedule,
   REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
@@ -41,16 +44,15 @@ import {
   RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
+import { IUser } from "@web/libs/user";
 import {
   Card,
-  DatePicker,
   Divider,
   Modal,
   Spin,
   Table,
   TablePaginationConfig,
   Tag,
-  TimePicker,
   Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
@@ -59,6 +61,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -80,15 +83,21 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "description",
   },
   {
+    title: "Approver",
+    dataIndex: "approver",
+    render: (approver: IUser) => approver?.fullName || "-",
+  },
+  {
     title: "Date",
-    dataIndex: "timeOff",
-    render: (timeOff: ITimeOff) => dayjs(timeOff?.date).format(DATE_FORMAT),
+    dataIndex: "schedule",
+    render: (schedule: ISchedule) =>
+      dayjs(schedule.startDate).format(DATE_FORMAT),
   },
   {
     title: "Time",
-    dataIndex: "timeOff",
-    render: (timeOff: ITimeOff) =>
-      `${dayjs(timeOff?.startTime).format(TIME_FORMAT)} - ${dayjs(timeOff?.endTime).format(TIME_FORMAT)}`,
+    dataIndex: "schedule",
+    render: (schedule: ISchedule) =>
+      `${dayjs(schedule?.startDate).format(TIME_FORMAT)} - ${dayjs(schedule?.endDate).format(TIME_FORMAT)}`,
   },
   {
     title: "Status",
@@ -146,6 +155,22 @@ const TimeOffActions = ({
   );
 };
 
+const timeOffSchema = z.object({
+  name: z.string().min(1, "Request Name is required"),
+  description: z.string().optional(),
+  date: z.any().refine((val) => !!val, {
+    message: "Date is required",
+  }),
+  startTime: z.any().refine((val) => !!val, {
+    message: "Start time is required",
+  }),
+  endTime: z.any().refine((val) => !!val, {
+    message: "End time is required",
+  }),
+});
+
+type TimeOffFormValues = z.infer<typeof timeOffSchema>;
+
 const TimeOffRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
@@ -189,14 +214,15 @@ const TimeOffRegistration = () => {
 
   const searchForm = useForm();
 
-  // Time off form has single date/time fields (not an array like weekly norm)
-  const timeOffForm = useForm({
+  // Update the timeOffForm to use zod validation
+  const timeOffForm = useForm<TimeOffFormValues>({
+    resolver: zodResolver(timeOffSchema),
     defaultValues: {
       name: "",
       description: "",
-      date: null, // Single date field
-      startTime: null, // Single start time
-      endTime: null, // Single end time
+      date: null, // Initially empty, will be validated by zod on submit
+      startTime: null,
+      endTime: null,
     },
   });
 
@@ -256,13 +282,16 @@ const TimeOffRegistration = () => {
         timeOffForm.setValue("name", response.data.name);
         timeOffForm.setValue("description", response.data.description || "");
 
-        if (response.data.timeOff) {
-          timeOffForm.setValue("date", dayjs(response.data.timeOff.date));
+        if (response.data.schedule) {
+          timeOffForm.setValue("date", dayjs(response.data.schedule.startDate));
           timeOffForm.setValue(
             "startTime",
-            dayjs(response.data.timeOff.startTime),
+            dayjs(response.data.schedule.startDate),
           );
-          timeOffForm.setValue("endTime", dayjs(response.data.timeOff.endTime));
+          timeOffForm.setValue(
+            "endTime",
+            dayjs(response.data.schedule.endDate),
+          );
         }
       }
       // Open the drawer after data is loaded
@@ -321,7 +350,7 @@ const TimeOffRegistration = () => {
     }
   };
 
-  const onSubmitCreate = async (data) => {
+  const onSubmitCreate = async (data: TimeOffFormValues) => {
     // Create a date object for the selected date
     const selectedDate = data.date.toDate();
 
@@ -350,9 +379,9 @@ const TimeOffRegistration = () => {
     };
 
     try {
-      if (isEditMode && selectedItemId) {
+      if (isEditMode && timeOffDetail.data) {
         const res = await updateTimeOff({
-          id: selectedItemId,
+          id: timeOffDetail.data.id,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
@@ -490,13 +519,13 @@ const TimeOffRegistration = () => {
 
             <Divider orientation="left">Time Off Details</Divider>
 
-            {timeOffDetail.data.timeOff && (
+            {timeOffDetail.data?.schedule && (
               <Card size="small" className="mb-4">
                 <div className="flex flex-col gap-2">
                   <div>
                     <Typography.Text type="secondary">Date:</Typography.Text>
                     <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.timeOff.date).format(
+                      {dayjs(timeOffDetail.data.schedule.startDate).format(
                         DATE_FORMAT,
                       )}
                     </Typography.Text>
@@ -504,11 +533,11 @@ const TimeOffRegistration = () => {
                   <div>
                     <Typography.Text type="secondary">Time:</Typography.Text>
                     <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.timeOff.startTime).format(
+                      {dayjs(timeOffDetail.data.schedule.startDate).format(
                         TIME_FORMAT,
                       )}{" "}
                       -{" "}
-                      {dayjs(timeOffDetail.data.timeOff.endTime).format(
+                      {dayjs(timeOffDetail.data.schedule.endDate).format(
                         TIME_FORMAT,
                       )}
                     </Typography.Text>
@@ -567,40 +596,37 @@ const TimeOffRegistration = () => {
 
           <Divider orientation="left">Time Off Details</Divider>
 
-          {/* Single date picker (not a repeatable field) */}
           <div className="flex flex-col gap-2">
-            <Typography.Text>Date</Typography.Text>
-            <DatePicker
-              style={{ width: "100%" }}
+            <CustomDatePicker
+              control={timeOffForm.control}
+              name="date"
+              label="Date"
               size="large"
-              value={timeOffForm.watch("date")}
-              onChange={(date) => timeOffForm.setValue("date", date)}
               placeholder="Select date"
+              required
             />
           </div>
 
-          {/* Single time range (not repeatable) */}
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-2">
-              <Typography.Text>Start Time</Typography.Text>
-              <TimePicker
-                style={{ width: "100%" }}
+              <CustomTimePicker
+                control={timeOffForm.control}
+                name="startTime"
+                label="Start Time"
                 size="large"
-                format="HH:mm"
-                value={timeOffForm.watch("startTime")}
-                onChange={(time) => timeOffForm.setValue("startTime", time)}
                 placeholder="Start time"
+                required
               />
             </div>
             <div className="flex flex-1 flex-col gap-2">
-              <Typography.Text>End Time</Typography.Text>
-              <TimePicker
-                style={{ width: "100%" }}
+              <CustomTimePicker
+                control={timeOffForm.control}
+                name="endTime"
+                label="End Time"
                 size="large"
                 format="HH:mm"
-                value={timeOffForm.watch("endTime")}
-                onChange={(time) => timeOffForm.setValue("endTime", time)}
                 placeholder="End time"
+                required
               />
             </div>
           </div>

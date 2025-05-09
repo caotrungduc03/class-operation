@@ -75,10 +75,6 @@ export class CreateBusySchedulesRequestDto {
   @IsOptional()
   description?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  reason: string;
-
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()

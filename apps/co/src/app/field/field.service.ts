@@ -90,8 +90,6 @@ export class FieldService extends BaseService<FieldEntity> {
   ): Promise<FieldEntity> {
     const field = await this.findById(id);
 
-    console.log('Running');
-
     // Don't allow code to be changed if specified
     if (updateFieldDto.code && updateFieldDto.code !== field.code) {
       const existingField = await this.findByCode(updateFieldDto.code);
@@ -119,11 +117,6 @@ export class FieldService extends BaseService<FieldEntity> {
         throw new NotFoundException('Leader not found');
       }
     }
-
-    console.log(field, updateFieldDto, {
-      ...field,
-      ...updateFieldDto,
-    });
 
     return this.store({
       ...field,

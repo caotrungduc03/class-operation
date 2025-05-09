@@ -113,7 +113,9 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
     const query = this.scheduleRepository
       .createQueryBuilder('schedule')
       .where('schedule.teacherId = :teacherId', { teacherId })
-      .andWhere('schedule.status = TRUE')
+      .andWhere('schedule.status = :status', {
+        status: UserStatus.ACTIVE,
+      })
       .andWhere(
         '(schedule.startDate <= :endDate AND schedule.endDate >= :startDate)',
         { startDate, endDate },

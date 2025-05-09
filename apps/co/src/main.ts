@@ -17,7 +17,11 @@ async function bootstrap() {
 
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+  });
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new CustomExceptionsFilter(httpAdapterHost));

@@ -239,7 +239,6 @@ const Calendar = () => {
 
   const onSubmitBusySchedule = async (data: BusyScheduleFormValues) => {
     // Create a date object for the selected date
-    console.log("data", data);
     const selectedDate = data.date.toDate();
 
     // Create start and end datetime by combining the date with selected times

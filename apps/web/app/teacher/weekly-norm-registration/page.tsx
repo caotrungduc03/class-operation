@@ -39,6 +39,7 @@ import {
   RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
+import { IUser } from "@web/libs/user";
 import {
   Card,
   Divider,
@@ -75,6 +76,11 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Description",
     dataIndex: "description",
+  },
+  {
+    title: "Approver",
+    dataIndex: "approver",
+    render: (approver: IUser) => approver?.fullName || "-",
   },
   {
     title: "Status",

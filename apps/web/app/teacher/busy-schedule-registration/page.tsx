@@ -1,36 +1,50 @@
 "use client";
+import { PlusOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
+import CustomDatePicker from "@web/components/common/CustomDatePicker";
+import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTimePicker from "@web/components/common/CustomTimePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  TIME_FORMAT,
+  TableColumn,
+} from "@web/libs/common";
+// Replace busy schedule endpoints hooks
+import {
+  useCreateBusyScheduleMutation,
   useGetBusySchedulesQuery,
   useLazyGetBusyScheduleByIdQuery,
+  useUpdateBusyScheduleMutation,
   useUpdateBusyScheduleStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-  closeApproveModal,
   closeCancelModal,
+  closeCreateModal,
   closeDetailModal,
-  closeRejectModal,
-  openApproveModal,
   openCancelModal,
+  openCreateModal,
   openDetailModal,
-  openRejectModal,
+  setEditMode,
+  setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
-import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
+import { NAV_TITLE } from "@web/libs/nav";
 import {
   IRequest,
+  ISchedule,
   REQUEST_STATUS_TAG,
   RequestAction,
   RequestStatus,
   RequestStatusOptions,
+  RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
-import { IUser } from "@web/libs/user";
 import {
   Card,
   Divider,
@@ -47,14 +61,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
-    href: NAV_LINK.MANAGE_REQUESTS,
-    title: NAV_TITLE.MANAGE_REQUESTS,
-  },
-  {
-    title: NAV_TITLE.BUSY_SCHEDULE_LIST,
+    title: NAV_TITLE.BUSY_SCHEDULE_REGISTRATION,
   },
 ];
 
@@ -72,19 +83,17 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "description",
   },
   {
-    title: "Creator",
-    dataIndex: "creator",
-    render: (creator: IUser) => creator?.fullName || "N/A",
+    title: "Date",
+    dataIndex: "schedule",
+    render: (schedule: ISchedule) =>
+      schedule && dayjs(schedule.startDate).format(DATE_FORMAT),
   },
   {
-    title: "Requester",
-    dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName || "-",
-  },
-  {
-    title: "Approver",
-    dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    title: "Time",
+    dataIndex: "schedule",
+    render: (schedule: ISchedule) =>
+      schedule &&
+      `${dayjs(schedule?.startDate).format(TIME_FORMAT)} - ${dayjs(schedule?.endDate).format(TIME_FORMAT)}`,
   },
   {
     title: "Status",
@@ -96,7 +105,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Created At",
     dataIndex: "createdAt",
-    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
     title: "",
@@ -108,15 +117,13 @@ const columnsTitles: TableColumn<IRequest>[] = [
 const BusyScheduleActions = ({
   record,
   onOpenDetail,
-  onOpenApproveModal,
+  onStartEdit,
   onOpenCancelModal,
-  onOpenRejectModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
-  onOpenApproveModal: (id: string) => void;
+  onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
-  onOpenRejectModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -128,16 +135,8 @@ const BusyScheduleActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Approve"
-          onClick={() => onOpenApproveModal(record.id)}
-        />
-      )}
-      {record.status === RequestStatus.PENDING && (
-        <CustomButton
-          type="link"
-          title="Reject"
-          color="danger"
-          onClick={() => onOpenRejectModal(record.id)}
+          title="Edit"
+          onClick={() => onStartEdit(record.id)}
         />
       )}
       {record.status === RequestStatus.APPROVED && (
@@ -152,14 +151,22 @@ const BusyScheduleActions = ({
   );
 };
 
-const BusyScheduleList = () => {
+const busyScheduleSchema = z.object({
+  name: z.string().min(1, "Request Name is required"),
+  description: z.string().optional(),
+  date: z.any().refine((val) => !!val, "Date is required"),
+  startTime: z.any().refine((val) => !!val, "Start time is required"),
+  endTime: z.any().refine((val) => !!val, "End time is required"),
+});
+
+type BusyScheduleFormValues = z.infer<typeof busyScheduleSchema>;
+
+const BusyScheduleRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
     status?: string;
     page?: number;
     limit?: number;
-    startDate?: string;
-    endDate?: string;
   }>({
     page: 1,
     limit: 10,
@@ -174,12 +181,13 @@ const BusyScheduleList = () => {
 
   const dispatch = useDispatch();
   const {
+    isOpenCreateModal,
     isDetailModalOpen,
     isCancelModalOpen,
-    isApproveModalOpen,
-    isRejectModalOpen,
+    isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
+
   const {
     data: busySchedulesData,
     isFetching,
@@ -189,10 +197,28 @@ const BusyScheduleList = () => {
   const [fetchBusyScheduleDetail, { data: busyScheduleDetail }] =
     useLazyGetBusyScheduleByIdQuery();
 
-  const [updateBusyScheduleStatus, { isLoading: isUpdatingStatus }] =
+  const [createBusySchedule, { isLoading: isCreating }] =
+    useCreateBusyScheduleMutation();
+  const [updateBusySchedule, { isLoading: isUpdating }] =
+    useUpdateBusyScheduleMutation();
+  const [updateBusyScheduleStatus, { isLoading: isCanceling }] =
     useUpdateBusyScheduleStatusMutation();
 
   const searchForm = useForm();
+
+  // Define the zod schema and infer its type
+
+  // Update the busyScheduleForm to use zod validation
+  const busyScheduleForm = useForm<BusyScheduleFormValues>({
+    resolver: zodResolver(busyScheduleSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      date: null, // Initially empty, will be validated by zod on submit
+      startTime: null,
+      endTime: null,
+    },
+  });
 
   const tableColumns = columnsTitles.map((item, index) => {
     if (item.dataIndex === "method") {
@@ -203,9 +229,8 @@ const BusyScheduleList = () => {
           <BusyScheduleActions
             record={record}
             onOpenDetail={handleOpenDetail}
-            onOpenApproveModal={handleOpenApproveModal}
+            onStartEdit={handleStartEdit}
             onOpenCancelModal={handleOpenCancelModal}
-            onOpenRejectModal={handleOpenRejectModal}
           />
         ),
       };
@@ -239,6 +264,43 @@ const BusyScheduleList = () => {
     }
   }, [busySchedulesData]);
 
+  const handleStartEdit = async (id: string) => {
+    dispatch(setSelectedItemId(id));
+    dispatch(setEditMode(true));
+    dispatch(closeDetailModal());
+
+    try {
+      const response = await fetchBusyScheduleDetail(id).unwrap();
+      if (response?.data) {
+        // Populate form with fetched data
+        busyScheduleForm.setValue("name", response.data.name);
+        busyScheduleForm.setValue(
+          "description",
+          response.data.description || "",
+        );
+
+        if (response.data.schedule) {
+          busyScheduleForm.setValue(
+            "date",
+            dayjs(response.data.schedule.startDate),
+          );
+          busyScheduleForm.setValue(
+            "startTime",
+            dayjs(response.data.schedule.startDate),
+          );
+          busyScheduleForm.setValue(
+            "endTime",
+            dayjs(response.data.schedule.endDate),
+          );
+        }
+      }
+      // Open the drawer after data is loaded
+      dispatch(openCreateModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
   const onSubmitSearch = (data: { name?: string; status?: string }) => {
     setSearchParams({
       ...searchParams,
@@ -268,32 +330,8 @@ const BusyScheduleList = () => {
     dispatch(closeDetailModal());
   };
 
-  const handleOpenApproveModal = (id: string) => {
-    dispatch(openApproveModal(id));
-  };
-
   const handleOpenCancelModal = (id: string) => {
     dispatch(openCancelModal(id));
-  };
-
-  const handleOpenRejectModal = (id: string) => {
-    dispatch(openRejectModal(id));
-  };
-
-  const handleApprove = async () => {
-    if (!selectedItemId) return;
-
-    try {
-      await updateBusyScheduleStatus({
-        id: selectedItemId,
-        action: RequestAction.APPROVE,
-      }).unwrap();
-      toast.success("Busy schedule request approved successfully");
-      refetch();
-      dispatch(closeApproveModal());
-    } catch (error) {
-      // Handled by the apiErrorMiddleware
-    }
   };
 
   const handleCancel = async () => {
@@ -312,19 +350,57 @@ const BusyScheduleList = () => {
     }
   };
 
-  const handleReject = async () => {
-    if (!selectedItemId) return;
+  const onSubmitCreate = async (data: BusyScheduleFormValues) => {
+    // Create a date object for the selected date
+    const selectedDate = data.date.toDate();
+
+    // Create start and end datetime by combining the date with selected times
+    const startDateTime = data.startTime.toDate();
+    const endDateTime = data.endTime.toDate();
+
+    // Set the date component of startDateTime and endDateTime to match the selected date
+    startDateTime.setFullYear(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+    );
+    endDateTime.setFullYear(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+    );
+
+    const formattedData = {
+      name: data.name,
+      description: data.description || "",
+      type: RequestType.BUSY_SCHEDULE,
+      startDate: startDateTime,
+      endDate: endDateTime,
+    };
+
     try {
-      await updateBusyScheduleStatus({
-        id: selectedItemId,
-        action: RequestAction.REJECT,
-      }).unwrap();
-      toast.success("Busy schedule request rejected successfully");
+      if (isEditMode && busyScheduleDetail.data) {
+        const res = await updateBusySchedule({
+          id: busyScheduleDetail.data.id,
+          data: formattedData,
+        }).unwrap();
+        toast.success(res.message);
+      } else {
+        const res = await createBusySchedule(formattedData).unwrap();
+        toast.success(res.message);
+      }
       refetch();
-      dispatch(closeRejectModal());
+      handleCloseDrawer();
     } catch (error) {
       // Handled by the apiErrorMiddleware
     }
+  };
+
+  const handleCloseDrawer = () => {
+    dispatch(closeCreateModal());
+    busyScheduleForm.reset();
+    dispatch(setEditMode(false));
+    dispatch(setSelectedItemId(null));
   };
 
   const handlePaginationChange = (newPagination: TablePaginationConfig) => {
@@ -336,8 +412,11 @@ const BusyScheduleList = () => {
   };
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.BUSY_SCHEDULE_LIST}>
-      <div id="busy-schedules-container" className="flex flex-col gap-6">
+    <PageLayout
+      breadcrumbs={breadcrumbs}
+      title={NAV_TITLE.BUSY_SCHEDULE_REGISTRATION}
+    >
+      <div id="busy-schedule-container" className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">
             <FilterGrid>
@@ -369,6 +448,13 @@ const BusyScheduleList = () => {
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
+              <CustomButton
+                type="primary"
+                title="Create Busy Schedule Request"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={() => dispatch(openCreateModal())}
+              />
             </div>
           </div>
         </Card>
@@ -384,7 +470,6 @@ const BusyScheduleList = () => {
           />
         </Card>
       </div>
-
       {/* Detail Modal */}
       <Modal
         title="Busy Schedule Request Details"
@@ -396,21 +481,12 @@ const BusyScheduleList = () => {
             title="Close"
             onClick={handleCloseDetail}
           />,
-          busyScheduleDetail?.data.status === RequestStatus.PENDING && (
+          busyScheduleDetail?.data?.status === RequestStatus.PENDING && (
             <CustomButton
-              key="approve"
+              key="edit"
               type="primary"
-              title="Approve"
-              onClick={() => handleOpenApproveModal(busyScheduleDetail.data.id)}
-            />
-          ),
-          busyScheduleDetail?.data.status === RequestStatus.PENDING && (
-            <CustomButton
-              key="reject"
-              type="primary"
-              color="danger"
-              title="Reject"
-              onClick={() => handleOpenRejectModal(busyScheduleDetail.data.id)}
+              title="Edit"
+              onClick={() => handleStartEdit(busyScheduleDetail.data.id)}
             />
           ),
         ]}
@@ -433,13 +509,6 @@ const BusyScheduleList = () => {
             </div>
 
             <div>
-              <Typography.Text type="secondary">Creator:</Typography.Text>
-              <Typography.Text className="ml-2">
-                {busyScheduleDetail.data.creator?.fullName || "N/A"}
-              </Typography.Text>
-            </div>
-
-            <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[busyScheduleDetail.data.status]}>
@@ -449,6 +518,33 @@ const BusyScheduleList = () => {
             </div>
 
             <Divider orientation="left">Busy Schedule Details</Divider>
+
+            {busyScheduleDetail.data?.schedule && (
+              <Card size="small" className="mb-4">
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <Typography.Text type="secondary">Date:</Typography.Text>
+                    <Typography.Text className="ml-2">
+                      {dayjs(busyScheduleDetail.data.schedule.startDate).format(
+                        DATE_FORMAT,
+                      )}
+                    </Typography.Text>
+                  </div>
+                  <div>
+                    <Typography.Text type="secondary">Time:</Typography.Text>
+                    <Typography.Text className="ml-2">
+                      {dayjs(busyScheduleDetail.data.schedule.startDate).format(
+                        TIME_FORMAT,
+                      )}{" "}
+                      -{" "}
+                      {dayjs(busyScheduleDetail.data.schedule.endDate).format(
+                        TIME_FORMAT,
+                      )}
+                    </Typography.Text>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             <div className="flex justify-between">
               <div>
@@ -476,32 +572,74 @@ const BusyScheduleList = () => {
           </div>
         )}
       </Modal>
-
-      {/* Approve Confirmation Modal */}
-      <Modal
-        title="Approve Busy Schedule Request"
-        open={isApproveModalOpen}
-        onCancel={() => dispatch(closeApproveModal())}
-        footer={[
-          <CustomButton
-            key="back"
-            title="Cancel"
-            onClick={() => dispatch(closeApproveModal())}
-          />,
-          <CustomButton
-            key="submit"
-            type="primary"
-            title="Approve Request"
-            loading={isUpdatingStatus}
-            onClick={handleApprove}
-          />,
-        ]}
+      {/* Create/Edit Drawer - Notice there's no field array or add/remove buttons */}
+      <CustomDrawer
+        title={
+          isEditMode
+            ? "Edit Busy Schedule Request"
+            : "Create Busy Schedule Request"
+        }
+        open={isOpenCreateModal}
+        onCancel={handleCloseDrawer}
+        onSubmit={busyScheduleForm.handleSubmit(onSubmitCreate)}
+        loading={isCreating || isUpdating}
       >
-        <Typography.Paragraph>
-          Are you sure you want to approve this busy schedule request?
-        </Typography.Paragraph>
-      </Modal>
+        <div className="flex flex-col gap-4">
+          <CustomInput
+            control={busyScheduleForm.control}
+            name="name"
+            label="Request Name"
+            placeholder="Enter request name"
+            size="large"
+            required
+          />
 
+          <CustomInput
+            control={busyScheduleForm.control}
+            name="description"
+            label="Reason"
+            placeholder="Enter description (optional)"
+            size="large"
+          />
+
+          <Divider orientation="left">Busy Schedule Details</Divider>
+
+          <div className="flex flex-col gap-2">
+            <CustomDatePicker
+              control={busyScheduleForm.control}
+              name="date"
+              label="Date"
+              size="large"
+              placeholder="Select date"
+              required
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex flex-1 flex-col gap-2">
+              <CustomTimePicker
+                control={busyScheduleForm.control}
+                name="startTime"
+                label="Start Time"
+                size="large"
+                placeholder="Start time"
+                required
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-2">
+              <CustomTimePicker
+                control={busyScheduleForm.control}
+                name="endTime"
+                label="End Time"
+                size="large"
+                format="HH:mm"
+                placeholder="End time"
+                required
+              />
+            </div>
+          </div>
+        </div>
+      </CustomDrawer>
       {/* Cancel Confirmation Modal */}
       <Modal
         title="Cancel Busy Schedule Request"
@@ -518,7 +656,7 @@ const BusyScheduleList = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
-            loading={isUpdatingStatus}
+            loading={isCanceling}
             onClick={handleCancel}
           />,
         ]}
@@ -528,34 +666,8 @@ const BusyScheduleList = () => {
           action cannot be undone.
         </Typography.Paragraph>
       </Modal>
-
-      {/* Reject Confirmation Modal */}
-      <Modal
-        title="Reject Busy Schedule Request"
-        open={isRejectModalOpen}
-        onCancel={() => dispatch(closeRejectModal())}
-        footer={[
-          <CustomButton
-            key="back"
-            title="Cancel"
-            onClick={() => dispatch(closeRejectModal())}
-          />,
-          <CustomButton
-            key="submit"
-            type="primary"
-            color="danger"
-            title="Reject Request"
-            loading={isUpdatingStatus}
-            onClick={handleReject}
-          />,
-        ]}
-      >
-        <Typography.Paragraph>
-          Are you sure you want to reject this busy schedule request?
-        </Typography.Paragraph>
-      </Modal>
     </PageLayout>
   );
 };
 
-export default BusyScheduleList;
+export default BusyScheduleRegistration;

@@ -5,7 +5,7 @@ import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { TableColumn } from "@web/libs/common";
+import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
   useGetWeeklyNormsQuery,
   useLazyGetWeeklyNormByIdQuery,
@@ -15,9 +15,11 @@ import {
   closeApproveModal,
   closeCancelModal,
   closeDetailModal,
+  closeRejectModal,
   openApproveModal,
   openCancelModal,
   openDetailModal,
+  openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
@@ -72,7 +74,17 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator: IUser) => creator?.fullName || "",
+    render: (creator: IUser) => creator?.fullName || "-",
+  },
+  {
+    title: "Requester",
+    dataIndex: "requester",
+    render: (requester: IUser) => requester?.fullName || "-",
+  },
+  {
+    title: "Approver",
+    dataIndex: "approver",
+    render: (approver: IUser) => approver?.fullName || "-",
   },
   {
     title: "Status",
@@ -84,7 +96,12 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Created At",
     dataIndex: "createdAt",
-    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
+  },
+  {
+    title: "Updated At",
+    dataIndex: "updatedAt",
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
     title: "",
@@ -98,11 +115,13 @@ const WeeklyNormActions = ({
   onOpenDetail,
   onOpenApproveModal,
   onOpenCancelModal,
+  onOpenRejectModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
   onOpenApproveModal: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
+  onOpenRejectModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -116,6 +135,14 @@ const WeeklyNormActions = ({
           type="link"
           title="Approve"
           onClick={() => onOpenApproveModal(record.id)}
+        />
+      )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Reject"
+          color="danger"
+          onClick={() => onOpenRejectModal(record.id)}
         />
       )}
       {record.status === RequestStatus.APPROVED && (
@@ -153,6 +180,7 @@ const WeeklyNormList = () => {
     isDetailModalOpen,
     isCancelModalOpen,
     isApproveModalOpen,
+    isRejectModalOpen,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
 
@@ -181,6 +209,7 @@ const WeeklyNormList = () => {
             onOpenDetail={handleOpenDetail}
             onOpenApproveModal={handleOpenApproveModal}
             onOpenCancelModal={handleOpenCancelModal}
+            onOpenRejectModal={handleOpenRejectModal}
           />
         ),
       };
@@ -292,6 +321,29 @@ const WeeklyNormList = () => {
     });
   };
 
+  const handleOpenRejectModal = (id: string) => {
+    dispatch(openCancelModal(id));
+  };
+
+  const handleCloseRejectModal = (id: string) => {
+    dispatch(openRejectModal(id));
+  };
+
+  const handleReject = async () => {
+    if (!selectedItemId) return;
+    try {
+      await updateWeeklyNormStatus({
+        id: selectedItemId,
+        action: RequestAction.REJECT,
+      }).unwrap();
+      toast.success("Weekly norm request rejected successfully");
+      refetch();
+      dispatch(closeRejectModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
   return (
     <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.WEEKLY_NORM_LIST}>
       <div id="weekly-norms-container" className="flex flex-col gap-6">
@@ -359,6 +411,15 @@ const WeeklyNormList = () => {
               type="primary"
               title="Approve"
               onClick={() => handleOpenApproveModal(normDetail.data.id)}
+            />
+          ),
+          normDetail?.data.status === RequestStatus.PENDING && (
+            <CustomButton
+              key="reject"
+              type="primary"
+              color="danger"
+              title="Reject"
+              onClick={() => handleOpenRejectModal(normDetail.data.id)}
             />
           ),
         ]}
@@ -487,6 +548,32 @@ const WeeklyNormList = () => {
         <Typography.Paragraph>
           Are you sure you want to cancel this weekly norm request? This action
           cannot be undone and will deactivate all associated weekly norms.
+        </Typography.Paragraph>
+      </Modal>
+
+      {/* Reject Confirmation Modal */}
+      <Modal
+        title="Reject Weekly Norm Request"
+        open={isRejectModalOpen}
+        onCancel={() => dispatch(closeRejectModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="Cancel"
+            onClick={() => dispatch(closeRejectModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Reject Request"
+            loading={isUpdatingStatus}
+            onClick={handleReject}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to reject this weekly norm request?
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

@@ -22,10 +22,9 @@ export interface WeeklyNormDto {
   teacherId?: string;
 }
 
-export interface ITimeOff {
-  date: Date;
-  startTime: Date;
-  endTime: Date;
+export interface ISchedule {
+  startDate: string;
+  endDate: string;
 }
 
 export interface IRequest extends ITimestamps {
@@ -42,7 +41,7 @@ export interface IRequest extends ITimestamps {
   approver?: IUser;
   teacherId?: string;
   weeklyNorms?: WeeklyNormDto[];
-  timeOff?: ITimeOff;
+  schedule?: ISchedule;
 }
 
 export interface CreateRequestWeeklyNormDto {
@@ -90,6 +89,7 @@ export const RequestStatusOptions = [
 
 export enum RequestAction {
   APPROVE = "APPROVE",
+  REJECT = "REJECT",
   CANCEL = "CANCEL",
 }
 

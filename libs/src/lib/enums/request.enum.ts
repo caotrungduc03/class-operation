@@ -13,5 +13,6 @@ export enum RequestStatus {
 
 export enum RequestAction {
   APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
   CANCEL = 'CANCEL',
 }

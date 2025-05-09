@@ -5,7 +5,6 @@ import {
   GetRequestDto,
   RequestAction,
   RequestDto,
-  RequestType,
   ResponseDto,
   RoleName,
   Roles,
@@ -139,13 +138,12 @@ export class RequestController {
   async updateWeeklyNormStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
-    @User('role') role: RoleName,
     @Body('action') action: RequestAction,
   ) {
     const updatedRequest = await this.requestService.updateWeeklyNormStatus(
       id,
       action,
-      action === RequestAction.APPROVE ? userId : undefined,
+      userId,
     );
 
     return new ResponseDto(
@@ -187,17 +185,17 @@ export class RequestController {
 
   @Get('time-offs')
   @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.TEACHER_PART_TIME)
-  async findTimeOff(@Query() queryObj: GetRequestDto) {
-    const { page, limit, total, data } = await this.requestService.query(
-      {
-        ...queryObj,
-        type: RequestType.TIME_OFF,
-      },
-      {
-        relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
-      },
-    );
-
+  async findTimeOff(
+    @Query() getRequestDto: GetRequestDto,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+  ) {
+    const { page, limit, total, data } =
+      await this.requestService.queryTimeOffRequests(
+        getRequestDto,
+        userId,
+        role,
+      );
     return new ResponseDto(HttpStatus.OK, 'Success', {
       page,
       limit,
@@ -245,7 +243,7 @@ export class RequestController {
     const updatedRequest = await this.requestService.updateTimeOffStatus(
       id,
       action,
-      action === RequestAction.APPROVE ? userId : undefined,
+      userId,
     );
 
     return new ResponseDto(
@@ -294,16 +292,17 @@ export class RequestController {
     RoleName.TEACHER_PART_TIME,
     RoleName.TEACHER_FULL_TIME,
   )
-  async findBusySchedule(@Query() queryObj: GetRequestDto) {
-    const { page, limit, total, data } = await this.requestService.query(
-      {
-        ...queryObj,
-        type: RequestType.BUSY_SCHEDULE,
-      },
-      {
-        relations: ['weeklyNorms', 'creator', 'requester', 'approver'],
-      },
-    );
+  async findBusySchedule(
+    @Query() getRequestDto: GetRequestDto,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+  ) {
+    const { page, limit, total, data } =
+      await this.requestService.queryBusyScheduleRequests(
+        getRequestDto,
+        userId,
+        role,
+      );
 
     return new ResponseDto(HttpStatus.OK, 'Success', {
       page,
@@ -356,13 +355,12 @@ export class RequestController {
   async updateBusyScheduleStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
-    @User('role') role: RoleName,
     @Body('action') action: RequestAction,
   ) {
     const updatedRequest = await this.requestService.updateBusyScheduleStatus(
       id,
       action,
-      action === RequestAction.APPROVE ? userId : undefined,
+      userId,
     );
 
     return new ResponseDto(
