@@ -3,13 +3,14 @@ import {
   IsArray,
   IsDate,
   IsEmpty,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { RequestStatus } from '../../enums';
+import { RequestPriority, RequestStatus } from '../../enums';
 import { CreateWeeklyNormDto } from '../weekly-norm/create-weekly-norm.dto';
 
 /**
@@ -88,3 +89,41 @@ export class CreateBusySchedulesRequestDto {
 
 // For backward compatibility
 export { CreateTimeOffRequestDto as CreateScheduleRequestDto };
+
+/**
+ * Support Ticket Request DTOs
+ */
+export class CreateSupportTicketRequestDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsOptional()
+  @IsUUID()
+  teacherId?: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  classId: string;
+
+  @IsNotEmpty()
+  @IsEnum(RequestPriority)
+  priority: RequestPriority;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @IsEmpty()
+  status: RequestStatus;
+
+  @IsEmpty()
+  creatorId?: string;
+
+  @IsEmpty()
+  requesterId?: string;
+}

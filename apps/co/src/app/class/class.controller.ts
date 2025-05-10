@@ -7,6 +7,7 @@ import {
   RoleName,
   Roles,
   UpdateClassDto,
+  User,
   UserDto,
 } from '@class-operation/libs';
 import {
@@ -27,7 +28,13 @@ export class ClassController {
   constructor(private readonly classService: ClassService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
   async find(@Query() queryParams: QueryClassDto) {
     const {
       page,
@@ -35,7 +42,7 @@ export class ClassController {
       total,
       data: classes,
     } = await this.classService.query(queryParams, {
-      // relations: ['teacher'],
+      relations: ['course', 'room', 'teacher', 'studentClasses'],
     });
 
     const results: Pagination<ClassDto> = {
@@ -48,8 +55,43 @@ export class ClassController {
     return new ResponseDto(HttpStatus.OK, 'Success', results);
   }
 
+  @Get('/my-classes')
+  @Roles(
+    RoleName.STUDENT,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
+  async findMyClasses(
+    @Query() queryParams: QueryClassDto,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+  ) {
+    const {
+      page,
+      limit,
+      total,
+      data: classes,
+    } = await this.classService.queryMyClasses(queryParams, userId, role);
+
+    const results: Pagination<ClassDto> = {
+      page,
+      limit,
+      total,
+      items: ClassDto.plainToInstance(classes, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
   @Get('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.STUDENT,
+  )
   async findById(@Param('id') id: string) {
     const classEntity = await this.classService.findById(id);
 

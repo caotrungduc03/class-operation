@@ -74,4 +74,22 @@ export class ScheduleController {
       result,
     );
   }
+
+  @Get('/student')
+  @Roles(RoleName.STUDENT)
+  async findByStudentClasses(
+    @Query() query: GetScheduleDto,
+    @User('userId') userId: string,
+  ) {
+    const result = await this.scheduleService.findByStudentClasses(
+      query,
+      userId,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Student class schedules retrieved successfully',
+      result,
+    );
+  }
 }

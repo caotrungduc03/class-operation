@@ -4,6 +4,7 @@ import {
   RoleName,
   ScheduleEntity,
   ScheduleType,
+  StudentClassEntity,
   UserStatus,
 } from '@class-operation/libs';
 import {
@@ -12,7 +13,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { BaseService } from '../../common';
 import { ClassService } from '../class/class.service';
 
@@ -21,6 +22,8 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
   constructor(
     @InjectRepository(ScheduleEntity)
     private readonly scheduleRepository: Repository<ScheduleEntity>,
+    @InjectRepository(StudentClassEntity)
+    private readonly studentClassRepository: Repository<StudentClassEntity>,
     private readonly classService: ClassService,
   ) {
     super(scheduleRepository);
@@ -186,8 +189,47 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
       type: ScheduleType.TEACHING,
     });
 
-    console.log('savedSchedule', savedSchedule);
-
     return savedSchedule;
+  }
+
+  async findByStudentClasses(query: GetScheduleDto, userId: string) {
+    const { startDate, endDate, name, type } = query;
+
+    // Get all class IDs where the user is a student
+    const studentClasses = await this.studentClassRepository.find({
+      where: {
+        studentId: userId,
+        status: UserStatus.ACTIVE,
+      },
+      select: ['classId'],
+    });
+
+    const classIds = studentClasses.map((sc) => sc.classId);
+
+    // If student isn't enrolled in any classes, return empty array
+    if (classIds.length === 0) {
+      return [];
+    }
+
+    // Build query conditions
+    const conditions: FindOptionsWhere<ScheduleEntity> = {
+      startDate: Between(new Date(startDate), new Date(endDate)),
+      endDate: Between(new Date(startDate), new Date(endDate)),
+      status: UserStatus.ACTIVE,
+      classId: In(classIds),
+    };
+
+    // Add name filter if provided
+    if (name) {
+      conditions.name = ILike(`%${name}%`);
+    }
+
+    // Add type filter if provided (default to teaching schedules)
+    conditions.type = type || ScheduleType.TEACHING;
+
+    return this.scheduleRepository.find({
+      where: conditions,
+      relations: ['class', 'class.course'],
+    });
   }
 }

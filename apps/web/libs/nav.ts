@@ -8,7 +8,8 @@ export const NAV_LINK = {
   LOGIN: "/login",
 
   WEEKLY_NORM_REGISTRATION: "/teacher/weekly-norm-registration",
-  MY_CALENDAR: "/teacher/my-calendar",
+  MY_TEACHER_CALENDAR: "/teacher/my-calendar",
+  MY_STUDENT_CALENDAR: "/student/my-calendar",
   TIME_OFF_REGISTRATION: "/teacher/time-off-registration",
   BUSY_SCHEDULE_REGISTRATION: "/teacher/busy-schedule-registration",
 
@@ -27,8 +28,12 @@ export const NAV_LINK = {
   MANAGE_CALENDAR: "/ops/calendar",
   MANAGE_COURSES: "/ops/course/list",
   MANAGE_CLASSES: "/ops/class/list",
+  MANAGE_SUPPORT_TICKETS: "/ops/support-ticket/list",
 
-  MY_CLASS: "/my-class",
+  MY_TEACHER_CLASS: "/teacher/my-class",
+  MY_STUDENT_CLASS: "/student/my-class",
+
+  MY_SUPPORT_TICKET: "/teacher/my-support-ticket",
 
   CLASS_DETAIL_OVERVIEW: (id: string) => `/ops/class/${id}/overview`,
   CLASS_DETAIL_SETTINGS: (id: string) => `/ops/class/${id}/settings`,
@@ -53,7 +58,8 @@ export const NAV_TITLE = {
   MANAGE_DEPARTMENTS: "Quản lý phòng ban",
   MY_PROFILE: "Thông tin cá nhân",
   WEEKLY_NORM_REGISTRATION: "Đăng ký định mức tuần",
-  MY_CALENDAR: "Thời khóa biểu",
+  MY_TEACHER_CALENDAR: "Thời khóa biểu",
+  MY_STUDENT_CALENDAR: "Thời khóa biểu",
   TIME_OFF_REGISTRATION: "Đăng ký lịch nghỉ cố định",
   BUSY_SCHEDULE_REGISTRATION: "Đăng ký lịch bận",
   MANAGE_REQUESTS: "Quản lý yêu cầu",
@@ -62,8 +68,11 @@ export const NAV_TITLE = {
   BUSY_SCHEDULE_LIST: "Đăng ký lịch bận",
   MANAGE_CALENDAR: "Quản lý thời khóa biểu",
   MANAGE_COURSES: "Quản lý khoá học",
-  MY_CLASS: "Các lớp được giao",
+  MY_TEACHER_CLASS: "Các lớp được giao",
+  MY_STUDENT_CLASS: "Các lớp đã đăng ký",
   MANAGE_CLASSES: "Quản lý lớp học",
   CLASS_DETAIL: "Chi tiết lớp học",
   USER_DETAIL: "Chi tiết người dùng",
+  MY_SUPPORT_TICKET: "Phiếu hỗ trợ",
+  MANAGE_SUPPORT_TICKETS: "Quản lý phiếu hỗ trợ",
 };

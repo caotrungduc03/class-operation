@@ -2,6 +2,8 @@ import {
   ClassEntity,
   CounterType,
   CreateClassDto,
+  QueryClassDto,
+  RoleName,
   ScheduleEntity,
   ScheduleType,
   UpdateClassDto,
@@ -123,5 +125,47 @@ export class ClassService extends BaseService<ClassEntity> {
         },
       ],
     });
+  }
+
+  async queryMyClasses(
+    getClassDto: QueryClassDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'createdAt:desc',
+      ...filter
+    } = getClassDto;
+
+    const queryBuilder = this.classRepository
+      .createQueryBuilder('entity')
+      .leftJoinAndSelect('entity.course', 'course')
+      .leftJoinAndSelect('entity.room', 'room')
+      .leftJoinAndSelect('entity.teacher', 'teacher')
+      .leftJoinAndSelect('entity.studentClasses', 'studentClasses');
+
+    if (
+      [RoleName.TEACHER_FULL_TIME, RoleName.TEACHER_PART_TIME].includes(role)
+    ) {
+      queryBuilder.andWhere('entity.teacherId = :userId', { userId });
+    } else if (role === RoleName.STUDENT) {
+      queryBuilder.andWhere('studentClasses.studentId = :userId', { userId });
+    }
+
+    const metadata = this.repository.metadata;
+    this.applyFiltering(queryBuilder, filter, metadata);
+    this.applyPagination(queryBuilder, page, limit);
+    this.applySorting(queryBuilder, sort, metadata);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
   }
 }

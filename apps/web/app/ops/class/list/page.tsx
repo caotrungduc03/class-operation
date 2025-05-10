@@ -65,12 +65,12 @@ const columnsTitles: TableColumn<IClass>[] = [
   {
     title: "Teacher",
     dataIndex: "teacher",
-    render: (teacher: IUser) => teacher?.fullName || "Not assigned",
+    render: (teacher: IUser) => teacher?.fullName || "",
   },
   {
     title: "Room",
     dataIndex: "room",
-    render: (room: IRoom) => room?.name || "Not assigned",
+    render: (room: IRoom) => room?.name || "",
   },
   {
     title: "Start Date",

@@ -24,6 +24,7 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { UserDetailModule } from './user-detail/user-detail.module';
 import { UserModule } from './user/user.module';
 import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
+import { SupportTicketModule } from './support-ticket/support-ticket.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { WeeklyNormModule } from './weekly-norm/weekly-norm.module';
     NotificationModule,
     FieldModule,
     DepartmentModule,
+    SupportTicketModule,
   ],
   controllers: [AppController],
   providers: [

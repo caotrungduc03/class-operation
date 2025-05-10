@@ -1,0 +1,623 @@
+"use client";
+import CustomButton from "@web/components/common/CustomButton";
+import CustomDropdown from "@web/components/common/CustomDropdown";
+import CustomInput from "@web/components/common/CustomInput";
+import CustomSelect from "@web/components/common/CustomSelect";
+import FilterGrid from "@web/components/common/FilterGrid";
+import PageLayout from "@web/layouts/PageLayout";
+import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import {
+  useGetSupportTicketsQuery,
+  useLazyGetSupportTicketByIdQuery,
+  useUpdateSupportTicketStatusMutation,
+} from "@web/libs/features/requests/requestApi";
+import {
+  closeApproveModal,
+  closeCancelModal,
+  closeDetailModal,
+  closeRejectModal,
+  openApproveModal,
+  openCancelModal,
+  openDetailModal,
+  openRejectModal,
+} from "@web/libs/features/table/tableSlice";
+import { NAV_TITLE } from "@web/libs/nav";
+import {
+  IRequest,
+  ISupportTicket,
+  REQUEST_PRIORITY_TAG,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestPriorityOptions,
+  RequestStatus,
+  RequestStatusOptions,
+} from "@web/libs/request";
+import { RootState } from "@web/libs/store";
+import { IUser } from "@web/libs/user";
+import {
+  Card,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
+} from "antd";
+import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
+import dayjs from "dayjs";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+
+const breadcrumbs: ItemType[] = [
+  {
+    title: NAV_TITLE.MANAGE_SUPPORT_TICKETS,
+  },
+];
+
+const columnsTitles: TableColumn<IRequest>[] = [
+  { title: "#", dataIndex: "index" },
+  { title: "Ticket Name", dataIndex: "name" },
+  { title: "Description", dataIndex: "description" },
+  {
+    title: "Class",
+    dataIndex: "supportTicket",
+    render: (supportTicket: ISupportTicket) =>
+      supportTicket?.class?.name || "-",
+  },
+  {
+    title: "Creator",
+    dataIndex: "creator",
+    render: (creator: IUser) => creator?.fullName || "-",
+  },
+  {
+    title: "Requester",
+    dataIndex: "requester",
+    render: (requester: IUser) => requester?.fullName || "-",
+  },
+  {
+    title: "Approver",
+    dataIndex: "approver",
+    render: (approver: IUser) => approver?.fullName || "-",
+  },
+  {
+    title: "Priority",
+    dataIndex: "supportTicket",
+    render: (supportTicket: ISupportTicket) => (
+      <Tag color={REQUEST_PRIORITY_TAG[supportTicket?.priority]}>
+        {supportTicket?.priority}
+      </Tag>
+    ),
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    render: (status: RequestStatus) => (
+      <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
+    ),
+  },
+  {
+    title: "Created At",
+    dataIndex: "createdAt",
+    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
+  },
+  { title: "", dataIndex: "method", fixed: "right" },
+];
+
+const SupportTicketActions = ({
+  record,
+  onOpenDetail,
+  onOpenApproveModal,
+  onOpenCancelModal,
+  onOpenRejectModal,
+}: {
+  record: IRequest;
+  onOpenDetail: (id: string) => void;
+  onOpenApproveModal: (id: string) => void;
+  onOpenCancelModal: (id: string) => void;
+  onOpenRejectModal: (id: string) => void;
+}) => {
+  return (
+    <CustomDropdown>
+      <CustomButton
+        type="link"
+        title="View"
+        onClick={() => onOpenDetail(record.id)}
+      />
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Approve"
+          onClick={() => onOpenApproveModal(record.id)}
+        />
+      )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Reject"
+          color="danger"
+          onClick={() => onOpenRejectModal(record.id)}
+        />
+      )}
+      {record.status === RequestStatus.APPROVED && (
+        <CustomButton
+          type="link"
+          title="Cancel"
+          color="danger"
+          onClick={() => onOpenCancelModal(record.id)}
+        />
+      )}
+    </CustomDropdown>
+  );
+};
+
+const SupportTicketList = () => {
+  const [searchParams, setSearchParams] = useState<{
+    name?: string;
+    status?: string;
+    priority?: string;
+    page?: number;
+    limit?: number;
+  }>({
+    page: 1,
+    limit: 10,
+  });
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    defaultCurrent: 1,
+    defaultPageSize: 10,
+    total: 0,
+    showSizeChanger: true,
+    showQuickJumper: true,
+  });
+
+  const dispatch = useDispatch();
+  const {
+    isDetailModalOpen,
+    isCancelModalOpen,
+    isApproveModalOpen,
+    isRejectModalOpen,
+    selectedItemId,
+  } = useSelector((state: RootState) => state.table);
+
+  const {
+    data: supportTicketsData,
+    isFetching,
+    refetch,
+  } = useGetSupportTicketsQuery(searchParams);
+
+  const [fetchSupportTicketDetail, { data: supportTicketDetail }] =
+    useLazyGetSupportTicketByIdQuery();
+
+  const [updateSupportTicketStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateSupportTicketStatusMutation();
+
+  const searchForm = useForm();
+
+  const tableColumns = columnsTitles.map((item, index) => {
+    if (item.dataIndex === "method") {
+      return {
+        ...item,
+        key: index,
+        render: (record: IRequest) => (
+          <SupportTicketActions
+            record={record}
+            onOpenDetail={handleOpenDetail}
+            onOpenApproveModal={handleOpenApproveModal}
+            onOpenCancelModal={handleOpenCancelModal}
+            onOpenRejectModal={handleOpenRejectModal}
+          />
+        ),
+      };
+    }
+    return {
+      ...item,
+      key: index,
+    };
+  });
+
+  const { current, pageSize } = pagination;
+
+  const tableData = useMemo(() => {
+    return (
+      supportTicketsData?.data?.items.map((item, index) => ({
+        ...item,
+        index: ((current || 1) - 1) * (pageSize || 10) + index + 1,
+        method: item,
+      })) || []
+    );
+  }, [supportTicketsData, current, pageSize]);
+
+  // Update pagination when data changes
+  useEffect(() => {
+    if (supportTicketsData?.data) {
+      setPagination((prev) => ({
+        ...prev,
+        current: supportTicketsData.data.page || prev.current,
+        pageSize: supportTicketsData.data.limit || prev.pageSize,
+        total: supportTicketsData.data.total || 0,
+      }));
+    }
+  }, [supportTicketsData]);
+
+  const onSubmitSearch = (data: {
+    name?: string;
+    status?: string;
+    priority?: string;
+  }) => {
+    setSearchParams({
+      ...searchParams,
+      ...data,
+      page: 1,
+    });
+  };
+
+  const handleReset = () => {
+    searchForm.reset();
+    setSearchParams({
+      page: 1,
+      limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+  };
+
+  const handleOpenDetail = (id: string) => {
+    dispatch(openDetailModal(id));
+    fetchSupportTicketDetail(id);
+  };
+
+  const handleCloseDetail = () => {
+    dispatch(closeDetailModal());
+  };
+
+  const handleOpenApproveModal = (id: string) => {
+    dispatch(openApproveModal(id));
+  };
+
+  const handleOpenCancelModal = (id: string) => {
+    dispatch(openCancelModal(id));
+  };
+
+  const handleOpenRejectModal = (id: string) => {
+    dispatch(openRejectModal(id));
+  };
+
+  const handleApprove = async () => {
+    if (!selectedItemId) return;
+
+    try {
+      await updateSupportTicketStatus({
+        id: selectedItemId,
+        action: RequestAction.APPROVE,
+      }).unwrap();
+      toast.success("Support ticket approved successfully");
+      refetch();
+      dispatch(closeApproveModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!selectedItemId) return;
+
+    try {
+      await updateSupportTicketStatus({
+        id: selectedItemId,
+        action: RequestAction.CANCEL,
+      }).unwrap();
+      toast.success("Support ticket canceled successfully");
+      refetch();
+      dispatch(closeCancelModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  const handleReject = async () => {
+    if (!selectedItemId) return;
+    try {
+      await updateSupportTicketStatus({
+        id: selectedItemId,
+        action: RequestAction.REJECT,
+      }).unwrap();
+      toast.success("Support ticket rejected successfully");
+      refetch();
+      dispatch(closeRejectModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  const handlePaginationChange = (newPagination: TablePaginationConfig) => {
+    setSearchParams({
+      ...searchParams,
+      page: newPagination.current,
+      limit: newPagination.pageSize,
+    });
+  };
+
+  return (
+    <PageLayout
+      breadcrumbs={breadcrumbs}
+      title={NAV_TITLE.MANAGE_SUPPORT_TICKETS}
+    >
+      <div id="support-tickets-container" className="flex flex-col gap-6">
+        <Card>
+          <div className="flex flex-col gap-4">
+            <FilterGrid>
+              <CustomInput
+                control={searchForm.control}
+                name="name"
+                size="large"
+                placeholder="Search by ticket name"
+              />
+              <CustomSelect
+                control={searchForm.control}
+                name="status"
+                size="large"
+                placeholder="Filter by status"
+                options={RequestStatusOptions}
+              />
+              <CustomSelect
+                control={searchForm.control}
+                name="priority"
+                size="large"
+                placeholder="Filter by priority"
+                options={RequestPriorityOptions}
+              />
+            </FilterGrid>
+            <div className="flex justify-between">
+              <div className="flex gap-4">
+                <CustomButton
+                  title="Reset"
+                  size="large"
+                  onClick={handleReset}
+                />
+                <CustomButton
+                  type="primary"
+                  title="Search"
+                  size="large"
+                  onClick={searchForm.handleSubmit(onSubmitSearch)}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <Table
+            loading={isFetching}
+            rowKey={(record) => record.id}
+            columns={tableColumns}
+            dataSource={tableData}
+            scroll={{ x: "max-content" }}
+            pagination={pagination}
+            onChange={handlePaginationChange}
+          />
+        </Card>
+      </div>
+
+      {/* Detail Modal */}
+      <Modal
+        title="Support Ticket Details"
+        open={isDetailModalOpen}
+        onCancel={handleCloseDetail}
+        footer={[
+          <CustomButton
+            key="close"
+            title="Close"
+            onClick={handleCloseDetail}
+          />,
+          supportTicketDetail?.data.status === RequestStatus.PENDING && (
+            <CustomButton
+              key="approve"
+              type="primary"
+              title="Approve"
+              onClick={() =>
+                handleOpenApproveModal(supportTicketDetail.data.id)
+              }
+            />
+          ),
+          supportTicketDetail?.data.status === RequestStatus.PENDING && (
+            <CustomButton
+              key="reject"
+              type="primary"
+              color="danger"
+              title="Reject"
+              onClick={() => handleOpenRejectModal(supportTicketDetail.data.id)}
+            />
+          ),
+        ]}
+        width={800}
+      >
+        {supportTicketDetail ? (
+          <div className="flex flex-col gap-4">
+            <div>
+              <Typography.Text type="secondary">Ticket Name:</Typography.Text>
+              <Typography.Title level={5} className="mt-1">
+                {supportTicketDetail.data.name}
+              </Typography.Title>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Paragraph className="mt-1">
+                {supportTicketDetail.data.description || ""}
+              </Typography.Paragraph>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">Creator:</Typography.Text>
+              <Typography.Text className="ml-2">
+                {supportTicketDetail.data.creator?.fullName || "N/A"}
+              </Typography.Text>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text className="ml-2">
+                {supportTicketDetail.data.requester?.fullName || "N/A"}
+              </Typography.Text>
+            </div>
+
+            <div className="flex gap-4">
+              <div>
+                <Typography.Text type="secondary">Status:</Typography.Text>
+                <span className="ml-2">
+                  <Tag
+                    color={REQUEST_STATUS_TAG[supportTicketDetail.data.status]}
+                  >
+                    {supportTicketDetail.data.status}
+                  </Tag>
+                </span>
+              </div>
+              <div>
+                <Typography.Text type="secondary">Priority:</Typography.Text>
+                <span className="ml-2">
+                  <Tag
+                    color={
+                      REQUEST_PRIORITY_TAG[
+                        supportTicketDetail.data.supportTicket.priority
+                      ]
+                    }
+                  >
+                    {supportTicketDetail.data.supportTicket.priority}
+                  </Tag>
+                </span>
+              </div>
+            </div>
+
+            <Divider orientation="left">Support Ticket Details</Divider>
+
+            <Card size="small" className="mb-4">
+              <div className="flex flex-col gap-2">
+                <div>
+                  <Typography.Text type="secondary">Class:</Typography.Text>
+                  <Typography.Text className="ml-2">
+                    {supportTicketDetail.data.supportTicket?.class?.name || "-"}
+                  </Typography.Text>
+                </div>
+                {supportTicketDetail.data.supportTicket?.note && (
+                  <div>
+                    <Typography.Text type="secondary">Note:</Typography.Text>
+                    <Typography.Paragraph className="mt-1">
+                      {supportTicketDetail.data.supportTicket.note}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <div className="flex justify-between">
+              <div>
+                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text className="ml-2">
+                  {dayjs(supportTicketDetail.data.createdAt).format(
+                    DATE_TIME_FORMAT,
+                  )}
+                </Typography.Text>
+              </div>
+
+              <div>
+                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text className="ml-2">
+                  {dayjs(supportTicketDetail.data.updatedAt).format(
+                    DATE_TIME_FORMAT,
+                  )}
+                </Typography.Text>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center p-10">
+            <Spin size="large" />
+          </div>
+        )}
+      </Modal>
+
+      {/* Approve Confirmation Modal */}
+      <Modal
+        title="Approve Support Ticket"
+        open={isApproveModalOpen}
+        onCancel={() => dispatch(closeApproveModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="Cancel"
+            onClick={() => dispatch(closeApproveModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            title="Approve Ticket"
+            loading={isUpdatingStatus}
+            onClick={handleApprove}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to approve this support ticket?
+        </Typography.Paragraph>
+      </Modal>
+
+      {/* Cancel Confirmation Modal */}
+      <Modal
+        title="Cancel Support Ticket"
+        open={isCancelModalOpen}
+        onCancel={() => dispatch(closeCancelModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="No, Keep It"
+            onClick={() => dispatch(closeCancelModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Yes, Cancel Ticket"
+            loading={isUpdatingStatus}
+            onClick={handleCancel}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to cancel this support ticket? This action
+          cannot be undone.
+        </Typography.Paragraph>
+      </Modal>
+
+      {/* Reject Confirmation Modal */}
+      <Modal
+        title="Reject Support Ticket"
+        open={isRejectModalOpen}
+        onCancel={() => dispatch(closeRejectModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="Cancel"
+            onClick={() => dispatch(closeRejectModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Reject Ticket"
+            loading={isUpdatingStatus}
+            onClick={handleReject}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to reject this support ticket?
+        </Typography.Paragraph>
+      </Modal>
+    </PageLayout>
+  );
+};
+
+export default SupportTicketList;

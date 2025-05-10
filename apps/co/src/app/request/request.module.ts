@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FieldModule } from '../field/field.module';
 import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 import { ScheduleModule } from '../schedule/schedule.module';
+import { SupportTicketModule } from '../support-ticket/support-ticket.module';
 import { UserDetailModule } from '../user-detail/user-detail.module';
 import { WeeklyNormModule } from '../weekly-norm/weekly-norm.module';
 import { RequestController } from './request.controller';
@@ -17,6 +18,7 @@ import { RequestService } from './request.service';
     FieldModule,
     UserDetailModule,
     RabbitMQModule,
+    SupportTicketModule,
   ],
   providers: [RequestService],
   controllers: [RequestController],

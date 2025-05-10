@@ -38,7 +38,7 @@ import * as z from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
-    title: NAV_TITLE.MY_CALENDAR,
+    title: NAV_TITLE.MY_TEACHER_CALENDAR,
   },
 ];
 
@@ -234,7 +234,7 @@ const MyCalendar = () => {
   };
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MY_CALENDAR}>
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MY_TEACHER_CALENDAR}>
       <div className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">
@@ -286,7 +286,6 @@ const MyCalendar = () => {
             onOpenCreate={handleOpenCreate}
             onRefetchAPI={handleRefetchAPI}
             loading={isFetchingNorms || isFetchingSchedules}
-            showWeeklyNorm
           />
         </Card>
 

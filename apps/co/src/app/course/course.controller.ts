@@ -26,7 +26,13 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.STUDENT,
+  )
   async find(@Query() queryParams: QueryCourseDto) {
     const {
       page,

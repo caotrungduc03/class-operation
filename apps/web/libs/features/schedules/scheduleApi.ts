@@ -39,6 +39,19 @@ export const scheduleApi = createApi({
         method: "DELETE",
       }),
     }),
+    getStudentSchedules: builder.query<
+      CustomResponse<ISchedule[]>,
+      {
+        startDate: string;
+        endDate: string;
+      }
+    >({
+      query: (params) => ({
+        url: "/schedules/student",
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
 
@@ -46,4 +59,5 @@ export const {
   useGetSchedulesQuery,
   useCreateScheduleMutation,
   useDeleteScheduleMutation,
+  useGetStudentSchedulesQuery,
 } = scheduleApi;

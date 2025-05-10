@@ -99,6 +99,17 @@ export const classApi = createApi({
         method: "DELETE",
       }),
     }),
+
+    getMyClasses: builder.query<
+      CustomResponse<Pagination<IClass[]>>,
+      QueryClassDto
+    >({
+      query: (params) => ({
+        url: "/classes/my-classes",
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
 
@@ -113,4 +124,5 @@ export const {
   useGetClassStudentsQuery,
   useAddStudentToClassMutation,
   useRemoveStudentFromClassMutation,
+  useGetMyClassesQuery,
 } = classApi;

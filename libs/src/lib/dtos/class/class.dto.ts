@@ -5,6 +5,15 @@ import { CourseDto } from '../course/course.dto';
 import { RoomDto } from '../room/room.dto';
 import { UserDto } from '../user/user.dto';
 
+export class StudentClassesDto extends BaseDto {
+  @Expose()
+  studentId: string;
+
+  @Expose()
+  @Type(() => UserDto)
+  student: UserDto;
+}
+
 export class ClassDto extends BaseDto {
   @Expose()
   code: string;
@@ -47,4 +56,8 @@ export class ClassDto extends BaseDto {
   @Expose()
   @Type(() => RoomDto)
   room: RoomDto;
+
+  @Expose()
+  @Type(() => StudentClassesDto)
+  studentClasses: StudentClassesDto[];
 }

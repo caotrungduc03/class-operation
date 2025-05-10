@@ -1,5 +1,6 @@
 import {
   CreateBusySchedulesRequestDto,
+  CreateSupportTicketRequestDto,
   CreateTimeOffRequestDto,
   CreateWeeklyNormRequestDto,
   GetRequestDto,
@@ -9,6 +10,7 @@ import {
   RequestType,
   RoleName,
   ScheduleType,
+  SupportTicketEntity,
   UpdateBusySchedulesRequestDto,
   UpdateTimeOffRequestDto,
   UpdateWeeklyNormRequestDto,
@@ -26,6 +28,7 @@ import { Repository } from 'typeorm';
 import { BaseService } from '../../common';
 import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import { ScheduleService } from '../schedule/schedule.service';
+import { SupportTicketService } from '../support-ticket/support-ticket.service';
 import { WeeklyNormService } from '../weekly-norm/weekly-norm.service';
 import { FieldService } from './../field/field.service';
 import { UserDetailService } from './../user-detail/user-detail.service';
@@ -40,6 +43,7 @@ export class RequestService extends BaseService<RequestEntity> {
     private readonly fieldService: FieldService,
     private readonly userDetailService: UserDetailService,
     private readonly rabbitMQService: RabbitMQService,
+    private readonly supportTicketService: SupportTicketService,
   ) {
     super(requestRepository);
   }
@@ -1016,6 +1020,310 @@ export class RequestService extends BaseService<RequestEntity> {
     // Delete associated schedule first
     if (request.schedule) {
       await this.scheduleService.delete(request.schedule.id);
+    }
+
+    // Delete the request
+    await this.requestRepository.remove(request);
+  }
+
+  async createSupportTicket(
+    createSupportTicketDto: CreateSupportTicketRequestDto,
+    userId: string,
+    role: RoleName,
+  ): Promise<SupportTicketEntity> {
+    switch (role) {
+      case RoleName.ADMIN:
+      case RoleName.RECEPTIONIST:
+        createSupportTicketDto.status = RequestStatus.APPROVED;
+        break;
+      case RoleName.TEACHER_PART_TIME:
+      case RoleName.TEACHER_FULL_TIME:
+        createSupportTicketDto.status = RequestStatus.PENDING;
+        createSupportTicketDto.requesterId = userId;
+        break;
+    }
+
+    const request = await this.store({
+      name: createSupportTicketDto.name,
+      description: createSupportTicketDto.description,
+      type: RequestType.SUPPORT_TICKET,
+      status: RequestStatus.PENDING,
+      creatorId: userId,
+      requesterId: createSupportTicketDto.requesterId,
+    });
+
+    return this.supportTicketService.store({
+      requestId: request.id,
+      classId: createSupportTicketDto.classId,
+      priority: createSupportTicketDto.priority,
+    });
+  }
+
+  async getSupportTicketById(id: string) {
+    const request = await this.findOne({
+      where: { id },
+      relations: [
+        'supportTicket',
+        'creator',
+        'requester',
+        'approver',
+        'supportTicket.class',
+      ],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Support ticket request not found');
+    }
+
+    return request;
+  }
+
+  async querySupportTickets(
+    getRequestDto: GetRequestDto,
+    userId: string,
+    role: RoleName,
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'createdAt:desc',
+      ...filter
+    } = getRequestDto;
+
+    const queryBuilder = this.requestRepository
+      .createQueryBuilder('entity')
+      .leftJoinAndSelect('entity.supportTicket', 'supportTicket')
+      .leftJoinAndSelect('supportTicket.class', 'class')
+      .leftJoinAndSelect('entity.creator', 'creator')
+      .leftJoinAndSelect('entity.requester', 'requester')
+      .leftJoinAndSelect('entity.approver', 'approver')
+      .where('entity.type = :type', { type: RequestType.SUPPORT_TICKET });
+
+    switch (role) {
+      case RoleName.ADMIN:
+        break;
+      case RoleName.MANAGE:
+        const teacherIds = await this.getFieldTeacherIds(userId);
+        queryBuilder.andWhere(
+          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+          {
+            teacherIds,
+            userId,
+          },
+        );
+        break;
+      case RoleName.TEACHER_FULL_TIME:
+      case RoleName.TEACHER_PART_TIME:
+        queryBuilder.andWhere('entity.requesterId = :userId', { userId });
+        break;
+    }
+
+    const metadata = this.repository.metadata;
+    this.applyFiltering(queryBuilder, filter, metadata);
+    this.applyPagination(queryBuilder, page, limit);
+    this.applySorting(queryBuilder, sort, metadata);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
+  }
+
+  async updateSupportTicket(
+    id: string,
+    updateData: Partial<CreateSupportTicketRequestDto>,
+  ) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.SUPPORT_TICKET },
+      relations: ['supportTicket'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Support ticket not found');
+    }
+
+    // Only allow updates for PENDING requests
+    if (request.status !== RequestStatus.PENDING) {
+      throw new BadRequestException('Only pending tickets can be updated');
+    }
+
+    // Update request basic info
+    const updatedRequest = await this.store({
+      ...request,
+      name: updateData.name || request.name,
+      description: updateData.description || request.description,
+    });
+
+    // Update support ticket specific info
+    if (request.supportTicket) {
+      await this.supportTicketService.update(request.supportTicket.id, {
+        classId: updateData.classId || request.supportTicket.classId,
+        priority: updateData.priority || request.supportTicket.priority,
+        note:
+          updateData.note !== undefined
+            ? updateData.note
+            : request.supportTicket.note,
+      });
+    }
+
+    return updatedRequest;
+  }
+
+  async updateSupportTicketStatus(
+    id: string,
+    action: RequestAction,
+    userId?: string,
+  ) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.SUPPORT_TICKET },
+      relations: ['supportTicket', 'requester', 'supportTicket.class'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Support ticket not found');
+    }
+
+    if (action === RequestAction.APPROVE) {
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending tickets can be approved');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for approval');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.APPROVED,
+        approverId: userId,
+      });
+
+      // Send notification via RabbitMQ
+      if (request.requester) {
+        const className = request.supportTicket?.class?.name || 'your class';
+        const notificationTitle = 'Support Ticket Approved';
+        const notificationContent = `Your support ticket "${request.name}" for ${className} has been approved.`;
+
+        // Send email notification
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+
+        // Send web notification
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
+      return updatedRequest;
+    } else if (action === RequestAction.REJECT) {
+      if (request.status !== RequestStatus.PENDING) {
+        throw new BadRequestException('Only pending tickets can be rejected');
+      }
+
+      if (!userId) {
+        throw new BadRequestException('User ID is required for rejection');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.REJECTED,
+        approverId: userId,
+      });
+
+      // Send notification via RabbitMQ
+      if (request.requester) {
+        const className = request.supportTicket?.class?.name || 'your class';
+        const notificationTitle = 'Support Ticket Rejected';
+        const notificationContent = `Your support ticket "${request.name}" for ${className} has been rejected.`;
+
+        // Send email notification
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+
+        // Send web notification
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
+      return updatedRequest;
+    } else if (action === RequestAction.CANCEL) {
+      if (request.status !== RequestStatus.APPROVED) {
+        throw new BadRequestException('Only approved tickets can be canceled');
+      }
+
+      // Update request status
+      const updatedRequest = await this.store({
+        ...request,
+        status: RequestStatus.CANCELED,
+      });
+
+      // Send notification via RabbitMQ
+      if (request.requester) {
+        const className = request.supportTicket?.class?.name || 'your class';
+        const notificationTitle = 'Support Ticket Canceled';
+        const notificationContent = `Your support ticket "${request.name}" for ${className} has been canceled.`;
+
+        // Send email notification
+        this.rabbitMQService.sendEmailNotification(
+          request.requester.email,
+          notificationTitle,
+          notificationContent,
+        );
+
+        // Send web notification
+        this.rabbitMQService.sendWebNotification(request.requester.id, {
+          title: notificationTitle,
+          content: notificationContent,
+        });
+      }
+
+      return updatedRequest;
+    }
+
+    throw new BadRequestException(
+      `Invalid action: ${action}. Must be one of: ${Object.values(RequestAction).join(', ')}`,
+    );
+  }
+
+  // Delete Support Ticket request
+  async deleteSupportTicket(id: string, userId: string) {
+    const request = await this.findOne({
+      where: { id, type: RequestType.SUPPORT_TICKET },
+      relations: ['supportTicket', 'creator'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Support ticket not found');
+    }
+
+    // Only allow deleting PENDING requests
+    if (request.status !== RequestStatus.PENDING) {
+      throw new BadRequestException('Only pending tickets can be deleted');
+    }
+
+    // Ensure only the creator can delete their own request
+    if (request.creatorId !== userId) {
+      throw new ForbiddenException('You can only delete your own requests');
+    }
+
+    // Delete associated support ticket first
+    if (request.supportTicket) {
+      await this.supportTicketService.delete(request.supportTicket.id);
     }
 
     // Delete the request

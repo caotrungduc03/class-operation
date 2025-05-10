@@ -9,6 +9,7 @@ import {
 import { RequestStatus, RequestType } from '../enums/request.enum';
 import { CustomBaseEntity } from './customBase.entity';
 import { ScheduleEntity } from './schedule.entity';
+import { SupportTicketEntity } from './support-ticket.entity';
 import { UserEntity } from './user.entity';
 import { WeeklyNormEntity } from './weekly-norm.entity';
 
@@ -79,4 +80,10 @@ export class RequestEntity extends CustomBaseEntity {
     nullable: true,
   })
   schedule: ScheduleEntity;
+
+  @OneToOne(
+    () => SupportTicketEntity,
+    (supportTicket: SupportTicketEntity) => supportTicket.request,
+  )
+  supportTicket: SupportTicketEntity;
 }

@@ -5,6 +5,7 @@ import {
   FormOutlined,
   HomeOutlined,
   ProfileOutlined,
+  QuestionCircleOutlined,
   ReadOutlined,
   ScheduleOutlined,
   UserOutlined,
@@ -134,6 +135,12 @@ const OPSNavigationItems: NavigationItem[] = [
       },
     ],
   },
+  {
+    key: NAV_LINK.MANAGE_SUPPORT_TICKETS,
+    icon: <QuestionCircleOutlined />,
+    label: NAV_TITLE.MANAGE_SUPPORT_TICKETS,
+    url: NAV_LINK.MANAGE_SUPPORT_TICKETS,
+  },
 ];
 
 const TeacherNavigationItems: NavigationItem[] = [
@@ -150,16 +157,16 @@ const TeacherNavigationItems: NavigationItem[] = [
     url: NAV_LINK.MY_PROFILE,
   },
   {
-    key: NAV_LINK.MY_CALENDAR,
+    key: NAV_LINK.MY_TEACHER_CALENDAR,
     icon: <CalendarOutlined />,
-    label: NAV_TITLE.MY_CALENDAR,
-    url: NAV_LINK.MY_CALENDAR,
+    label: NAV_TITLE.MY_TEACHER_CALENDAR,
+    url: NAV_LINK.MY_TEACHER_CALENDAR,
   },
   {
-    key: NAV_LINK.MY_CLASS,
+    key: NAV_LINK.MY_TEACHER_CLASS,
     icon: <ReadOutlined />,
-    label: NAV_TITLE.MY_CLASS,
-    url: `${NAV_LINK.TEACHER}${NAV_LINK.MY_CLASS}`,
+    label: NAV_TITLE.MY_TEACHER_CLASS,
+    url: NAV_LINK.MY_TEACHER_CLASS,
   },
   {
     key: NAV_LINK.BUSY_SCHEDULE_REGISTRATION,
@@ -180,6 +187,12 @@ const TeacherNavigationItems: NavigationItem[] = [
     url: NAV_LINK.TIME_OFF_REGISTRATION,
     roles: [RoleName.TEACHER_PART_TIME],
   },
+  {
+    key: NAV_LINK.MY_SUPPORT_TICKET,
+    icon: <QuestionCircleOutlined />,
+    label: NAV_TITLE.MY_SUPPORT_TICKET,
+    url: NAV_LINK.MY_SUPPORT_TICKET,
+  },
 ];
 
 const StudentNavigationItems: NavigationItem[] = [
@@ -196,10 +209,16 @@ const StudentNavigationItems: NavigationItem[] = [
     url: NAV_LINK.MY_PROFILE,
   },
   {
-    key: NAV_LINK.MY_CLASS,
+    key: NAV_LINK.MY_STUDENT_CALENDAR,
+    icon: <CalendarOutlined />,
+    label: NAV_TITLE.MY_STUDENT_CALENDAR,
+    url: NAV_LINK.MY_STUDENT_CALENDAR,
+  },
+  {
+    key: NAV_LINK.MY_STUDENT_CLASS,
     icon: <ReadOutlined />,
-    label: NAV_TITLE.MY_CLASS,
-    url: `${NAV_LINK.STUDENT}${NAV_LINK.MY_CLASS}`,
+    label: NAV_TITLE.MY_STUDENT_CLASS,
+    url: NAV_LINK.MY_STUDENT_CLASS,
   },
 ];
 

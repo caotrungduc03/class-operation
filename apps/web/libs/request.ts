@@ -1,3 +1,4 @@
+import { IClass } from "./class";
 import { ITimestamps } from "./common";
 import { IUser } from "./user";
 
@@ -5,6 +6,7 @@ export enum RequestType {
   WEEKLY_NORM = "WEEKLY_NORM",
   TIME_OFF = "TIME_OFF",
   BUSY_SCHEDULE = "BUSY_SCHEDULE",
+  SUPPORT_TICKET = "SUPPORT_TICKET", // Add support ticket type
 }
 
 export enum RequestStatus {
@@ -12,6 +14,13 @@ export enum RequestStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
   CANCELED = "CANCELED",
+}
+
+export enum RequestPriority {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
 }
 
 export interface WeeklyNormDto {
@@ -42,6 +51,15 @@ export interface IRequest extends ITimestamps {
   teacherId?: string;
   weeklyNorms?: WeeklyNormDto[];
   schedule?: ISchedule;
+  supportTicket?: ISupportTicket;
+}
+
+export interface ISupportTicket {
+  id: string;
+  class: IClass;
+  request: IRequest;
+  note?: string;
+  priority: RequestPriority;
 }
 
 export interface CreateRequestWeeklyNormDto {
@@ -68,6 +86,15 @@ export interface CreateRequestBusyScheduleDto {
   endDate: Date;
 }
 
+export interface CreateRequestSupportTicketDto {
+  name: string;
+  description?: string;
+  classId: string;
+  priority: RequestPriority;
+  note?: string;
+  teacherId?: string;
+}
+
 export const RequestStatusOptions = [
   {
     value: RequestStatus.PENDING,
@@ -87,6 +114,25 @@ export const RequestStatusOptions = [
   },
 ];
 
+export const RequestPriorityOptions = [
+  {
+    value: RequestPriority.LOW,
+    label: "Low",
+  },
+  {
+    value: RequestPriority.MEDIUM,
+    label: "Medium",
+  },
+  {
+    value: RequestPriority.HIGH,
+    label: "High",
+  },
+  {
+    value: RequestPriority.URGENT,
+    label: "Urgent",
+  },
+];
+
 export enum RequestAction {
   APPROVE = "APPROVE",
   REJECT = "REJECT",
@@ -98,4 +144,11 @@ export const REQUEST_STATUS_TAG = {
   [RequestStatus.APPROVED]: "success",
   [RequestStatus.REJECTED]: "error",
   [RequestStatus.CANCELED]: "default",
+} as const;
+
+export const REQUEST_PRIORITY_TAG = {
+  [RequestPriority.LOW]: "success",
+  [RequestPriority.MEDIUM]: "processing",
+  [RequestPriority.HIGH]: "warning",
+  [RequestPriority.URGENT]: "error",
 } as const;

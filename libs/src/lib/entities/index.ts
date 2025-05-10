@@ -11,6 +11,7 @@ export * from './role.entity';
 export * from './room.entity';
 export * from './schedule.entity';
 export * from './student-class.entity';
+export * from './support-ticket.entity';
 export * from './user-detail.entity';
 export * from './user.entity';
 export * from './weekly-norm.entity';

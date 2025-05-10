@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
-import { UserStatus } from '../../enums';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { PaginationRequestDto } from '../common/pagination-request.dto';
 
-export class QueryClassDto {
+export class QueryClassDto extends PaginationRequestDto {
   @ApiProperty({ required: false, description: 'Search by class name' })
   @IsOptional()
   @IsString()
@@ -23,19 +17,4 @@ export class QueryClassDto {
   @IsOptional()
   @IsUUID()
   teacherId?: string;
-
-  @ApiProperty({ required: false, description: 'Filter by status' })
-  @IsOptional()
-  @IsEnum(UserStatus)
-  status?: UserStatus;
-
-  @ApiProperty({ required: false, description: 'Filter by start date (from)' })
-  @IsOptional()
-  @IsDateString()
-  startDateFrom?: Date;
-
-  @ApiProperty({ required: false, description: 'Filter by start date (to)' })
-  @IsOptional()
-  @IsDateString()
-  startDateTo?: Date;
 }

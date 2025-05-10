@@ -1,5 +1,6 @@
 import {
   CreateBusySchedulesRequestDto,
+  CreateSupportTicketRequestDto,
   CreateTimeOffRequestDto,
   CreateWeeklyNormRequestDto,
   GetRequestDto,
@@ -378,5 +379,109 @@ export class RequestController {
     await this.requestService.deleteBusySchedule(id, userId);
 
     return new ResponseDto(HttpStatus.OK, 'Busy schedule request deleted');
+  }
+
+  @Post('support-tickets')
+  createSupportTicket(
+    @Body() createSupportTicketDto: CreateSupportTicketRequestDto,
+    @User('userId') userId: string,
+    @User('role') role: RoleName,
+  ) {
+    return this.requestService.createSupportTicket(
+      createSupportTicketDto,
+      userId,
+      role,
+    );
+  }
+
+  @Get('support-tickets')
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
+  async getAllSupportTickets(
+    @Query() getRequestDto: GetRequestDto,
+    @User('role') role: RoleName,
+    @User('userId') userId: string,
+  ) {
+    const { page, limit, total, data } =
+      await this.requestService.querySupportTickets(
+        getRequestDto,
+        userId,
+        role,
+      );
+
+    return new ResponseDto(HttpStatus.OK, 'Success', {
+      page,
+      limit,
+      total,
+      items: RequestDto.plainToInstance(data, ['admin']),
+    });
+  }
+
+  @Put('support-tickets/:id')
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
+  async updateSupportTicket(
+    @Param('id') id: string,
+    @Body() updateData: Partial<CreateSupportTicketRequestDto>,
+  ) {
+    const updatedRequest = await this.requestService.updateSupportTicket(
+      id,
+      updateData,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Support ticket updated successfully',
+      updatedRequest,
+    );
+  }
+
+  @Patch('support-tickets/:id/status')
+  @Roles(RoleName.ADMIN, RoleName.MANAGE)
+  async updateSupportTicketStatus(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+    @Body('action') action: RequestAction,
+  ) {
+    const updatedRequest = await this.requestService.updateSupportTicketStatus(
+      id,
+      action,
+      userId,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      `Support ticket ${action.toLowerCase()} successfully`,
+      updatedRequest,
+    );
+  }
+
+  @Delete('support-tickets/:id')
+  async deleteSupportTicket(
+    @Param('id') id: string,
+    @User('userId') userId: string,
+  ) {
+    await this.requestService.deleteSupportTicket(id, userId);
+
+    return new ResponseDto(HttpStatus.OK, 'Support ticket deleted');
+  }
+
+  @Get('support-tickets/:id')
+  async getSupportTicketById(@Param('id') id: string) {
+    const request = await this.requestService.getSupportTicketById(id);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Success',
+      RequestDto.plainToInstance(request, ['admin']),
+    );
   }
 }

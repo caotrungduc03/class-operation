@@ -3,6 +3,7 @@ import { CustomResponse, Pagination } from "@web/libs/common";
 import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import {
   CreateRequestBusyScheduleDto,
+  CreateRequestSupportTicketDto,
   CreateRequestTimeOffDto,
   CreateRequestWeeklyNormDto,
   IRequest,
@@ -196,6 +197,71 @@ export const requestApi = createApi({
         method: "DELETE",
       }),
     }),
+
+    // Support Ticket endpoints
+    getSupportTickets: builder.query<
+      CustomResponse<Pagination<IRequest[]>>,
+      {
+        search?: string;
+        status?: string;
+        page?: number;
+        limit?: number;
+        priority?: string;
+      }
+    >({
+      query: (params) => ({
+        url: "/requests/support-tickets",
+        method: "GET",
+        params,
+      }),
+    }),
+
+    getSupportTicketById: builder.query<CustomResponse<IRequest>, string>({
+      query: (id) => ({
+        url: `/requests/support-tickets/${id}`,
+        method: "GET",
+      }),
+    }),
+
+    createSupportTicket: builder.mutation<
+      CustomResponse<IRequest>,
+      CreateRequestSupportTicketDto
+    >({
+      query: (body) => ({
+        url: "/requests/support-tickets",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    updateSupportTicket: builder.mutation<
+      CustomResponse<IRequest>,
+      { id: string; data: Partial<CreateRequestSupportTicketDto> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/requests/support-tickets/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
+
+    updateSupportTicketStatus: builder.mutation<
+      CustomResponse<IRequest>,
+      { id: string; action: RequestAction }
+    >({
+      query: ({ id, action }) => ({
+        url: `/requests/support-tickets/${id}/status`,
+        method: "PATCH",
+        body: { action },
+      }),
+    }),
+
+    deleteSupportTicket: builder.mutation<CustomResponse<void>, string>({
+      query: (id) => ({
+        url: `/requests/support-tickets/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -226,4 +292,13 @@ export const {
   useUpdateBusyScheduleMutation,
   useUpdateBusyScheduleStatusMutation,
   useDeleteBusyScheduleMutation,
+
+  // Support Ticket hooks
+  useGetSupportTicketsQuery,
+  useGetSupportTicketByIdQuery,
+  useLazyGetSupportTicketByIdQuery,
+  useCreateSupportTicketMutation,
+  useUpdateSupportTicketMutation,
+  useUpdateSupportTicketStatusMutation,
+  useDeleteSupportTicketMutation,
 } = requestApi;

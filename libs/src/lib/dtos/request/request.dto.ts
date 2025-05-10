@@ -4,6 +4,7 @@ import { BaseDto } from '../common/base.dto';
 import { ScheduleDto } from '../schedule/schedule.dto';
 import { UserDto } from '../user/user.dto';
 import { WeeklyNormDto } from '../weekly-norm/weekly-norm.dto';
+import { SupportTicketDto } from './../support-ticket/support-ticket.dto';
 
 /**
  * Base Request DTO
@@ -50,4 +51,8 @@ export class RequestDto extends BaseDto {
   @Expose()
   @Type(() => ScheduleDto)
   schedule: ScheduleDto;
+
+  @Expose()
+  @Type(() => SupportTicketDto)
+  supportTicket: SupportTicketDto;
 }

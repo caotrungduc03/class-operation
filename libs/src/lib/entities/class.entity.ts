@@ -5,6 +5,7 @@ import { CustomBaseEntity } from './customBase.entity';
 import { RoomEntity } from './room.entity';
 import { ScheduleEntity } from './schedule.entity';
 import { StudentClassEntity } from './student-class.entity';
+import { SupportTicketEntity } from './support-ticket.entity';
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'classes' })
@@ -94,4 +95,10 @@ export class ClassEntity extends CustomBaseEntity {
 
   @OneToMany(() => ScheduleEntity, (schedule: ScheduleEntity) => schedule.class)
   schedules: ScheduleEntity[];
+
+  @OneToMany(
+    () => SupportTicketEntity,
+    (supportTicket: SupportTicketEntity) => supportTicket.class,
+  )
+  supportTickets: SupportTicketEntity[];
 }

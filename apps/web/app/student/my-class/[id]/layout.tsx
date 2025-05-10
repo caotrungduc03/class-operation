@@ -8,13 +8,13 @@ import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import React from "react";
 
 const breadcrumbs: ItemType[] = [
   {
-    title: NAV_TITLE.MANAGE_CLASSES,
-    href: NAV_LINK.MANAGE_CLASSES,
+    title: NAV_TITLE.MY_STUDENT_CLASS,
+    href: NAV_LINK.MY_STUDENT_CLASS,
   },
   {
     title: NAV_TITLE.CLASS_DETAIL,
@@ -22,9 +22,6 @@ const breadcrumbs: ItemType[] = [
 ];
 
 const ClassDetail = ({ children }: React.PropsWithChildren) => {
-  const [currentTab, setCurrentTab] = useState("1");
-  const router = useRouter();
-  const pathname = usePathname();
   const { id: classId } = useParams<{ id: string }>();
 
   const { data: classData, isLoading } = useGetClassByIdQuery(classId, {
@@ -36,64 +33,17 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
   const tabs = [
     {
       key: "1",
-      label: (
-        <div
-          onClick={() => router.push(NAV_LINK.CLASS_DETAIL_OVERVIEW(classId))}
-        >
-          Overview
-        </div>
-      ),
-    },
-    {
-      key: "2",
-      label: (
-        <div
-          onClick={() => router.push(NAV_LINK.CLASS_DETAIL_SETTINGS(classId))}
-        >
-          Settings
-        </div>
-      ),
-    },
-    {
-      key: "3",
-      label: (
-        <div
-          onClick={() => router.push(NAV_LINK.CLASS_DETAIL_CALENDAR(classId))}
-        >
-          Calendar
-        </div>
-      ),
-    },
-    {
-      key: "4",
-      label: (
-        <div
-          onClick={() => router.push(NAV_LINK.CLASS_DETAIL_STUDENTS(classId))}
-        >
-          Students
-        </div>
-      ),
+      label: "Overview",
     },
   ];
-
-  useEffect(() => {
-    if (pathname.includes("/overview")) {
-      setCurrentTab("1");
-    } else if (pathname.includes("/settings")) {
-      setCurrentTab("2");
-    } else if (pathname.includes("/calendar")) {
-      setCurrentTab("3");
-    } else if (pathname.includes("/students")) {
-      setCurrentTab("4");
-    } else {
-      setCurrentTab("1");
-    }
-  }, [pathname]);
 
   if (isLoading || !classDetail) return <Loading />;
 
   return (
-    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.CLASS_DETAIL}>
+    <PageLayout
+      breadcrumbs={breadcrumbs}
+      title={classDetail?.name || "Class Detail"}
+    >
       <div className="class-detail flex flex-col gap-6">
         <Card>
           <div className="flex gap-6">
@@ -160,12 +110,7 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
               </div>
             </div>
           </div>
-          <Tabs
-            size="large"
-            items={tabs}
-            className="mt-4"
-            activeKey={currentTab}
-          />
+          <Tabs size="large" items={tabs} className="mt-4" activeKey="1" />
         </Card>
         {children}
       </div>

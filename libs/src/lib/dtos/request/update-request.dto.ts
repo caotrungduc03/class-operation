@@ -9,7 +9,7 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { RequestAction } from '../../enums';
+import { RequestAction, RequestPriority } from '../../enums';
 import { UpdateWeeklyNormDto } from '../weekly-norm/update-weekly-norm.dto';
 
 export class UpdateRequestDto {
@@ -102,4 +102,18 @@ export class UpdateBusySchedulesRequestDto {
   @IsDate()
   @IsNotEmpty()
   endDate: Date;
+}
+
+export class UpdateSupportTicketRequestDto {
+  @IsOptional()
+  @IsUUID()
+  classId?: string;
+
+  @IsOptional()
+  @IsEnum(RequestPriority)
+  priority?: RequestPriority;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
 }
