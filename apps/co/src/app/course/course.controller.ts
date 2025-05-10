@@ -29,6 +29,7 @@ export class CourseController {
   @Roles(
     RoleName.ADMIN,
     RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
     RoleName.TEACHER_FULL_TIME,
     RoleName.TEACHER_PART_TIME,
     RoleName.STUDENT,
@@ -52,7 +53,7 @@ export class CourseController {
   }
 
   @Get('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async findById(@Param('id') id: string) {
     const course = await this.courseService.findById(id);
 
@@ -64,7 +65,7 @@ export class CourseController {
   }
 
   @Post('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async create(@Body() createCourseDto: CreateCourseDto) {
     const course = await this.courseService.create(createCourseDto);
 
@@ -76,7 +77,7 @@ export class CourseController {
   }
 
   @Put('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async updateById(
     @Param('id') id: string,
     @Body() updateCourseDto: UpdateCourseDto,
@@ -91,7 +92,7 @@ export class CourseController {
   }
 
   @Delete('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async deleteById(@Param('id') id: string) {
     await this.courseService.deleteById(id);
 

@@ -372,6 +372,7 @@ export class RequestController {
   }
 
   @Delete('busy-schedules/:id')
+  @Roles(RoleName.ADMIN, RoleName.MANAGE)
   async deleteBusySchedule(
     @Param('id') id: string,
     @User('userId') userId: string,
@@ -382,6 +383,12 @@ export class RequestController {
   }
 
   @Post('support-tickets')
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.RECEPTIONIST,
+  )
   createSupportTicket(
     @Body() createSupportTicketDto: CreateSupportTicketRequestDto,
     @User('userId') userId: string,
@@ -400,6 +407,7 @@ export class RequestController {
     RoleName.MANAGE,
     RoleName.TEACHER_PART_TIME,
     RoleName.TEACHER_FULL_TIME,
+    RoleName.RECEPTIONIST,
   )
   async getAllSupportTickets(
     @Query() getRequestDto: GetRequestDto,
@@ -445,7 +453,7 @@ export class RequestController {
   }
 
   @Patch('support-tickets/:id/status')
-  @Roles(RoleName.ADMIN, RoleName.MANAGE)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST)
   async updateSupportTicketStatus(
     @Param('id') id: string,
     @User('userId') userId: string,
@@ -465,6 +473,7 @@ export class RequestController {
   }
 
   @Delete('support-tickets/:id')
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST)
   async deleteSupportTicket(
     @Param('id') id: string,
     @User('userId') userId: string,
@@ -475,6 +484,7 @@ export class RequestController {
   }
 
   @Get('support-tickets/:id')
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST)
   async getSupportTicketById(@Param('id') id: string) {
     const request = await this.requestService.getSupportTicketById(id);
 

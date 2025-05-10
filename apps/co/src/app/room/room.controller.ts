@@ -26,7 +26,7 @@ export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
   @Get('/')
-  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL, RoleName.STAFF_ACADEMIC)
   async find(@Query() queryParams: QueryRoomDto) {
     const {
       page,

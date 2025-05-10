@@ -222,7 +222,7 @@ const ClassCalendar = () => {
           classId: classId,
         };
 
-        await createSchedule(scheduleData).unwrap();
+        schedulesPromises.push(createSchedule(scheduleData).unwrap());
         currentDate = currentDate.add(1, "day");
       }
 

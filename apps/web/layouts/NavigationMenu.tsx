@@ -140,6 +140,7 @@ const OPSNavigationItems: NavigationItem[] = [
     icon: <QuestionCircleOutlined />,
     label: NAV_TITLE.MANAGE_SUPPORT_TICKETS,
     url: NAV_LINK.MANAGE_SUPPORT_TICKETS,
+    roles: [RoleName.ADMIN, RoleName.RECEPTIONIST],
   },
 ];
 

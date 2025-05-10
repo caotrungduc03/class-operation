@@ -103,7 +103,7 @@ export class ClassController {
   }
 
   @Get('/:id/students')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async findStudentsByClassId(
     @Query() query: Record<string, any>,
     @Param('id') id: string,
@@ -122,7 +122,7 @@ export class ClassController {
   }
 
   @Post('/')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async create(@Body() createClassDto: CreateClassDto) {
     const classEntity = await this.classService.create(createClassDto);
 
@@ -134,7 +134,7 @@ export class ClassController {
   }
 
   @Put('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async updateById(
     @Param('id') id: string,
     @Body() updateClassDto: UpdateClassDto,
@@ -149,7 +149,7 @@ export class ClassController {
   }
 
   @Delete('/:id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async deleteById(@Param('id') id: string) {
     await this.classService.deleteById(id);
 
@@ -175,7 +175,7 @@ export class ClassController {
   }
 
   @Post('/:id/students/:studentId')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async addStudentToClass(
     @Param('id') id: string,
     @Param('studentId') studentId: string,
@@ -189,7 +189,7 @@ export class ClassController {
   }
 
   @Delete('/:id/students/:studentId')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async removeStudentFromClass(
     @Param('id') id: string,
     @Param('studentId') studentId: string,

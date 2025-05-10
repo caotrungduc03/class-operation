@@ -28,6 +28,7 @@ export class ScheduleController {
     RoleName.MANAGE,
     RoleName.TEACHER_PART_TIME,
     RoleName.TEACHER_FULL_TIME,
+    RoleName.RECEPTIONIST,
   )
   async findByRangeDate(
     @Query() query: GetScheduleDto,
