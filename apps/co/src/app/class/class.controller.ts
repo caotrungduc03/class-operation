@@ -104,14 +104,21 @@ export class ClassController {
 
   @Get('/:id/students')
   @Roles(RoleName.ADMIN)
-  async findStudentsByClassId(@Param('id') id: string) {
-    const students = await this.classService.findStudentsByClassId(id);
+  async findStudentsByClassId(
+    @Query() query: Record<string, any>,
+    @Param('id') id: string,
+  ) {
+    const { page, limit, total, data } =
+      await this.classService.findStudentsByClassId(query, id);
 
-    return new ResponseDto(
-      HttpStatus.OK,
-      'Success',
-      UserDto.plainToInstance(students, ['admin']),
-    );
+    const results: Pagination<UserDto> = {
+      page,
+      limit,
+      total,
+      items: UserDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
   }
 
   @Post('/')
@@ -164,6 +171,34 @@ export class ClassController {
       HttpStatus.CREATED,
       'Created schedules successfully',
       result,
+    );
+  }
+
+  @Post('/:id/students/:studentId')
+  @Roles(RoleName.ADMIN)
+  async addStudentToClass(
+    @Param('id') id: string,
+    @Param('studentId') studentId: string,
+  ) {
+    await this.classService.addStudentToClass(id, studentId);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Student added to class successfully',
+    );
+  }
+
+  @Delete('/:id/students/:studentId')
+  @Roles(RoleName.ADMIN)
+  async removeStudentFromClass(
+    @Param('id') id: string,
+    @Param('studentId') studentId: string,
+  ) {
+    await this.classService.removeStudentFromClass(id, studentId);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Student removed from class successfully',
     );
   }
 }

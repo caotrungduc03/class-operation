@@ -47,6 +47,24 @@ export class ScheduleController {
     );
   }
 
+  @Get('/student')
+  @Roles(RoleName.STUDENT)
+  async findByStudentClasses(
+    @Query() query: GetScheduleDto,
+    @User('userId') userId: string,
+  ) {
+    const result = await this.scheduleService.findByStudentClasses(
+      query,
+      userId,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Student class schedules retrieved successfully',
+      result,
+    );
+  }
+
   @Get('/:id')
   @Roles(RoleName.ADMIN, RoleName.TEACHER_FULL_TIME)
   async findById(@Param('id') id: string) {
@@ -71,24 +89,6 @@ export class ScheduleController {
     return new ResponseDto(
       HttpStatus.CREATED,
       'Teaching schedules created successfully',
-      result,
-    );
-  }
-
-  @Get('/student')
-  @Roles(RoleName.STUDENT)
-  async findByStudentClasses(
-    @Query() query: GetScheduleDto,
-    @User('userId') userId: string,
-  ) {
-    const result = await this.scheduleService.findByStudentClasses(
-      query,
-      userId,
-    );
-
-    return new ResponseDto(
-      HttpStatus.OK,
-      'Student class schedules retrieved successfully',
       result,
     );
   }

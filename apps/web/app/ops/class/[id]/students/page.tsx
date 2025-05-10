@@ -17,6 +17,7 @@ import {
   useGetClassStudentsQuery,
   useRemoveStudentFromClassMutation,
 } from "@web/libs/features/classes/classApi";
+import { useGetStudentsQuery } from "@web/libs/features/users/userApi";
 import { IUser, STATUS_LABEL, STATUS_TAG, UserStatus } from "@web/libs/user";
 import { Card, Modal, Table, Tag, Typography } from "antd";
 import Image from "next/image";
@@ -123,8 +124,7 @@ const ClassStudents = () => {
     },
   );
 
-  const { data: availableStudentsData } = useGetClassStudentsQuery({
-    classId,
+  const { data: availableStudentsData } = useGetStudentsQuery({
     page: 1,
     limit: 100,
   });
