@@ -1,11 +1,21 @@
 import {
+  CreateTeachingSchedulesDto,
   GetScheduleDto,
   ResponseDto,
   RoleName,
   Roles,
   User,
 } from '@class-operation/libs';
-import { Controller, Get, HttpStatus, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+
 import { ScheduleService } from './schedule.service';
 
 @Controller('schedules')
@@ -45,6 +55,22 @@ export class ScheduleController {
     return new ResponseDto(
       HttpStatus.OK,
       'Schedule retrieved successfully',
+      result,
+    );
+  }
+
+  @Post('/teaching')
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.STAFF_ACADEMIC)
+  async createTeachingSchedules(
+    @Body() createTeachingScheduleDto: CreateTeachingSchedulesDto,
+  ) {
+    const result = await this.scheduleService.createTeachingSchedules(
+      createTeachingScheduleDto,
+    );
+
+    return new ResponseDto(
+      HttpStatus.CREATED,
+      'Teaching schedules created successfully',
       result,
     );
   }

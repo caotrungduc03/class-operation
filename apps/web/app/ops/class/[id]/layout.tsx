@@ -90,7 +90,7 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
     }
   }, [pathname]);
 
-  if (isLoading) return <Loading />;
+  if (isLoading || !classDetail) return <Loading />;
 
   return (
     <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.CLASS_DETAIL}>
@@ -101,15 +101,17 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
               <ReadOutlined style={{ fontSize: 64, color: "#1890ff" }} />
             </div>
             <div className="flex flex-grow flex-col">
-              <div className="flex justify-between">
+              <div className="flex items-center justify-start">
                 <Typography.Title level={4}>
                   {classDetail?.name}
                 </Typography.Title>
-                <Tag color={STATUS_TAG[classDetail.status]}>
-                  {STATUS_LABEL[classDetail.status]}
-                </Tag>
               </div>
               <div className="flex gap-6">
+                <div>
+                  <Tag color={STATUS_TAG[classDetail.status]}>
+                    {STATUS_LABEL[classDetail.status]}
+                  </Tag>
+                </div>
                 <div>
                   <Typography.Text strong>Code: </Typography.Text>
                   <Typography.Text>{classDetail?.code}</Typography.Text>

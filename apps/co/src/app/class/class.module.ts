@@ -1,9 +1,4 @@
-import {
-  ClassEntity,
-  CourseEntity,
-  RoomEntity,
-  UserEntity,
-} from '@class-operation/libs';
+import { ClassEntity, ScheduleEntity } from '@class-operation/libs';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CounterModule } from '../counter/counter.module';
@@ -12,12 +7,7 @@ import { ClassService } from './class.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ClassEntity,
-      CourseEntity,
-      UserEntity,
-      RoomEntity,
-    ]),
+    TypeOrmModule.forFeature([ClassEntity, ScheduleEntity]),
     CounterModule,
   ],
   controllers: [ClassController],

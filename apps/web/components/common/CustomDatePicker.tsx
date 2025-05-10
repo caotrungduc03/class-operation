@@ -14,6 +14,7 @@ interface CustomDatePickerProps {
   required?: boolean;
   format?: string;
   className?: string;
+  disabledDate?: (current: dayjs.Dayjs) => boolean;
 }
 
 const CustomDatePicker = ({
@@ -26,6 +27,7 @@ const CustomDatePicker = ({
   required,
   format = "DD/MM/YYYY",
   className,
+  disabledDate,
 }: CustomDatePickerProps) => {
   return (
     <div className={`w-full ${className}`}>
@@ -46,6 +48,7 @@ const CustomDatePicker = ({
                 style={{ width: "100%" }}
                 onChange={(date) => field.onChange(date ?? null)}
                 value={field.value ? dayjs(field.value) : null}
+                disabledDate={disabledDate}
               />
 
               {error?.message && (

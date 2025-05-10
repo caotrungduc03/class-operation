@@ -73,7 +73,7 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
     debounce((value: string) => {
       setDebouncedSearchTerm(value);
       setPage(1);
-      setOptions([]);
+      setOptions(initialOptions ?? []);
       isFetchingNextPage.current = false;
     }, debounceTimeout),
     [debounceTimeout],
@@ -111,7 +111,12 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
   useEffect(() => {
     if (transformedOptions.length > 0) {
       if (page === 1) {
-        setOptions(transformedOptions);
+        // Keep initialOptions at the top and add unique new options from API
+        const existingValues = new Set(initialOptions.map((opt) => opt.value));
+        const uniqueNewOptions = transformedOptions.filter(
+          (opt) => !existingValues.has(opt.value),
+        );
+        setOptions([...initialOptions, ...uniqueNewOptions]);
       } else {
         setOptions((prevOptions) => {
           const existingValues = new Set(prevOptions.map((opt) => opt.value));
@@ -122,8 +127,6 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
         });
       }
       isFetchingNextPage.current = false;
-    } else if (page === 1 && !isFetching && !isLoading) {
-      setOptions([]);
     }
 
     if (!isFetching) {
@@ -137,7 +140,11 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
   };
 
   const handleFocus = () => {
-    if (fetchOnFocus && !isInitialFocusFetchDone && options.length === 0) {
+    if (
+      fetchOnFocus &&
+      !isInitialFocusFetchDone &&
+      options.length === (initialOptions?.length || 0)
+    ) {
       setIsInitialFocusFetchDone(true);
     }
     selectProps.onFocus?.();
@@ -166,23 +173,7 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
     selectProps.onPopupScroll?.(event);
   };
 
-  const dropdownRender = (menu: React.ReactElement) => (
-    <>
-      {menu}
-      {isFetching && page > 1 && (
-        <div style={{ padding: "8px", textAlign: "center" }}>
-          <Loading /> Loading more...
-        </div>
-      )}
-      {!hasNextPage && options.length > 0 && page > 1 && (
-        <div style={{ padding: "8px", textAlign: "center", color: "#aaa" }}>
-          End of list
-        </div>
-      )}
-    </>
-  );
-
-  const getNotFoundContent = () => {
+  const getNotFoundContent = useCallback(() => {
     if (isLoading || (isFetching && page === 1)) {
       return (
         <div style={{ padding: "8px", textAlign: "center" }}>
@@ -214,33 +205,84 @@ export const useDebouncedSelect = <T extends Record<string, any>>({
       );
     }
     return null;
-  };
-
-  return {
-    selectProps: {
-      ...selectProps,
-      options: options,
-      value: field.value,
-      loading: isLoading || (isFetching && page === 1),
-      showSearch: true,
-      filterOption: false,
-      onSearch: handleSearch,
-      onChange: handleChange,
-      onFocus: handleFocus,
-      onBlur: field.onBlur,
-      onPopupScroll: handlePopupScroll,
-      notFoundContent: getNotFoundContent(),
-      dropdownRender: dropdownRender,
-      searchValue: searchTerm,
-      allowClear: true,
-      placeholder: selectProps.placeholder || "Select or search...",
-      ref: field.ref,
-    },
-    fieldState,
-    isLoading: isLoading || isFetching,
+  }, [
+    isLoading,
+    isFetching,
+    page,
     isError,
-    error,
-    options,
-    hasNextPage,
-  };
+    error?.message,
+    options.length,
+    debouncedSearchTerm,
+    isInitialFocusFetchDone,
+  ]);
+
+  const dropdownRender = useCallback(
+    (menu: React.ReactElement) => (
+      <>
+        {menu}
+        {isFetching && page > 1 && (
+          <div style={{ padding: "8px", textAlign: "center" }}>
+            <Loading /> Loading more...
+          </div>
+        )}
+        {!hasNextPage && options.length > 0 && page > 1 && (
+          <div style={{ padding: "8px", textAlign: "center", color: "#aaa" }}>
+            End of list
+          </div>
+        )}
+      </>
+    ),
+    [isFetching, page, hasNextPage, options.length],
+  );
+
+  return useMemo(
+    () => ({
+      selectProps: {
+        ...selectProps,
+        options: options,
+        value: field.value,
+        loading: isLoading || (isFetching && page === 1),
+        showSearch: true,
+        filterOption: false,
+        onSearch: handleSearch,
+        onChange: handleChange,
+        onFocus: handleFocus,
+        onBlur: field.onBlur,
+        onPopupScroll: handlePopupScroll,
+        notFoundContent: getNotFoundContent(),
+        dropdownRender: dropdownRender,
+        searchValue: searchTerm,
+        allowClear: true,
+        placeholder: selectProps.placeholder || "Select or search...",
+        ref: field.ref,
+      },
+      fieldState,
+      isLoading: isLoading || isFetching,
+      isError,
+      error,
+      options,
+      hasNextPage,
+    }),
+    [
+      selectProps,
+      options,
+      field.value,
+      field.onBlur,
+      field.ref,
+      isLoading,
+      isFetching,
+      page,
+      handleSearch,
+      handleChange,
+      handleFocus,
+      handlePopupScroll,
+      getNotFoundContent,
+      dropdownRender,
+      searchTerm,
+      fieldState,
+      isError,
+      error,
+      hasNextPage,
+    ],
+  );
 };

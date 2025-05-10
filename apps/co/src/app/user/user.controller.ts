@@ -25,7 +25,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/teachers')
-  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.STAFF_GENERAL)
   async findTeachers(@Query() query: Record<string, any>) {
     const { page, limit, total, data } =
       await this.userService.findUsersByRoleName(

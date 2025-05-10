@@ -7,12 +7,14 @@ import CustomInputNumber from "@web/components/common/CustomInputNumber";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
 import Loading from "@web/components/common/Loading";
+import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import { UpdateClassDto } from "@web/libs/class";
 import {
   useGetClassByIdQuery,
   useUpdateClassMutation,
 } from "@web/libs/features/classes/classApi";
-import { useGetCoursesQuery } from "@web/libs/features/courses/courseApi";
+import { useGetRoomsQuery } from "@web/libs/features/rooms/roomApi";
+import { useGetTeachersQuery } from "@web/libs/features/users/userApi";
 import { StatusOptions, UserStatus } from "@web/libs/user";
 import { Card, Typography } from "antd";
 import dayjs from "dayjs";
@@ -39,8 +41,7 @@ const classFormSchema = z.object({
 type ClassFormValues = z.infer<typeof classFormSchema>;
 
 const ClassSettings = () => {
-  const { id } = useParams();
-  const classId = id as string;
+  const { id: classId } = useParams<{ id: string }>();
   const router = useRouter();
 
   const {
@@ -52,15 +53,35 @@ const ClassSettings = () => {
   });
 
   const [updateClass, { isLoading: isUpdating }] = useUpdateClassMutation();
-  const { data: coursesData } = useGetCoursesQuery({ limit: 100 });
 
   const classDetail = classData?.data;
 
-  const courseOptions =
-    coursesData?.data?.items.map((course) => ({
-      label: `${course.code} - ${course.name}`,
-      value: course.id,
-    })) || [];
+  const courseOptions = classDetail?.course
+    ? [
+        {
+          label: `${classDetail.course.code} - ${classDetail.course.name}`,
+          value: classDetail.course.id,
+        },
+      ]
+    : [];
+
+  const teacherOptions = classDetail?.teacher
+    ? [
+        {
+          label: `${classDetail.teacher.fullName}`,
+          value: classDetail.teacher.id,
+        },
+      ]
+    : [];
+
+  const roomOptions = classDetail?.room
+    ? [
+        {
+          label: `${classDetail.room.name}`,
+          value: classDetail.room.id,
+        },
+      ]
+    : [];
 
   const { control, handleSubmit, reset } = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
@@ -77,21 +98,41 @@ const ClassSettings = () => {
     },
   });
 
+  // Teacher select with debounce
+  const { selectProps: teacherSelectProps } = useDebouncedSelect({
+    name: "teacherId",
+    control: control,
+    useGetDataQuery: useGetTeachersQuery,
+    labelField: "fullName",
+    valueField: "id",
+    initialOptions: teacherOptions,
+  });
+
+  // Room select with debounce
+  const { selectProps: roomSelectProps } = useDebouncedSelect({
+    name: "roomId",
+    control: control,
+    useGetDataQuery: useGetRoomsQuery,
+    labelField: "name",
+    valueField: "id",
+    initialOptions: roomOptions,
+  });
+
   useEffect(() => {
-    if (classDetail) {
-      reset({
-        name: classDetail.name,
-        description: classDetail.description || "",
-        startDate: classDetail.startDate ? dayjs(classDetail.startDate) : null,
-        endDate: classDetail.endDate ? dayjs(classDetail.endDate) : null,
-        quantity: classDetail.quantity || 0,
-        status: classDetail.status,
-        courseId: classDetail.courseId,
-        teacherId: classDetail.teacherId || null,
-        roomId: classDetail.roomId || null,
-      });
-    }
-  }, [classDetail, reset]);
+    if (!classDetail) return;
+
+    reset({
+      name: classDetail.name,
+      description: classDetail.description || "",
+      startDate: classDetail.startDate ? dayjs(classDetail.startDate) : null,
+      endDate: classDetail.endDate ? dayjs(classDetail.endDate) : null,
+      quantity: classDetail.quantity || 0,
+      status: classDetail.status,
+      courseId: classDetail.courseId,
+      teacherId: classDetail.teacherId || null,
+      roomId: classDetail.roomId || null,
+    });
+  }, [classDetail]);
 
   const onSubmit = async (formData: ClassFormValues) => {
     try {
@@ -222,19 +263,35 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Teacher ID:</Typography.Text>
+            <Typography.Text strong>Teacher:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <CustomInput name="teacherId" control={control} size="large" />
+            <CustomSelect
+              name="teacherId"
+              control={control}
+              size="large"
+              placeholder="Select teacher"
+              options={teacherSelectProps.options}
+              onFocus={teacherSelectProps.onFocus}
+              onPopupScroll={teacherSelectProps.onPopupScroll}
+            />
           </div>
         </div>
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Room ID:</Typography.Text>
+            <Typography.Text strong>Room:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <CustomInput name="roomId" control={control} size="large" />
+            <CustomSelect
+              name="roomId"
+              control={control}
+              size="large"
+              placeholder="Select room"
+              options={roomSelectProps.options}
+              onFocus={roomSelectProps.onFocus}
+              onPopupScroll={roomSelectProps.onPopupScroll}
+            />
           </div>
         </div>
 

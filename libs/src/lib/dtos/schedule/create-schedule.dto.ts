@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -35,4 +36,26 @@ export class CreateScheduleDto {
   @IsUUID()
   @IsOptional()
   teacherId?: string;
+}
+
+export class CreateTeachingSchedulesDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  startDate: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  endDate: string;
+
+  @IsNotEmpty()
+  @IsString()
+  classId: string;
 }

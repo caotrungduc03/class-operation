@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsEmpty,
   IsEnum,
   IsNotEmpty,
@@ -30,7 +29,7 @@ export class CreateCourseDto {
     default: false,
   })
   @IsOptional()
-  @IsBoolean()
+  @IsEnum(UserStatus)
   status?: UserStatus;
 
   @ApiProperty({

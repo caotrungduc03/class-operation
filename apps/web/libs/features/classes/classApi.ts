@@ -7,6 +7,8 @@ import {
 } from "@web/libs/class";
 import { CustomResponse, Pagination } from "@web/libs/common";
 import { baseFetchQuery } from "@web/libs/customBaseQuery";
+import { ISchedule } from "@web/libs/schedule";
+import { IUser } from "@web/libs/user";
 
 export const classApi = createApi({
   reducerPath: "classApi",
@@ -57,7 +59,7 @@ export const classApi = createApi({
     }),
 
     getClassSchedules: builder.query<
-      CustomResponse<any[]>,
+      CustomResponse<ISchedule[]>,
       { classId: string; startDate?: string; endDate?: string }
     >({
       query: ({ classId, startDate, endDate }) => ({
@@ -68,7 +70,7 @@ export const classApi = createApi({
     }),
 
     getClassStudents: builder.query<
-      CustomResponse<Pagination<any[]>>,
+      CustomResponse<Pagination<IUser[]>>,
       { classId: string; page?: number; limit?: number; search?: string }
     >({
       query: ({ classId, ...params }) => ({

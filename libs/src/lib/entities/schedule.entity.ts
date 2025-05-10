@@ -42,6 +42,7 @@ export class ScheduleEntity extends CustomBaseEntity {
 
   @Column({
     name: 'request_id',
+    nullable: true,
   })
   requestId: string;
 

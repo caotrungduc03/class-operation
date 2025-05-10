@@ -469,6 +469,7 @@ const Classes = () => {
             name="startDate"
             label="Start Date"
             placeholder="Select start date"
+            required
           />
 
           <CustomDatePicker
@@ -476,6 +477,7 @@ const Classes = () => {
             name="endDate"
             label="End Date"
             placeholder="Select end date"
+            required
           />
 
           <CustomInputNumber

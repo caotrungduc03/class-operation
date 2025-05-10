@@ -34,7 +34,9 @@ export class ClassController {
       limit,
       total,
       data: classes,
-    } = await this.classService.query(queryParams);
+    } = await this.classService.query(queryParams, {
+      // relations: ['teacher'],
+    });
 
     const results: Pagination<ClassDto> = {
       page,
@@ -103,5 +105,23 @@ export class ClassController {
     await this.classService.deleteById(id);
 
     return new ResponseDto(HttpStatus.OK, 'Deleted a class');
+  }
+
+  @Get('/:id/schedules')
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
+  async getSchedules(@Param('id') id: string) {
+    const result = await this.classService.getSchedules(id);
+
+    return new ResponseDto(
+      HttpStatus.CREATED,
+      'Created schedules successfully',
+      result,
+    );
   }
 }

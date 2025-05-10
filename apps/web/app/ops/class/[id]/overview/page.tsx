@@ -51,10 +51,10 @@ const ClassOverview = () => {
           {classDetail.course?.name} ({classDetail.course?.code})
         </Descriptions.Item>
         <Descriptions.Item label="Teacher" span={1}>
-          {classDetail.teacher?.fullName || "Not assigned"}
+          {classDetail.teacher?.fullName || ""}
         </Descriptions.Item>
         <Descriptions.Item label="Room" span={1}>
-          {classDetail.room?.name || "Not assigned"}
+          {classDetail.room?.name || ""}
         </Descriptions.Item>
         <Descriptions.Item label="Start Date" span={1}>
           {classDetail.startDate
@@ -70,7 +70,7 @@ const ClassOverview = () => {
           {classDetail.quantity || 0} students
         </Descriptions.Item>
         <Descriptions.Item label="Description" span={2}>
-          {classDetail.description || "No description"}
+          {classDetail.description || ""}
         </Descriptions.Item>
         <Descriptions.Item label="Created At" span={1}>
           {dayjs(classDetail.createdAt).format("DD/MM/YYYY HH:mm")}

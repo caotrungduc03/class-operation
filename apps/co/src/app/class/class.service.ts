@@ -2,8 +2,11 @@ import {
   ClassEntity,
   CounterType,
   CreateClassDto,
+  ScheduleEntity,
+  ScheduleType,
   UpdateClassDto,
   UserEntity,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   BadRequestException,
@@ -21,6 +24,8 @@ export class ClassService extends BaseService<ClassEntity> {
     @InjectRepository(ClassEntity)
     private readonly classRepository: Repository<ClassEntity>,
     private readonly counterService: CounterService,
+    @InjectRepository(ScheduleEntity)
+    private readonly scheduleRepository: Repository<ScheduleEntity>,
   ) {
     super(classRepository);
   }
@@ -99,5 +104,24 @@ export class ClassService extends BaseService<ClassEntity> {
     // Extract students from the student-class relationship
     const students = classEntity.studentClasses.map((sc) => sc.student);
     return students;
+  }
+
+  async getSchedules(classId: string) {
+    const classEntity = await this.findById(classId);
+
+    return this.scheduleRepository.find({
+      where: [
+        {
+          classId,
+          status: UserStatus.ACTIVE,
+          type: ScheduleType.TEACHING,
+        },
+        {
+          teacherId: classEntity.teacherId,
+          status: UserStatus.ACTIVE,
+          type: ScheduleType.BUSY,
+        },
+      ],
+    });
   }
 }
