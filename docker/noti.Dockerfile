@@ -10,8 +10,8 @@ RUN yarn install --frozen-lockfile
 # Copy all project files
 COPY . .
 
-# Build the CO app using Nx
-RUN npx nx build co --prod
+# Build the noti app using Nx
+RUN npx nx build noti --prod
 
 # Production stage
 FROM node:18-alpine AS production
@@ -22,12 +22,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
-# Use the CO_PORT from environment
-ARG CO_PORT=3000
-ENV PORT=$CO_PORT
+# Use the NOTI_PORT from environment
+ARG NOTI_PORT=8082
+ENV PORT=$NOTI_PORT
 
 # Copy built app from the builder stage
-COPY --from=builder /app/dist/apps/co ./
+COPY --from=builder /app/dist/apps/noti ./
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock* ./
 

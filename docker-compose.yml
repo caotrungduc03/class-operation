@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - '${DB_PORT}:5432'
+      - ${DB_PORT}:5432
     volumes:
       - postgres_co:/var/lib/postgresql/data
     env_file:
@@ -35,7 +35,7 @@ services:
     container_name: co_app
     build:
       context: .
-      dockerfile: ./apps/co/Dockerfile
+      dockerfile: docker/co.Dockerfile
     restart: always
     ports:
       - ${CO_PORT}:${CO_PORT}
@@ -61,10 +61,10 @@ services:
     container_name: noti_app
     build:
       context: .
-      dockerfile: ./apps/noti/Dockerfile
+      dockerfile: docker/noti.Dockerfile
     restart: always
     ports:
-      - '${NOTI_PORT}:${NOTI_PORT}'
+      - ${NOTI_PORT}:${NOTI_PORT}
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
@@ -85,7 +85,7 @@ services:
     container_name: web_app
     build:
       context: .
-      dockerfile: ./apps/web/Dockerfile
+      dockerfile: docker/web.Dockerfile
     restart: always
     ports:
       - 3000:3000

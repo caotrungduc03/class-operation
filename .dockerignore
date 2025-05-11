@@ -54,6 +54,7 @@ lerna-debug.log*
 .env.production.local
 
 # Docker files (to avoid recursion)
+docker/*
 Dockerfile
 **/Dockerfile
 docker-compose*.yml
@@ -84,7 +85,7 @@ LICENSE
 .eslintrc.*
 .eslintignore
 jest.config.*
-nx.json
+
 tsconfig.tsbuildinfo
 **/tsconfig.*.json
 *.tsbuildinfo

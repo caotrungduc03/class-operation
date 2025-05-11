@@ -1,6 +1,6 @@
-import { RoleName } from "@class-operation/libs";
 import { MenuProps } from "antd";
 import { FixedType } from "rc-table/lib/interface";
+import { RoleName } from "./role";
 
 // Format constants
 export const DATE_FORMAT = "DD/MM/YYYY";

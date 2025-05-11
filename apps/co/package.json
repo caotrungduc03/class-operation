@@ -39,12 +39,6 @@
             "buildTarget": "co:build:production"
           }
         }
-      },
-      "docker-build": {
-        "dependsOn": [
-          "build"
-        ],
-        "command": "docker build -f apps/co/Dockerfile . -t co"
       }
     }
   }

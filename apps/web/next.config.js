@@ -22,6 +22,7 @@ const nextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ["https://devtobiz.id.vn"],
 };
 
 const plugins = [
