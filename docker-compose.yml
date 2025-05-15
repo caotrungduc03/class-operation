@@ -92,9 +92,9 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_API_URL_SOCKET=${NEXT_PUBLIC_API_URL_SOCKET}
-    depends_on:
-      - co
-      - noti
+    # depends_on:
+    #   - co
+    #   - noti
     env_file:
       - .env
 

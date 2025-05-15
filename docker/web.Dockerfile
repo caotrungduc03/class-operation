@@ -7,10 +7,14 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 # Cài đặt các phụ thuộc bằng Yarn
-RUN yarn install
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
-# Sao chép các file còn lại vào image
-COPY . .
+COPY eslint.config.mjs ./
+COPY nx.json ./
+COPY tsconfig*.json ./
+COPY .env ./
+
+COPY apps/web ./apps/web
 
 # Build the web app using Nx
 RUN npx nx build web --prod
@@ -30,11 +34,13 @@ COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/package.json ./package.json
 
 # Install production dependencies only
-RUN yarn install --production --frozen-lockfile --non-interactive
+RUN yarn install --production --frozen-lockfile --non-interactive --network-timeout 600000 && \
+    yarn cache clean && \
+    rm -rf /app/.yarn/cache
 
 # Expose the port
 EXPOSE 3000
 
 # Start the Next.js app
-CMD ["next", "start"]
+CMD ["yarn", "start"]
 

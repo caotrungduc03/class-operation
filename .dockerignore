@@ -44,7 +44,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # Environment and local files
-.env
+# .env
 .env.*
 !.env.example
 .local
@@ -85,8 +85,8 @@ LICENSE
 .eslintrc.*
 .eslintignore
 jest.config.*
-
+# nx.json
 tsconfig.tsbuildinfo
-**/tsconfig.*.json
+# **/tsconfig.*.json
 *.tsbuildinfo
 **/babel.config.js
