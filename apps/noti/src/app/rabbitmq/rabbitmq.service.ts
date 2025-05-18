@@ -35,8 +35,14 @@ export class RabbitMQService implements OnModuleInit {
     const user = process.env.RABBITMQ_USER;
     const password = process.env.RABBITMQ_PASSWORD;
     const host = process.env.RABBITMQ_HOST;
-    const port = process.env.RABBITMQ_PORT;
-    const url = defaultUrl ?? `${http}://${user}:${password}@${host}:${port}`;
+    const port = process.env.RABBITMQ_PORT || 5672;
+    const url = defaultUrl || {
+      protocol: http,
+      username: user,
+      password,
+      hostname: host,
+      port: Number(port),
+    };
 
     this.connection = await connect(url);
     this.channel = await this.connection.createChannel();

@@ -62,6 +62,7 @@ services:
     restart: always
     ports:
       - ${NOTI_PORT}:${NOTI_PORT}
+      - ${SOCKET_PORT}:${SOCKET_PORT}
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - RABBITMQ_URL=${RABBITMQ_URL}
@@ -72,6 +73,8 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+    depends_on:
+      - rabbitmq
     env_file:
       - .env
 
@@ -86,6 +89,8 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_API_URL_SOCKET=${NEXT_PUBLIC_API_URL_SOCKET}
+    depends_on:
+      - rabbitmq
     env_file:
       - .env
 
