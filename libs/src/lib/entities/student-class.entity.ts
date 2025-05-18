@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserStatus } from '../enums';
-import { ClassEntity } from './class.entity';
+import type { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
-import { UserEntity } from './user.entity';
+import type { UserEntity } from './user.entity';
 
 @Entity({ name: 'student_class' })
 export class StudentClassEntity extends CustomBaseEntity {
@@ -19,14 +19,11 @@ export class StudentClassEntity extends CustomBaseEntity {
   })
   status: UserStatus;
 
-  @ManyToOne(
-    () => ClassEntity,
-    (classEntity: ClassEntity) => classEntity.studentClasses,
-  )
+  @ManyToOne('ClassEntity', 'studentClasses')
   @JoinColumn({ name: 'class_id' })
   class: ClassEntity;
 
-  @ManyToOne(() => UserEntity, (user: UserEntity) => user.students)
+  @ManyToOne('UserEntity', 'students')
   @JoinColumn({ name: 'student_id' })
   student: UserEntity;
 }

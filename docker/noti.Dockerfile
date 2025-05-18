@@ -3,14 +3,17 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
-# Copy all project files
-COPY . .
+COPY eslint.config.mjs ./
+COPY nx.json ./
+COPY tsconfig*.json ./
+COPY .env ./
 
-# Build the noti app using Nx
+COPY apps/noti ./apps/noti
+COPY libs ./libs
+
 RUN npx nx build noti --prod
 
 # Production stage
@@ -18,23 +21,16 @@ FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Set NODE_ENV
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-
-# Use the NOTI_PORT from environment
-ARG NOTI_PORT=8082
-ENV PORT=$NOTI_PORT
-
-# Copy built app from the builder stage
 COPY --from=builder /app/dist/apps/noti ./
+COPY --from=builder /app/dist/libs ./libs
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock* ./
 
-# Install production dependencies only
-RUN yarn install --production --frozen-lockfile --non-interactive
+RUN yarn install --production --frozen-lockfile --non-interactive --network-timeout 600000
 
-# Expose the port (will use the PORT env variable)
-EXPOSE $PORT
+ARG NOTI_PORT=8081
+ARG SOCKET_PORT=8082
+EXPOSE $NOTI_PORT
+EXPOSE $SOCKET_PORT
 
 CMD ["node", "main.js"]

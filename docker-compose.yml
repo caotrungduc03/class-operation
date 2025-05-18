@@ -51,9 +51,6 @@ services:
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-    # depends_on:
-    #   - postgres
-    #   - rabbitmq
     env_file:
       - .env
 
@@ -75,9 +72,6 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
-    depends_on:
-      - postgres
-      - rabbitmq
     env_file:
       - .env
 
@@ -92,9 +86,6 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_API_URL_SOCKET=${NEXT_PUBLIC_API_URL_SOCKET}
-    # depends_on:
-    #   - co
-    #   - noti
     env_file:
       - .env
 

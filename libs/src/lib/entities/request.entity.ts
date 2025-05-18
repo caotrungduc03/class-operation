@@ -8,10 +8,10 @@ import {
 } from 'typeorm';
 import { RequestStatus, RequestType } from '../enums/request.enum';
 import { CustomBaseEntity } from './customBase.entity';
-import { ScheduleEntity } from './schedule.entity';
-import { SupportTicketEntity } from './support-ticket.entity';
-import { UserEntity } from './user.entity';
-import { WeeklyNormEntity } from './weekly-norm.entity';
+import type { ScheduleEntity } from './schedule.entity';
+import type { SupportTicketEntity } from './support-ticket.entity';
+import type { UserEntity } from './user.entity';
+import type { WeeklyNormEntity } from './weekly-norm.entity';
 
 @Entity({
   name: 'requests',
@@ -40,7 +40,7 @@ export class RequestEntity extends CustomBaseEntity {
   })
   creatorId: string;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne('UserEntity')
   @JoinColumn({
     name: 'creator_id',
   })
@@ -52,7 +52,7 @@ export class RequestEntity extends CustomBaseEntity {
   })
   requesterId: string;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne('UserEntity')
   @JoinColumn({
     name: 'requester_id',
   })
@@ -64,26 +64,20 @@ export class RequestEntity extends CustomBaseEntity {
   })
   approverId: string;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne('UserEntity')
   @JoinColumn({
     name: 'approver_id',
   })
   approver: UserEntity;
 
-  @OneToMany(
-    () => WeeklyNormEntity,
-    (weeklyNorm: WeeklyNormEntity) => weeklyNorm.request,
-  )
+  @OneToMany('WeeklyNormEntity', 'request')
   weeklyNorms: WeeklyNormEntity[];
 
-  @OneToOne(() => ScheduleEntity, (schedule) => schedule.request, {
+  @OneToOne('ScheduleEntity', 'request', {
     nullable: true,
   })
   schedule: ScheduleEntity;
 
-  @OneToOne(
-    () => SupportTicketEntity,
-    (supportTicket: SupportTicketEntity) => supportTicket.request,
-  )
+  @OneToOne('SupportTicketEntity', 'request')
   supportTicket: SupportTicketEntity;
 }

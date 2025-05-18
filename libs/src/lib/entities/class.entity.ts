@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { UserStatus } from '../enums';
-import { CourseEntity } from './course.entity';
+import type { CourseEntity } from './course.entity';
 import { CustomBaseEntity } from './customBase.entity';
-import { RoomEntity } from './room.entity';
-import { ScheduleEntity } from './schedule.entity';
-import { StudentClassEntity } from './student-class.entity';
-import { SupportTicketEntity } from './support-ticket.entity';
-import { UserEntity } from './user.entity';
+import type { RoomEntity } from './room.entity';
+import type { ScheduleEntity } from './schedule.entity';
+import type { StudentClassEntity } from './student-class.entity';
+import type { SupportTicketEntity } from './support-ticket.entity';
+import type { UserEntity } from './user.entity';
 
 @Entity({ name: 'classes' })
 export class ClassEntity extends CustomBaseEntity {
@@ -55,7 +55,7 @@ export class ClassEntity extends CustomBaseEntity {
   })
   courseId: string;
 
-  @ManyToOne(() => CourseEntity, (course: CourseEntity) => course.classes)
+  @ManyToOne('CourseEntity', 'classes')
   @JoinColumn({
     name: 'course_id',
   })
@@ -67,16 +67,14 @@ export class ClassEntity extends CustomBaseEntity {
   })
   teacherId: string;
 
-  @ManyToOne(() => UserEntity, (user: UserEntity) => user.teachers)
+  @ManyToOne('UserEntity', 'teachers')
   @JoinColumn({
     name: 'teacher_id',
   })
   teacher: UserEntity;
 
-  @OneToMany(
-    () => StudentClassEntity,
-    (studentClass: StudentClassEntity) => studentClass.class,
-  )
+  @OneToMany('StudentClassEntity', 'class')
+  @JoinColumn()
   studentClasses: StudentClassEntity[];
 
   @Column({
@@ -85,7 +83,7 @@ export class ClassEntity extends CustomBaseEntity {
   })
   roomId: string;
 
-  @ManyToOne(() => RoomEntity, (room: RoomEntity) => room.classes, {
+  @ManyToOne('RoomEntity', 'classes', {
     nullable: true,
   })
   @JoinColumn({
@@ -93,12 +91,9 @@ export class ClassEntity extends CustomBaseEntity {
   })
   room: RoomEntity;
 
-  @OneToMany(() => ScheduleEntity, (schedule: ScheduleEntity) => schedule.class)
+  @OneToMany('ScheduleEntity', 'class')
   schedules: ScheduleEntity[];
 
-  @OneToMany(
-    () => SupportTicketEntity,
-    (supportTicket: SupportTicketEntity) => supportTicket.class,
-  )
+  @OneToMany('SupportTicketEntity', 'class')
   supportTickets: SupportTicketEntity[];
 }

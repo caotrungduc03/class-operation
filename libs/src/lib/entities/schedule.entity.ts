@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { UserStatus } from '../enums';
 import { ScheduleType } from '../enums/schedule.enum';
-import { ClassEntity } from './class.entity';
+import type { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
-import { RequestEntity } from './request.entity';
+import type { RequestEntity } from './request.entity';
 
 @Entity({
   name: 'schedules',
@@ -46,7 +46,7 @@ export class ScheduleEntity extends CustomBaseEntity {
   })
   requestId: string;
 
-  @OneToOne(() => RequestEntity, (request: RequestEntity) => request.schedule)
+  @OneToOne('RequestEntity', 'schedule')
   @JoinColumn({
     name: 'request_id',
   })
@@ -64,10 +64,7 @@ export class ScheduleEntity extends CustomBaseEntity {
   })
   classId: string;
 
-  @ManyToOne(
-    () => ClassEntity,
-    (classEntity: ClassEntity) => classEntity.schedules,
-  )
+  @ManyToOne('ClassEntity', 'schedules')
   @JoinColumn({
     name: 'class_id',
   })

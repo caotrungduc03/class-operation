@@ -1,7 +1,6 @@
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { UserStatus } from '../../enums';
 import { BaseDto } from '../common/base.dto';
-import { RequestDto } from '../request/request.dto';
 
 @Exclude()
 export class WeeklyNormDto extends BaseDto {
@@ -18,6 +17,5 @@ export class WeeklyNormDto extends BaseDto {
   status: UserStatus;
 
   @Expose()
-  @Type(() => RequestDto)
-  request: RequestDto;
+  requestId: string;
 }

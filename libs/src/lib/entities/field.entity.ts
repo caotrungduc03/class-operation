@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { CustomBaseEntity } from './customBase.entity';
-import { UserDetail } from './user-detail.entity';
-import { UserEntity } from './user.entity';
+import type { UserDetail } from './user-detail.entity';
+import type { UserEntity } from './user.entity';
 
 @Entity({ name: 'fields' })
 export class FieldEntity extends CustomBaseEntity {
@@ -19,10 +19,10 @@ export class FieldEntity extends CustomBaseEntity {
   @Column({ name: 'leader_id', nullable: true })
   leaderId: string;
 
-  @OneToOne(() => UserEntity)
+  @OneToOne('UserEntity', 'leaderOfField')
   @JoinColumn({ name: 'leader_id' })
   leader: UserEntity;
 
-  @OneToMany(() => UserDetail, (userDetail: UserDetail) => userDetail.field)
+  @OneToMany('UserDetail', 'field')
   teachers: UserDetail[];
 }

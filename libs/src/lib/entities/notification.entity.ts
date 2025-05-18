@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { CustomBaseEntity } from './customBase.entity';
-import { UserEntity } from './user.entity';
+import type { UserEntity } from './user.entity';
 
 @Entity({
   name: 'notifications',
@@ -25,6 +25,6 @@ export class NotificationEntity extends CustomBaseEntity {
   })
   content?: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.notifications)
+  @ManyToOne('UserEntity', 'notifications')
   user: UserEntity;
 }

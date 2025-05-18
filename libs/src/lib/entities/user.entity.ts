@@ -7,13 +7,13 @@ import {
   OneToOne,
 } from 'typeorm';
 import { UserStatus } from '../enums';
-import { ClassEntity } from './class.entity';
+import type { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
-import { FieldEntity } from './field.entity';
-import { NotificationEntity } from './notification.entity';
-import { RoleEntity } from './role.entity';
-import { StudentClassEntity } from './student-class.entity';
-import { UserDetail } from './user-detail.entity';
+import type { FieldEntity } from './field.entity';
+import type { NotificationEntity } from './notification.entity';
+import type { RoleEntity } from './role.entity';
+import type { StudentClassEntity } from './student-class.entity';
+import type { UserDetail } from './user-detail.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends CustomBaseEntity {
@@ -67,7 +67,7 @@ export class UserEntity extends CustomBaseEntity {
   })
   roleId: string;
 
-  @ManyToOne(() => RoleEntity, (role: RoleEntity) => role.users)
+  @ManyToOne('RoleEntity', 'users')
   @JoinColumn({
     name: 'role_id',
   })
@@ -79,27 +79,21 @@ export class UserEntity extends CustomBaseEntity {
   })
   detailUserId: string;
 
-  @OneToOne(() => UserDetail, (detailUser: UserDetail) => detailUser.user)
+  @OneToOne('UserDetail', 'user')
   @JoinColumn({
     name: 'detail_user_id',
   })
   detail: UserDetail;
 
-  @OneToMany(
-    () => ClassEntity,
-    (classEntity: ClassEntity) => classEntity.teacher,
-  )
+  @OneToMany('ClassEntity', 'teacher')
   teachers: ClassEntity[];
 
-  @OneToMany(
-    () => StudentClassEntity,
-    (studentClass: StudentClassEntity) => studentClass.student,
-  )
+  @OneToMany('StudentClassEntity', 'student')
   students: StudentClassEntity[];
 
-  @OneToMany(() => NotificationEntity, (notification) => notification.user)
+  @OneToMany('NotificationEntity', 'user')
   notifications: NotificationEntity[];
 
-  @OneToOne(() => FieldEntity, (field) => field.leader)
+  @OneToOne('FieldEntity', 'leader')
   leaderOfField: FieldEntity;
 }

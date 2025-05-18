@@ -20,7 +20,7 @@ export class CourseEntity extends CustomBaseEntity {
   description: string;
 
   @Column({
-    name: 'enum',
+    type: 'enum',
     enum: UserStatus,
     default: UserStatus.ACTIVE,
   })
@@ -32,9 +32,6 @@ export class CourseEntity extends CustomBaseEntity {
   })
   type: CourseType;
 
-  @OneToMany(
-    () => ClassEntity,
-    (classEntity: ClassEntity) => classEntity.course,
-  )
+  @OneToMany('ClassEntity', 'course')
   classes: ClassEntity[];
 }

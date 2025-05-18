@@ -15,9 +15,6 @@ export class DepartmentEntity extends CustomBaseEntity {
   })
   description: string;
 
-  @OneToMany(
-    () => UserDetail,
-    (userDetail: UserDetail) => userDetail.department,
-  )
+  @OneToMany('UserDetail', 'department')
   users: UserDetail[];
 }

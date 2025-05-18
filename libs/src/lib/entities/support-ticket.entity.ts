@@ -1,6 +1,6 @@
-import { ClassEntity } from '@class-operation/libs';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { RequestPriority } from '../enums';
+import { ClassEntity } from './class.entity';
 import { CustomBaseEntity } from './customBase.entity';
 import { RequestEntity } from './request.entity';
 

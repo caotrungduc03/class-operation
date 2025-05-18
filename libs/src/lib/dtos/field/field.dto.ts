@@ -1,6 +1,17 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { BaseDto } from '../common/base.dto';
-import { UserDto } from '../user/user.dto';
+
+export class SimpleUserDto extends BaseDto {
+  @Expose()
+  firstName: string;
+
+  @Expose()
+  lastName: string;
+
+  @Expose()
+  @Transform(({ obj }) => `${obj.lastName} ${obj.firstName}`)
+  fullName: string;
+}
 
 export class FieldDto extends BaseDto {
   @Expose()
@@ -15,6 +26,6 @@ export class FieldDto extends BaseDto {
   leaderId: string;
 
   @Expose()
-  @Type(() => UserDto)
-  leader: UserDto;
+  @Type(() => SimpleUserDto)
+  leader: SimpleUserDto;
 }

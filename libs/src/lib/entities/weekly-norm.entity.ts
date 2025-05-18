@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserStatus } from '../enums';
 import { CustomBaseEntity } from './customBase.entity';
-import { RequestEntity } from './request.entity';
+import type { RequestEntity } from './request.entity';
 
 @Entity({ name: 'weekly_norms' })
 export class WeeklyNormEntity extends CustomBaseEntity {
@@ -41,10 +41,7 @@ export class WeeklyNormEntity extends CustomBaseEntity {
   })
   status: UserStatus;
 
-  @ManyToOne(
-    () => RequestEntity,
-    (request: RequestEntity) => request.weeklyNorms,
-  )
+  @ManyToOne('RequestEntity', 'weeklyNorms')
   @JoinColumn({
     name: 'request_id',
   })
