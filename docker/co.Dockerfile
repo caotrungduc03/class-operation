@@ -3,7 +3,7 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json yarn.lock* ./
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 600000
 
 COPY eslint.config.mjs ./
@@ -26,7 +26,9 @@ COPY --from=builder /app/dist/libs ./libs
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock* ./
 
-RUN yarn install --production --frozen-lockfile --non-interactive --network-timeout 600000
+RUN yarn install --production --frozen-lockfile --non-interactive --network-timeout 600000 && \
+    yarn cache clean && \
+    rm -rf /app/.yarn/cache
 
 ARG CO_PORT=8080
 EXPOSE $CO_PORT
