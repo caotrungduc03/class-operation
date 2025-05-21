@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import * as http from 'http';
 import { Server } from 'socket.io';
 
@@ -13,7 +18,14 @@ export class SocketService implements OnModuleInit {
     this.httpServer = http.createServer();
     this.server = new Server(this.httpServer, {
       cors: {
-        origin: '*',
+        origin: (origin, callback) => {
+          const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [];
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new BadRequestException('Not allowed by CORS'));
+          }
+        },
         methods: ['GET', 'POST'],
       },
     });
