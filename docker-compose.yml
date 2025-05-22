@@ -73,8 +73,6 @@ services:
       - RABBITMQ_PORT=${RABBITMQ_PORT}
       - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
-    depends_on:
-      - rabbitmq
     env_file:
       - .env
 
@@ -89,8 +87,6 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_API_URL_SOCKET=${NEXT_PUBLIC_API_URL_SOCKET}
-    depends_on:
-      - rabbitmq
     env_file:
       - .env
 
