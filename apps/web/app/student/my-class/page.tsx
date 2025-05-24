@@ -139,7 +139,7 @@ const MyClass = () => {
           ...item,
           render: (name: string, record: IClass) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleViewClass(record.id)}
               >
@@ -236,66 +236,67 @@ const MyClass = () => {
 
   return (
     <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MY_STUDENT_CLASS}>
-      <Card>
-        <div className="mb-6 flex flex-col gap-4">
-          <FilterGrid>
-            <CustomInput
-              control={searchForm.control}
-              name="name"
-              size="large"
-              placeholder="Search by name or code"
-            />
-            <CustomSelect
-              control={searchForm.control}
-              name="courseId"
-              size="large"
-              placeholder="Filter by course"
-              options={courseOptions}
-            />
-            <CustomInput
-              control={searchForm.control}
-              name="teacherId"
-              size="large"
-              placeholder="Filter by teacher"
-            />
-            <CustomDatePicker
-              control={searchForm.control}
-              name="startDateFrom"
-              size="large"
-              placeholder="Start Date From"
-            />
-            <CustomDatePicker
-              control={searchForm.control}
-              name="startDateTo"
-              size="large"
-              placeholder="Start Date To"
-            />
-            <CustomSelect
-              control={searchForm.control}
-              name="status"
-              size="large"
-              placeholder="Filter by status"
-              options={StatusOptions}
-            />
-          </FilterGrid>
-          <div className="flex gap-4">
-            <CustomButton 
-              title="Reset" 
-              size="large" 
-              icon={<ReloadOutlined />}
-              onClick={handleReset} 
-            />
-            <CustomButton
-              type="primary"
-              title="Search"
-              size="large"
-              icon={<SearchOutlined />}
-              onClick={searchForm.handleSubmit(onSubmitSearch)}
-            />
+      <div id="my-class-container" className="flex flex-col gap-6">
+        <Card>
+          <div className="flex flex-col gap-4">
+            <FilterGrid>
+              <CustomInput
+                control={searchForm.control}
+                name="name"
+                size="large"
+                placeholder="Search by name or code"
+              />
+              <CustomSelect
+                control={searchForm.control}
+                name="courseId"
+                size="large"
+                placeholder="Filter by course"
+                options={courseOptions}
+              />
+              <CustomInput
+                control={searchForm.control}
+                name="teacherId"
+                size="large"
+                placeholder="Filter by teacher"
+              />
+              <CustomDatePicker
+                control={searchForm.control}
+                name="startDateFrom"
+                size="large"
+                placeholder="Start Date From"
+              />
+              <CustomDatePicker
+                control={searchForm.control}
+                name="startDateTo"
+                size="large"
+                placeholder="Start Date To"
+              />
+              <CustomSelect
+                control={searchForm.control}
+                name="status"
+                size="large"
+                placeholder="Filter by status"
+                options={StatusOptions}
+              />
+            </FilterGrid>
+            <div className="flex gap-4">
+              <CustomButton
+                title="Reset"
+                size="large"
+                icon={<ReloadOutlined />}
+                onClick={handleReset}
+              />
+              <CustomButton
+                type="primary"
+                title="Search"
+                size="large"
+                icon={<SearchOutlined />}
+                onClick={searchForm.handleSubmit(onSubmitSearch)}
+              />
+            </div>
           </div>
-        </div>
-
-        <Card title="My Classes">
+        </Card>
+        <Card>
           <Table
             loading={isFetching}
             rowKey={(record) => record.id}
@@ -306,7 +307,7 @@ const MyClass = () => {
             onChange={handlePaginationChange}
           />
         </Card>
-      </Card>
+      </div>
     </PageLayout>
   );
 };

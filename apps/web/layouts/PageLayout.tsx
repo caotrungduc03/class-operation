@@ -6,7 +6,7 @@ import { memo } from "react";
 
 interface PageLayoutProps extends React.PropsWithChildren {
   breadcrumbs: ItemType[];
-  title: string;
+  title?: string;
 }
 
 const PageLayout = ({ children, breadcrumbs, title }: PageLayoutProps) => {
@@ -23,9 +23,11 @@ const PageLayout = ({ children, breadcrumbs, title }: PageLayoutProps) => {
             ...breadcrumbs,
           ]}
         />
-        <Typography.Title level={3} className="mb-4">
-          {title}
-        </Typography.Title>
+        {title && (
+          <Typography.Title level={3} className="mb-4">
+            {title}
+          </Typography.Title>
+        )}
         {children}
       </div>
     </Layout>

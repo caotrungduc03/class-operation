@@ -1,11 +1,19 @@
 import { MenuProps } from "antd";
+import dayjs from "dayjs";
+import updateLocale from "dayjs/plugin/updateLocale";
 import { FixedType } from "rc-table/lib/interface";
 import { RoleName } from "./role";
+
+dayjs.extend(updateLocale);
+dayjs.updateLocale("en", {
+  weekStart: 1,
+});
 
 // Format constants
 export const DATE_FORMAT = "DD/MM/YYYY";
 export const DATE_TIME_FORMAT = "DD/MM/YYYY HH:mm";
 export const TIME_FORMAT = "HH:mm";
+export const MAX_LIMIT_REQUEST = 100000;
 
 // Enums
 export enum AccessRole {

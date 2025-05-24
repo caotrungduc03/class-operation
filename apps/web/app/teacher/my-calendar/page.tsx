@@ -73,12 +73,8 @@ const MyCalendar = () => {
   const [selectedEvents, setSelectedEvents] = useState<IEvent[]>([]);
 
   const [dateRange, setDateRange] = useState({
-    startDate: dayjs()
-      .startOf("month")
-      .startOf("week")
-      .add(1, "day")
-      .toISOString(),
-    endDate: dayjs().endOf("month").endOf("week").add(1, "day").toISOString(),
+    startDate: dayjs().startOf("month").startOf("week").toISOString(),
+    endDate: dayjs().endOf("month").endOf("week").toISOString(),
   });
   const [searchParams, setSearchParams] = useState<SearchFormValues>({
     name: undefined,

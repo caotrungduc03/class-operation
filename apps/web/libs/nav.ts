@@ -69,10 +69,12 @@ export const NAV_TITLE = {
   MANAGE_CALENDAR: "Quản lý thời khóa biểu",
   MANAGE_COURSES: "Quản lý khoá học",
   MY_TEACHER_CLASS: "Lớp học được giao",
-  MY_STUDENT_CLASS: "Lớp đang theo học",
+  MY_STUDENT_CLASS: "Lớp đã đăng ký",
+  MY_ACTIVE_CLASS: "Lớp đang hoạt động",
   MANAGE_CLASSES: "Quản lý lớp học",
   CLASS_DETAIL: "Chi tiết lớp học",
   USER_DETAIL: "Chi tiết người dùng",
   MY_SUPPORT_TICKET: "Phiếu hỗ trợ",
   MANAGE_SUPPORT_TICKETS: "Quản lý phiếu hỗ trợ",
+  QUICK_ACTIONS: "Thao tác nhanh",
 };
