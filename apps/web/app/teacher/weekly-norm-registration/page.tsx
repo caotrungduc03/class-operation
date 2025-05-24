@@ -7,48 +7,49 @@ import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomInputNumber from "@web/components/common/CustomInputNumber";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import CustomRangePicker from "@web/components/common/CustomeRangePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-  useCreateWeeklyNormMutation,
-  useDeleteWeeklyNormMutation,
-  useGetWeeklyNormsQuery,
-  useLazyGetWeeklyNormByIdQuery,
-  useUpdateWeeklyNormMutation,
-  useUpdateWeeklyNormStatusMutation,
+    useCreateWeeklyNormMutation,
+    useDeleteWeeklyNormMutation,
+    useGetWeeklyNormsQuery,
+    useLazyGetWeeklyNormByIdQuery,
+    useUpdateWeeklyNormMutation,
+    useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-  closeCancelModal,
-  closeCreateModal,
-  closeDetailModal,
-  openCancelModal,
-  openCreateModal,
-  openDetailModal,
-  setEditMode,
-  setSelectedItemId,
+    closeCancelModal,
+    closeCreateModal,
+    closeDetailModal,
+    openCancelModal,
+    openCreateModal,
+    openDetailModal,
+    setEditMode,
+    setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-  IRequest,
-  REQUEST_STATUS_TAG,
-  RequestAction,
-  RequestStatus,
-  RequestStatusOptions,
-  RequestType,
+    IRequest,
+    REQUEST_STATUS_TAG,
+    RequestAction,
+    RequestStatus,
+    RequestStatusOptions,
+    RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-  Card,
-  Divider,
-  Modal,
-  Spin,
-  Table,
-  TablePaginationConfig,
-  Tag,
-  Typography,
+    Card,
+    Divider,
+    Modal,
+    Spin,
+    Table,
+    TablePaginationConfig,
+    Tag,
+    Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs, { Dayjs } from "dayjs";
@@ -238,27 +239,45 @@ const WeeklyNormRegistration = () => {
     name: "weeklyNorms",
   });
 
-  const tableColumns = columnsTitles.map((item, index) => {
-    if (item.dataIndex === "method") {
+  const tableColumns = useMemo(() => {
+    return columnsTitles.map((item, index) => {
+      if (item.dataIndex === "method") {
+        return {
+          ...item,
+          key: index,
+          render: (record: IRequest) => (
+            <WeeklyNormActions
+              record={record}
+              onOpenDetail={handleOpenDetail}
+              onStartEdit={handleStartEdit}
+              onOpenCancelModal={handleOpenCancelModal}
+              onOpenDeleteModal={handleOpenDeleteModal}
+            />
+          ),
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          key: index,
+          render: (name: string, record: IRequest) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleOpenDetail(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
+        };
+      }
       return {
         ...item,
         key: index,
-        render: (record: IRequest) => (
-          <WeeklyNormActions
-            record={record}
-            onOpenDetail={handleOpenDetail}
-            onStartEdit={handleStartEdit}
-            onOpenCancelModal={handleOpenCancelModal}
-            onOpenDeleteModal={handleOpenDeleteModal}
-          />
-        ),
       };
-    }
-    return {
-      ...item,
-      key: index,
-    };
-  });
+    });
+  }, []);
 
   const { current, pageSize } = pagination;
 

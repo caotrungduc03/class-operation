@@ -9,6 +9,7 @@ import CustomInput from "@web/components/common/CustomInput";
 import CustomInputNumber from "@web/components/common/CustomInputNumber";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { CreateClassDto, IClass } from "@web/libs/class";
@@ -217,6 +218,22 @@ const Classes = () => {
               />
             );
           },
+          key: index,
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          render: (name: string, record: IClass) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleEditClass(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
           key: index,
         };
       }

@@ -4,6 +4,7 @@ import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { IClass } from "@web/libs/class";
@@ -123,6 +124,22 @@ const MyClass = () => {
             >
               View
             </Button>
+          ),
+          key: index,
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          render: (name: string, record: IClass) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleViewClass(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
           ),
           key: index,
         };

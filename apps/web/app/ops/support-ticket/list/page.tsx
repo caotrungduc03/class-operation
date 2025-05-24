@@ -3,6 +3,7 @@ import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
@@ -208,6 +209,22 @@ const SupportTicketList = () => {
             onOpenCancelModal={handleOpenCancelModal}
             onOpenRejectModal={handleOpenRejectModal}
           />
+        ),
+      };
+    }
+    if (item.dataIndex === "name") {
+      return {
+        ...item,
+        key: index,
+        render: (name: string, record: IRequest) => (
+          <CustomTooltip title={name}>
+            <span 
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
+              onClick={() => handleOpenDetail(record.id)}
+            >
+              {name}
+            </span>
+          </CustomTooltip>
         ),
       };
     }

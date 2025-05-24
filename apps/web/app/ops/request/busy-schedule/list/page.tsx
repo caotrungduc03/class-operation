@@ -3,43 +3,44 @@ import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-  useGetBusySchedulesQuery,
-  useLazyGetBusyScheduleByIdQuery,
-  useUpdateBusyScheduleStatusMutation,
+    useGetBusySchedulesQuery,
+    useLazyGetBusyScheduleByIdQuery,
+    useUpdateBusyScheduleStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-  closeApproveModal,
-  closeCancelModal,
-  closeDetailModal,
-  closeRejectModal,
-  openApproveModal,
-  openCancelModal,
-  openDetailModal,
-  openRejectModal,
+    closeApproveModal,
+    closeCancelModal,
+    closeDetailModal,
+    closeRejectModal,
+    openApproveModal,
+    openCancelModal,
+    openDetailModal,
+    openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-  IRequest,
-  REQUEST_STATUS_TAG,
-  RequestAction,
-  RequestStatus,
-  RequestStatusOptions,
+    IRequest,
+    REQUEST_STATUS_TAG,
+    RequestAction,
+    RequestStatus,
+    RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-  Card,
-  Divider,
-  Modal,
-  Spin,
-  Table,
-  TablePaginationConfig,
-  Tag,
-  Typography,
+    Card,
+    Divider,
+    Modal,
+    Spin,
+    Table,
+    TablePaginationConfig,
+    Tag,
+    Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -207,6 +208,22 @@ const BusyScheduleList = () => {
             onOpenCancelModal={handleOpenCancelModal}
             onOpenRejectModal={handleOpenRejectModal}
           />
+        ),
+      };
+    }
+    if (item.dataIndex === "name") {
+      return {
+        ...item,
+        key: index,
+        render: (name: string, record: IRequest) => (
+          <CustomTooltip title={name}>
+            <span 
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
+              onClick={() => handleOpenDetail(record.id)}
+            >
+              {name}
+            </span>
+          </CustomTooltip>
         ),
       };
     }

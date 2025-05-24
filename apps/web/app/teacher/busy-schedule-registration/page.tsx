@@ -8,6 +8,7 @@ import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTimePicker from "@web/components/common/CustomTimePicker";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import {
@@ -220,26 +221,44 @@ const BusyScheduleRegistration = () => {
     },
   });
 
-  const tableColumns = columnsTitles.map((item, index) => {
-    if (item.dataIndex === "method") {
+  const tableColumns = useMemo(() => {
+    return columnsTitles.map((item, index) => {
+      if (item.dataIndex === "method") {
+        return {
+          ...item,
+          key: index,
+          render: (record: IRequest) => (
+            <BusyScheduleActions
+              record={record}
+              onOpenDetail={handleOpenDetail}
+              onStartEdit={handleStartEdit}
+              onOpenCancelModal={handleOpenCancelModal}
+            />
+          ),
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          key: index,
+          render: (name: string, record: IRequest) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleOpenDetail(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
+        };
+      }
       return {
         ...item,
         key: index,
-        render: (record: IRequest) => (
-          <BusyScheduleActions
-            record={record}
-            onOpenDetail={handleOpenDetail}
-            onStartEdit={handleStartEdit}
-            onOpenCancelModal={handleOpenCancelModal}
-          />
-        ),
       };
-    }
-    return {
-      ...item,
-      key: index,
-    };
-  });
+    });
+  }, []);
 
   const { current, pageSize } = pagination;
 

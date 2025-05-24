@@ -6,52 +6,53 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetClassesQuery } from "@web/libs/features/classes/classApi";
 import {
-  useCreateSupportTicketMutation,
-  useGetSupportTicketsQuery,
-  useLazyGetSupportTicketByIdQuery,
-  useUpdateSupportTicketMutation,
-  useUpdateSupportTicketStatusMutation,
+    useCreateSupportTicketMutation,
+    useGetSupportTicketsQuery,
+    useLazyGetSupportTicketByIdQuery,
+    useUpdateSupportTicketMutation,
+    useUpdateSupportTicketStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-  closeCancelModal,
-  closeCreateModal,
-  closeDetailModal,
-  openCancelModal,
-  openCreateModal,
-  openDetailModal,
-  setEditMode,
-  setSelectedItemId,
+    closeCancelModal,
+    closeCreateModal,
+    closeDetailModal,
+    openCancelModal,
+    openCreateModal,
+    openDetailModal,
+    setEditMode,
+    setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-  IRequest,
-  ISupportTicket,
-  REQUEST_PRIORITY_TAG,
-  REQUEST_STATUS_TAG,
-  RequestAction,
-  RequestPriority,
-  RequestPriorityOptions,
-  RequestStatus,
-  RequestStatusOptions,
-  RequestType,
+    IRequest,
+    ISupportTicket,
+    REQUEST_PRIORITY_TAG,
+    REQUEST_STATUS_TAG,
+    RequestAction,
+    RequestPriority,
+    RequestPriorityOptions,
+    RequestStatus,
+    RequestStatusOptions,
+    RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-  Card,
-  Divider,
-  Modal,
-  Spin,
-  Table,
-  TablePaginationConfig,
-  Tag,
-  Typography,
+    Card,
+    Divider,
+    Modal,
+    Spin,
+    Table,
+    TablePaginationConfig,
+    Tag,
+    Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -239,26 +240,45 @@ const MySupportTicket = () => {
     labelField: "name",
   });
 
-  const tableColumns = columnsTitles.map((item, index) => {
-    if (item.dataIndex === "method") {
+  // Change from direct map to useMemo with name field rendering
+  const tableColumns = useMemo(() => {
+    return columnsTitles.map((item, index) => {
+      if (item.dataIndex === "method") {
+        return {
+          ...item,
+          key: index,
+          render: (record: IRequest) => (
+            <SupportTicketActions
+              record={record}
+              onOpenDetail={handleOpenDetail}
+              onStartEdit={handleStartEdit}
+              onOpenCancelModal={handleOpenCancelModal}
+            />
+          ),
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          key: index,
+          render: (name: string, record: IRequest) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleOpenDetail(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
+        };
+      }
       return {
         ...item,
         key: index,
-        render: (record: IRequest) => (
-          <SupportTicketActions
-            record={record}
-            onOpenDetail={handleOpenDetail}
-            onStartEdit={handleStartEdit}
-            onOpenCancelModal={handleOpenCancelModal}
-          />
-        ),
       };
-    }
-    return {
-      ...item,
-      key: index,
-    };
-  });
+    });
+  }, []);
 
   const { current, pageSize } = pagination;
 

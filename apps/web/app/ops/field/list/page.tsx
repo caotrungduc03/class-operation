@@ -7,6 +7,7 @@ import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
@@ -48,14 +49,12 @@ const columnsTitles: TableColumn<IField>[] = [
     dataIndex: "index",
   },
   {
+    title: "Code",
+    dataIndex: "code",
+  },
+  {
     title: "Name",
     dataIndex: "name",
-    render: (_, record: IField) => (
-      <div className="flex flex-col">
-        <span className="font-bold text-blue-500">{record.code}</span>
-        <span>{record.name}</span>
-      </div>
-    ),
   },
   {
     title: "Description",
@@ -64,15 +63,7 @@ const columnsTitles: TableColumn<IField>[] = [
   {
     title: "Leader",
     dataIndex: "leader",
-    render: (leader: IUser | null) => {
-      if (!leader) return null;
-      return (
-        <div className="flex flex-col">
-          <span className="font-bold text-blue-500">{leader.detail.code}</span>
-          <span>{leader.fullName}</span>
-        </div>
-      );
-    },
+    render: (leader: IUser | null) => leader?.fullName,
   },
   {
     title: "Created Date",
@@ -184,7 +175,7 @@ const Fields = () => {
       if (item.dataIndex === "method") {
         return {
           ...item,
-          render: (record: IField) => {
+          render: (_, record: IField) => {
             return (
               <FieldActions
                 record={record}
@@ -193,6 +184,22 @@ const Fields = () => {
               />
             );
           },
+          key: index,
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          render: (name: string, record: IField) => (
+            <CustomTooltip title={name}>
+              <span
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleEditField(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
           key: index,
         };
       }
@@ -208,10 +215,11 @@ const Fields = () => {
       data?.data?.items.map((item, index) => ({
         ...item,
         index: ((current || 1) - 1) * (pageSize || 10) + index + 1,
-        method: item,
       })) || []
     );
   }, [data, current, pageSize]);
+
+  console.log({ tableData });
 
   const onSubmitSearch = (formData: { search?: string }) => {
     setSearchParams({

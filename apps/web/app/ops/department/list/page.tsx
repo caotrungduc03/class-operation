@@ -6,6 +6,7 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomTextArea from "@web/components/common/CustomTextArea";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
@@ -44,14 +45,12 @@ const columnsTitles: TableColumn<IDepartment>[] = [
     dataIndex: "index",
   },
   {
+    title: "Code",
+    dataIndex: "code",
+  },
+  {
     title: "Name",
     dataIndex: "name",
-    render: (_, record: IDepartment) => (
-      <div className="flex flex-col">
-        <span className="font-bold text-blue-500">{record.code}</span>
-        <span>{record.name}</span>
-      </div>
-    ),
   },
   {
     title: "Description",
@@ -169,6 +168,22 @@ const Departments = () => {
               />
             );
           },
+          key: index,
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          render: (name: string, record: IDepartment) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleEditDepartment(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
           key: index,
         };
       }

@@ -6,6 +6,7 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
@@ -263,6 +264,22 @@ const Teachers = () => {
               />
             );
           },
+          key: index,
+        };
+      }
+      if (item.dataIndex === "fullName") {
+        return {
+          ...item,
+          render: (fullName: string, record: IUser) => (
+            <CustomTooltip title={fullName}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleViewTeacher(record.id)}
+              >
+                {fullName}
+              </span>
+            </CustomTooltip>
+          ),
           key: index,
         };
       }

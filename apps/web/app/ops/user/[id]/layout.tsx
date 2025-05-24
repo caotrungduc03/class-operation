@@ -129,7 +129,7 @@ const UserDetailLayout = ({ children }: React.PropsWithChildren) => {
                   </Typography.Text>
                 </div>
               </div>
-              <div className="mb-2 mt-auto">
+              <div className="mb-2 mt-auto w-[300px]">
                 <div className="mb-2 flex justify-between">
                   <Typography.Text>Complete</Typography.Text>
                   <Typography.Text>{percentage}%</Typography.Text>

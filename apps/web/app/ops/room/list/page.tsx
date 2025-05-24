@@ -7,6 +7,7 @@ import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomInputNumber from "@web/components/common/CustomInputNumber";
 import CustomTextArea from "@web/components/common/CustomTextArea";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
@@ -181,6 +182,22 @@ const Rooms = () => {
               />
             );
           },
+          key: index,
+        };
+      }
+      if (item.dataIndex === "name") {
+        return {
+          ...item,
+          render: (name: string, record: IRoom) => (
+            <CustomTooltip title={name}>
+              <span 
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleEditRoom(record.id)}
+              >
+                {name}
+              </span>
+            </CustomTooltip>
+          ),
           key: index,
         };
       }
