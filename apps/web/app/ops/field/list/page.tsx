@@ -1,5 +1,5 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -106,12 +106,14 @@ const FieldActions = ({
       <CustomButton
         type="link"
         title="Edit"
+        icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
         title="Delete"
         color="danger"
+        icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
       />
     </CustomDropdown>
@@ -218,8 +220,6 @@ const Fields = () => {
       })) || []
     );
   }, [data, current, pageSize]);
-
-  console.log({ tableData });
 
   const onSubmitSearch = (formData: { search?: string }) => {
     setSearchParams({
@@ -352,12 +352,14 @@ const Fields = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

@@ -1,5 +1,5 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -16,14 +16,14 @@ import { CreateClassDto, IClass } from "@web/libs/class";
 import { TableColumn } from "@web/libs/common";
 import { ICourse } from "@web/libs/course";
 import {
-  useCreateClassMutation,
-  useDeleteClassMutation,
-  useGetClassesQuery,
+    useCreateClassMutation,
+    useDeleteClassMutation,
+    useGetClassesQuery,
 } from "@web/libs/features/classes/classApi";
 import { useGetCoursesQuery } from "@web/libs/features/courses/courseApi";
 import {
-  closeCreateModal,
-  openCreateModal,
+    closeCreateModal,
+    openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { IRoom } from "@web/libs/room";
@@ -133,12 +133,14 @@ const ClassActions = ({
       <CustomButton
         type="link"
         title="Edit"
+        icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
         title="Delete"
         color="danger"
+        icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
       />
     </CustomDropdown>
@@ -424,12 +426,14 @@ const Classes = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

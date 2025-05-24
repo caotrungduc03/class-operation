@@ -1,5 +1,5 @@
 "use client";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -10,17 +10,17 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import Loading from "@web/components/common/Loading";
 import { SHIFTS_OPTIONS } from "@web/libs/class";
 import {
-  useGetClassByIdQuery,
-  useGetClassSchedulesQuery,
+    useGetClassByIdQuery,
+    useGetClassSchedulesQuery,
 } from "@web/libs/features/classes/classApi";
 import {
-  useCreateScheduleMutation,
-  useDeleteScheduleMutation,
+    useCreateScheduleMutation,
+    useDeleteScheduleMutation,
 } from "@web/libs/features/schedules/scheduleApi";
 import {
-  CreateTeachingScheduleDto,
-  SCHEDULE_TYPE_LABEL,
-  SCHEDULE_TYPE_TAG,
+    CreateTeachingScheduleDto,
+    SCHEDULE_TYPE_LABEL,
+    SCHEDULE_TYPE_TAG,
 } from "@web/libs/schedule";
 import { Alert, Card, Modal, Popconfirm, Tag, Typography } from "antd";
 import AntdCalendar from "antd-calendar";
@@ -308,11 +308,17 @@ const ClassCalendar = () => {
         </FilterGrid>
         <div className="flex justify-between">
           <div className="flex gap-4">
-            <CustomButton title="Reset" size="large" onClick={handleReset} />
+            <CustomButton 
+              title="Reset" 
+              size="large" 
+              icon={<ReloadOutlined />}
+              onClick={handleReset} 
+            />
             <CustomButton
               type="primary"
               title="Search"
               size="large"
+              icon={<SearchOutlined />}
               onClick={handleSubmit(onSubmitSearch)}
             />
           </div>

@@ -136,14 +136,6 @@ const NotificationList = ({
           </div>
         )}
       </div>
-      <div className="border-t pt-2 text-center">
-        <Link
-          href={NAV_LINK.MY_NOTIFICATION || "/my-notification"}
-          className="text-sm"
-        >
-          Xem tất cả thông báo
-        </Link>
-      </div>
     </div>
   );
 };

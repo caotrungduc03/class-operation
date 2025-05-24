@@ -1,5 +1,9 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -258,12 +262,14 @@ const MyCalendar = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

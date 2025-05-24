@@ -171,8 +171,6 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
       new Date(endDate),
     );
 
-    console.log('hasOverlap', hasOverlap);
-
     if (hasOverlap) {
       throw new BadRequestException(
         'Schedule overlaps with existing schedules for this teacher',

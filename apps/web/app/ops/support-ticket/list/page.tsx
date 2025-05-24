@@ -1,4 +1,5 @@
 "use client";
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
@@ -8,42 +9,42 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-  useGetSupportTicketsQuery,
-  useLazyGetSupportTicketByIdQuery,
-  useUpdateSupportTicketStatusMutation,
+    useGetSupportTicketsQuery,
+    useLazyGetSupportTicketByIdQuery,
+    useUpdateSupportTicketStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-  closeApproveModal,
-  closeCancelModal,
-  closeDetailModal,
-  closeRejectModal,
-  openApproveModal,
-  openCancelModal,
-  openDetailModal,
-  openRejectModal,
+    closeApproveModal,
+    closeCancelModal,
+    closeDetailModal,
+    closeRejectModal,
+    openApproveModal,
+    openCancelModal,
+    openDetailModal,
+    openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-  IRequest,
-  ISupportTicket,
-  REQUEST_PRIORITY_TAG,
-  REQUEST_STATUS_TAG,
-  RequestAction,
-  RequestPriorityOptions,
-  RequestStatus,
-  RequestStatusOptions,
+    IRequest,
+    ISupportTicket,
+    REQUEST_PRIORITY_TAG,
+    REQUEST_STATUS_TAG,
+    RequestAction,
+    RequestPriorityOptions,
+    RequestStatus,
+    RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-  Card,
-  Divider,
-  Modal,
-  Spin,
-  Table,
-  TablePaginationConfig,
-  Tag,
-  Typography,
+    Card,
+    Divider,
+    Modal,
+    Spin,
+    Table,
+    TablePaginationConfig,
+    Tag,
+    Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -125,12 +126,14 @@ const SupportTicketActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Approve"
+          icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
       )}
@@ -139,6 +142,7 @@ const SupportTicketActions = ({
           type="link"
           title="Reject"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
         />
       )}
@@ -147,6 +151,7 @@ const SupportTicketActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<DeleteOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -393,12 +398,14 @@ const SupportTicketList = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -427,6 +434,7 @@ const SupportTicketList = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           supportTicketDetail?.data.status === RequestStatus.PENDING && (
@@ -434,6 +442,7 @@ const SupportTicketList = () => {
               key="approve"
               type="primary"
               title="Approve"
+              icon={<CheckOutlined />}
               onClick={() =>
                 handleOpenApproveModal(supportTicketDetail.data.id)
               }
@@ -445,6 +454,7 @@ const SupportTicketList = () => {
               type="primary"
               color="danger"
               title="Reject"
+              icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(supportTicketDetail.data.id)}
             />
           ),
@@ -565,12 +575,14 @@ const SupportTicketList = () => {
           <CustomButton
             key="back"
             title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeApproveModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             title="Approve Ticket"
+            icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
           />,
@@ -589,14 +601,16 @@ const SupportTicketList = () => {
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Ticket"
+            title="Cancel Ticket"
+            icon={<DeleteOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,
@@ -617,6 +631,7 @@ const SupportTicketList = () => {
           <CustomButton
             key="back"
             title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeRejectModal())}
           />,
           <CustomButton
@@ -624,6 +639,7 @@ const SupportTicketList = () => {
             type="primary"
             color="danger"
             title="Reject Ticket"
+            icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
           />,

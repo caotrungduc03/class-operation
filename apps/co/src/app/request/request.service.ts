@@ -1043,8 +1043,6 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
     }
 
-    console.log({ createSupportTicketDto });
-
     const request = await this.store({
       name: createSupportTicketDto.name,
       description: createSupportTicketDto.description,
@@ -1053,8 +1051,6 @@ export class RequestService extends BaseService<RequestEntity> {
       creatorId: userId,
       requesterId: createSupportTicketDto.requesterId,
     });
-
-    console.log({ request });
 
     return this.supportTicketService.store({
       requestId: request.id,

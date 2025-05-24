@@ -1,5 +1,5 @@
 "use client";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
 import CustomInput from "@web/components/common/CustomInput";
@@ -259,11 +259,17 @@ const MyClass = () => {
             />
           </FilterGrid>
           <div className="flex gap-4">
-            <CustomButton title="Reset" size="large" onClick={handleReset} />
+            <CustomButton 
+              title="Reset" 
+              size="large" 
+              icon={<ReloadOutlined />}
+              onClick={handleReset} 
+            />
             <CustomButton
               type="primary"
               title="Search"
               size="large"
+              icon={<SearchOutlined />}
               onClick={searchForm.handleSubmit(onSubmitSearch)}
             />
           </div>

@@ -1,5 +1,5 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -14,32 +14,32 @@ import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetDepartmentsQuery } from "@web/libs/features/departments/departmentApi";
 import { useGetFieldsQuery } from "@web/libs/features/fields/fieldApi";
 import {
-  closeCreateModal,
-  openCreateModal,
+    closeCreateModal,
+    openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import {
-  useCreateUserMutation,
-  useDeleteUserMutation,
-  useGetTeachersQuery,
+    useCreateUserMutation,
+    useDeleteUserMutation,
+    useGetTeachersQuery,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-  ROLE_LABEL,
-  ROLE_TAG,
-  RoleName,
-  TeacherRoleOptions,
+    ROLE_LABEL,
+    ROLE_TAG,
+    RoleName,
+    TeacherRoleOptions,
 } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import {
-  IDetailUser,
-  IRole,
-  IUser,
-  STATUS_LABEL,
-  STATUS_TAG,
-  StatusOptions,
-  TeacherLevel,
-  TeacherLevelOptions,
-  UserStatus,
+    IDetailUser,
+    IRole,
+    IUser,
+    STATUS_LABEL,
+    STATUS_TAG,
+    StatusOptions,
+    TeacherLevel,
+    TeacherLevelOptions,
+    UserStatus,
 } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
@@ -169,17 +169,20 @@ const TeacherActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onView(record.id)}
       />
       <CustomButton
         type="link"
         title="Edit"
+        icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
         title="Delete"
         color="danger"
+        icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
       />
     </CustomDropdown>
@@ -426,12 +429,14 @@ const Teachers = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

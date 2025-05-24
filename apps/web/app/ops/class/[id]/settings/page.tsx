@@ -1,4 +1,5 @@
 "use client";
+import { CloseOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -306,7 +307,12 @@ const ClassSettings = () => {
       </div>
 
       <div className="mt-8 flex justify-end gap-4">
-        <CustomButton title="Cancel" size="large" onClick={handleCancel} />
+        <CustomButton 
+          title="Cancel" 
+          size="large" 
+          icon={<CloseOutlined />}
+          onClick={handleCancel} 
+        />
         <CustomButton
           type="primary"
           title="Save"

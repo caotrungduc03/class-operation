@@ -1,5 +1,13 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -120,24 +128,37 @@ const BusyScheduleActions = ({
   onOpenDetail,
   onStartEdit,
   onOpenCancelModal,
+  onOpenDeleteModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
   onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
+  onOpenDeleteModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Edit"
+          icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
+        />
+      )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Delete"
+          color="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => onOpenDeleteModal(record.id)}
         />
       )}
       {record.status === RequestStatus.APPROVED && (
@@ -145,6 +166,7 @@ const BusyScheduleActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -233,6 +255,7 @@ const BusyScheduleRegistration = () => {
               onOpenDetail={handleOpenDetail}
               onStartEdit={handleStartEdit}
               onOpenCancelModal={handleOpenCancelModal}
+              onOpenDeleteModal={() => {}}
             />
           ),
         };
@@ -243,7 +266,7 @@ const BusyScheduleRegistration = () => {
           key: index,
           render: (name: string, record: IRequest) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleOpenDetail(record.id)}
               >
@@ -458,12 +481,14 @@ const BusyScheduleRegistration = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -498,6 +523,7 @@ const BusyScheduleRegistration = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           busyScheduleDetail?.data?.status === RequestStatus.PENDING && (
@@ -505,6 +531,7 @@ const BusyScheduleRegistration = () => {
               key="edit"
               type="primary"
               title="Edit"
+              icon={<EditOutlined />}
               onClick={() => handleStartEdit(busyScheduleDetail.data.id)}
             />
           ),

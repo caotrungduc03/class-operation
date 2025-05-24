@@ -1,4 +1,5 @@
 "use client";
+import { EditOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import Loading from "@web/components/common/Loading";
 import { useGetClassByIdQuery } from "@web/libs/features/classes/classApi";
@@ -30,7 +31,12 @@ const ClassOverview = () => {
             Class Overview
           </Typography.Title>
           <Link href={NAV_LINK.CLASS_DETAIL_SETTINGS(id)}>
-            <CustomButton type="primary" title="Edit Class" size="large" />
+            <CustomButton 
+              type="primary" 
+              title="Edit Class" 
+              size="large" 
+              icon={<EditOutlined />}
+            />
           </Link>
         </div>
       }

@@ -1,5 +1,13 @@
 "use client";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -13,43 +21,43 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-    useCreateWeeklyNormMutation,
-    useDeleteWeeklyNormMutation,
-    useGetWeeklyNormsQuery,
-    useLazyGetWeeklyNormByIdQuery,
-    useUpdateWeeklyNormMutation,
-    useUpdateWeeklyNormStatusMutation,
+  useCreateWeeklyNormMutation,
+  useDeleteWeeklyNormMutation,
+  useGetWeeklyNormsQuery,
+  useLazyGetWeeklyNormByIdQuery,
+  useUpdateWeeklyNormMutation,
+  useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeCancelModal,
-    closeCreateModal,
-    closeDetailModal,
-    openCancelModal,
-    openCreateModal,
-    openDetailModal,
-    setEditMode,
-    setSelectedItemId,
+  closeCancelModal,
+  closeCreateModal,
+  closeDetailModal,
+  openCancelModal,
+  openCreateModal,
+  openDetailModal,
+  setEditMode,
+  setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestStatus,
-    RequestStatusOptions,
-    RequestType,
+  IRequest,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestStatus,
+  RequestStatusOptions,
+  RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Card,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs, { Dayjs } from "dayjs";
@@ -125,12 +133,14 @@ const WeeklyNormActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Edit"
+          icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
       )}
@@ -139,6 +149,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Delete"
           color="danger"
+          icon={<DeleteOutlined />}
           onClick={() => onOpenDeleteModal(record.id)}
         />
       )}
@@ -147,6 +158,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -262,7 +274,7 @@ const WeeklyNormRegistration = () => {
           key: index,
           render: (name: string, record: IRequest) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleOpenDetail(record.id)}
               >
@@ -502,12 +514,14 @@ const WeeklyNormRegistration = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -542,6 +556,7 @@ const WeeklyNormRegistration = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           normDetail?.data?.status === RequestStatus.PENDING && (
@@ -549,6 +564,7 @@ const WeeklyNormRegistration = () => {
               key="edit"
               type="primary"
               title="Edit"
+              icon={<EditOutlined />}
               onClick={() => handleStartEdit(normDetail.data.id)}
             />
           ),

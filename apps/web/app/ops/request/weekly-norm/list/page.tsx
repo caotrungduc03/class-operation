@@ -1,4 +1,5 @@
 "use client";
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
@@ -129,12 +130,14 @@ const WeeklyNormActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Approve"
+          icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
       )}
@@ -143,6 +146,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Reject"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
         />
       )}
@@ -151,6 +155,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<DeleteOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -388,12 +393,14 @@ const WeeklyNormList = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

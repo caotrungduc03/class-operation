@@ -1,5 +1,6 @@
 "use client";
 
+import { CloseOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
@@ -246,7 +247,12 @@ const MyProfileSettings = () => {
         </div>
       </div>
       <div className="mt-8 flex justify-end gap-4">
-        <CustomButton title="Cancel" size="large" onClick={handleCancel} />
+        <CustomButton 
+          title="Cancel" 
+          size="large" 
+          icon={<CloseOutlined />}
+          onClick={handleCancel} 
+        />
         <CustomButton
           type="primary"
           title="Save"

@@ -1,5 +1,5 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -12,15 +12,15 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import {
-  useCreateRoomMutation,
-  useDeleteRoomMutation,
-  useGetRoomsQuery,
-  useLazyGetRoomByIdQuery,
-  useUpdateRoomMutation,
+    useCreateRoomMutation,
+    useDeleteRoomMutation,
+    useGetRoomsQuery,
+    useLazyGetRoomByIdQuery,
+    useUpdateRoomMutation,
 } from "@web/libs/features/rooms/roomApi";
 import {
-  closeCreateModal,
-  openCreateModal,
+    closeCreateModal,
+    openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { CreateRoomDto, IRoom } from "@web/libs/room";
@@ -110,12 +110,14 @@ const RoomActions = ({
       <CustomButton
         type="link"
         title="Edit"
+        icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
         title="Delete"
         color="danger"
+        icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
       />
     </CustomDropdown>
@@ -357,12 +359,14 @@ const Rooms = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>

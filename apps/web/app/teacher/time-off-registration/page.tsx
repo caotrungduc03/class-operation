@@ -1,5 +1,13 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -12,49 +20,47 @@ import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import {
-    DATE_FORMAT,
-    DATE_TIME_FORMAT,
-    TIME_FORMAT,
-    TableColumn,
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  TIME_FORMAT,
+  TableColumn,
 } from "@web/libs/common";
 import {
-    useCreateTimeOffMutation,
-    useGetTimeOffsQuery,
-    useLazyGetTimeOffByIdQuery,
-    useUpdateTimeOffMutation,
-    useUpdateTimeOffStatusMutation,
+  useCreateTimeOffMutation,
+  useGetTimeOffsQuery,
+  useLazyGetTimeOffByIdQuery,
+  useUpdateTimeOffMutation,
+  useUpdateTimeOffStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeCancelModal,
-    closeCreateModal,
-    closeDetailModal,
-    openCancelModal,
-    openCreateModal,
-    openDetailModal,
-    setEditMode,
-    setSelectedItemId,
+  closeCancelModal,
+  closeCreateModal,
+  closeDetailModal,
+  openCancelModal,
+  openCreateModal,
+  openDetailModal,
+  setEditMode,
+  setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    ISchedule,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestStatus,
-    RequestStatusOptions,
-    RequestType,
+  IRequest,
+  ISchedule,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestStatus,
+  RequestStatusOptions,
+  RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -124,24 +130,37 @@ const TimeOffActions = ({
   onOpenDetail,
   onStartEdit,
   onOpenCancelModal,
+  onOpenDeleteModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
   onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
+  onOpenDeleteModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Edit"
+          icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
+        />
+      )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Delete"
+          color="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => onOpenDeleteModal(record.id)}
         />
       )}
       {record.status === RequestStatus.APPROVED && (
@@ -149,6 +168,7 @@ const TimeOffActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -239,6 +259,7 @@ const TimeOffRegistration = () => {
               onOpenDetail={handleOpenDetail}
               onStartEdit={handleStartEdit}
               onOpenCancelModal={handleOpenCancelModal}
+              onOpenDeleteModal={handleOpenDeleteModal}
             />
           ),
         };
@@ -249,7 +270,7 @@ const TimeOffRegistration = () => {
           key: index,
           render: (name: string, record: IRequest) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleOpenDetail(record.id)}
               >
@@ -351,6 +372,10 @@ const TimeOffRegistration = () => {
 
   const handleOpenCancelModal = (id: string) => {
     dispatch(openCancelModal(id));
+  };
+
+  const handleOpenDeleteModal = (id: string) => {
+    // Implement the logic to open the delete confirmation modal
   };
 
   const handleCancel = async () => {
@@ -458,12 +483,14 @@ const TimeOffRegistration = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -498,6 +525,7 @@ const TimeOffRegistration = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           timeOffDetail?.data?.status === RequestStatus.PENDING && (
@@ -505,6 +533,7 @@ const TimeOffRegistration = () => {
               key="edit"
               type="primary"
               title="Edit"
+              icon={<EditOutlined />}
               onClick={() => handleStartEdit(timeOffDetail.data.id)}
             />
           ),

@@ -1,5 +1,13 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -13,46 +21,46 @@ import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetClassesQuery } from "@web/libs/features/classes/classApi";
 import {
-    useCreateSupportTicketMutation,
-    useGetSupportTicketsQuery,
-    useLazyGetSupportTicketByIdQuery,
-    useUpdateSupportTicketMutation,
-    useUpdateSupportTicketStatusMutation,
+  useCreateSupportTicketMutation,
+  useGetSupportTicketsQuery,
+  useLazyGetSupportTicketByIdQuery,
+  useUpdateSupportTicketMutation,
+  useUpdateSupportTicketStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeCancelModal,
-    closeCreateModal,
-    closeDetailModal,
-    openCancelModal,
-    openCreateModal,
-    openDetailModal,
-    setEditMode,
-    setSelectedItemId,
+  closeCancelModal,
+  closeCreateModal,
+  closeDetailModal,
+  openCancelModal,
+  openCreateModal,
+  openDetailModal,
+  setEditMode,
+  setSelectedItemId,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    ISupportTicket,
-    REQUEST_PRIORITY_TAG,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestPriority,
-    RequestPriorityOptions,
-    RequestStatus,
-    RequestStatusOptions,
-    RequestType,
+  IRequest,
+  ISupportTicket,
+  REQUEST_PRIORITY_TAG,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestPriority,
+  RequestPriorityOptions,
+  RequestStatus,
+  RequestStatusOptions,
+  RequestType,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Card,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -147,12 +155,14 @@ const SupportTicketActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Edit"
+          icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
       )}
@@ -161,6 +171,7 @@ const SupportTicketActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<DeleteOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -263,7 +274,7 @@ const MySupportTicket = () => {
           key: index,
           render: (name: string, record: IRequest) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleOpenDetail(record.id)}
               >
@@ -463,12 +474,14 @@ const MySupportTicket = () => {
                 <CustomButton
                   title="Reset"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
                   title="Search"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -503,6 +516,7 @@ const MySupportTicket = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           supportTicketDetail?.data?.status === RequestStatus.PENDING && (

@@ -1,4 +1,5 @@
 "use client";
+import { CloseOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
@@ -8,22 +9,22 @@ import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import { useGetDepartmentsQuery } from "@web/libs/features/departments/departmentApi";
 import { useGetFieldsQuery } from "@web/libs/features/fields/fieldApi";
 import {
-  useGetUserByIdQuery,
-  useUpdateUserMutation,
+    useGetUserByIdQuery,
+    useUpdateUserMutation,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK } from "@web/libs/nav";
 import {
-  ManagerRoleOptions,
-  RoleName,
-  RoleOptions,
-  StaffRoleOptions,
-  TeacherRoleOptions,
+    ManagerRoleOptions,
+    RoleName,
+    RoleOptions,
+    StaffRoleOptions,
+    TeacherRoleOptions,
 } from "@web/libs/role";
 import {
-  StatusOptions,
-  TeacherLevel,
-  TeacherLevelOptions,
-  UserStatus,
+    StatusOptions,
+    TeacherLevel,
+    TeacherLevelOptions,
+    UserStatus,
 } from "@web/libs/user";
 import { Card, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
@@ -309,7 +310,12 @@ const UserSettings = () => {
         </div>
       </div>
       <div className="mt-8 flex justify-end gap-4">
-        <CustomButton title="Cancel" size="large" onClick={handleCancel} />
+        <CustomButton 
+          title="Cancel" 
+          size="large" 
+          icon={<CloseOutlined />}
+          onClick={handleCancel} 
+        />
         <CustomButton
           type="primary"
           title="Save"

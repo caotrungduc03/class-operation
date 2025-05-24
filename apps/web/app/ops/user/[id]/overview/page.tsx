@@ -1,4 +1,5 @@
 "use client";
+import { EditOutlined } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
 import Loading from "@web/components/common/Loading";
 import { useGetUserByIdQuery } from "@web/libs/features/users/userApi";
@@ -36,7 +37,12 @@ const UserOverview = () => {
             User Overview
           </Typography.Title>
           <Link href={NAV_LINK.USER_DETAIL_SETTINGS(userId)}>
-            <CustomButton type="primary" title="Edit User" size="large" />
+            <CustomButton 
+              type="primary" 
+              title="Edit User" 
+              size="large" 
+              icon={<EditOutlined />}
+            />
           </Link>
         </div>
       }
