@@ -331,6 +331,25 @@ const ClassCalendar = () => {
           onOpenCreate={() => {}}
           onRefetchAPI={handleRefetchAPI}
           loading={isLoading}
+          weeklyNormTitle="Định mức"
+          monthTitles={[
+            "Thứ Hai",
+            "Thứ Ba",
+            "Thứ Tư",
+            "Thứ Năm",
+            "Thứ Sáu",
+            "Thứ Bảy",
+            "Chủ Nhật",
+          ]}
+          weekTitles={[
+            "Thứ Hai",
+            "Thứ Ba",
+            "Thứ Tư",
+            "Thứ Năm",
+            "Thứ Sáu",
+            "Thứ Bảy",
+            "Chủ Nhật",
+          ]}
         />
 
         {/* Event Detail Modal */}

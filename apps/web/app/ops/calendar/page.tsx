@@ -344,7 +344,25 @@ const Calendar = () => {
               onOpenCreate={handleOpenCreate}
               onRefetchAPI={handleRefetchAPI}
               loading={isFetchingWeeklyNorms || isFetchingSchedules}
-              showWeeklyNorm
+              weeklyNormTitle="Định mức"
+              monthTitles={[
+                "Thứ Hai",
+                "Thứ Ba",
+                "Thứ Tư",
+                "Thứ Năm",
+                "Thứ Sáu",
+                "Thứ Bảy",
+                "Chủ Nhật",
+              ]}
+              weekTitles={[
+                "Thứ Hai",
+                "Thứ Ba",
+                "Thứ Tư",
+                "Thứ Năm",
+                "Thứ Sáu",
+                "Thứ Bảy",
+                "Chủ Nhật",
+              ]}
             />
           </Card>
         ) : (
