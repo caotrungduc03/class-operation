@@ -1,5 +1,13 @@
 "use client";
-import { CheckOutlined, CloseOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
@@ -9,39 +17,38 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-    useGetWeeklyNormsQuery,
-    useLazyGetWeeklyNormByIdQuery,
-    useUpdateWeeklyNormStatusMutation,
+  useGetWeeklyNormsQuery,
+  useLazyGetWeeklyNormByIdQuery,
+  useUpdateWeeklyNormStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeApproveModal,
-    closeCancelModal,
-    closeDetailModal,
-    closeRejectModal,
-    openApproveModal,
-    openCancelModal,
-    openDetailModal,
-    openRejectModal,
+  closeApproveModal,
+  closeCancelModal,
+  closeDetailModal,
+  closeRejectModal,
+  openApproveModal,
+  openCancelModal,
+  openDetailModal,
+  openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestStatus,
-    RequestStatusOptions,
+  IRequest,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestStatus,
+  RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -49,6 +56,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -59,6 +67,13 @@ const breadcrumbs: ItemType[] = [
     title: NAV_TITLE.WEEKLY_NORM_LIST,
   },
 ];
+
+const searchSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormData = z.infer<typeof searchSchema>;
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
@@ -202,7 +217,9 @@ const WeeklyNormList = () => {
   const [updateWeeklyNormStatus, { isLoading: isUpdatingStatus }] =
     useUpdateWeeklyNormStatusMutation();
 
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+  });
 
   const tableColumns = useMemo(() => {
     return columnsTitles.map((item, index) => {
@@ -227,7 +244,7 @@ const WeeklyNormList = () => {
           key: index,
           render: (name: string, record: IRequest) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleOpenDetail(record.id)}
               >
@@ -268,7 +285,7 @@ const WeeklyNormList = () => {
     }
   }, [weeklyNormsData]);
 
-  const onSubmitSearch = (data: { name?: string; status?: string }) => {
+  const onSubmitSearch = (data: SearchFormData) => {
     setSearchParams({
       ...searchParams,
       ...data,
@@ -286,6 +303,7 @@ const WeeklyNormList = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -429,6 +447,7 @@ const WeeklyNormList = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           normDetail?.data.status === RequestStatus.PENDING && (
@@ -436,6 +455,7 @@ const WeeklyNormList = () => {
               key="approve"
               type="primary"
               title="Approve"
+              icon={<CheckOutlined />}
               onClick={() => handleOpenApproveModal(normDetail.data.id)}
             />
           ),
@@ -445,6 +465,7 @@ const WeeklyNormList = () => {
               type="primary"
               color="danger"
               title="Reject"
+              icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(normDetail.data.id)}
             />
           ),
@@ -533,12 +554,14 @@ const WeeklyNormList = () => {
           <CustomButton
             key="back"
             title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeApproveModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             title="Approve Request"
+            icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
           />,
@@ -559,6 +582,7 @@ const WeeklyNormList = () => {
           <CustomButton
             key="back"
             title="No, Keep It"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
@@ -566,6 +590,7 @@ const WeeklyNormList = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
+            icon={<DeleteOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,
@@ -586,6 +611,7 @@ const WeeklyNormList = () => {
           <CustomButton
             key="back"
             title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeRejectModal())}
           />,
           <CustomButton
@@ -593,6 +619,7 @@ const WeeklyNormList = () => {
             type="primary"
             color="danger"
             title="Reject Request"
+            icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
           />,

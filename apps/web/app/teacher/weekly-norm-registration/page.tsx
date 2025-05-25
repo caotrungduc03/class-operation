@@ -31,9 +31,11 @@ import {
 import {
   closeCancelModal,
   closeCreateModal,
+  closeDeleteModal,
   closeDetailModal,
   openCancelModal,
   openCreateModal,
+  openDeleteModal,
   openDetailModal,
   setEditMode,
   setSelectedItemId,
@@ -185,6 +187,14 @@ const weeklyNormSchema = z.object({
 
 type WeeklyNormFormValues = z.infer<typeof weeklyNormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const WeeklyNormRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
@@ -208,6 +218,7 @@ const WeeklyNormRegistration = () => {
     isOpenCreateModal,
     isDetailModalOpen,
     isCancelModalOpen,
+    isDeleteModalOpen,
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
@@ -230,7 +241,9 @@ const WeeklyNormRegistration = () => {
   const [deleteWeeklyNorm, { isLoading: isDeleting }] =
     useDeleteWeeklyNormMutation();
 
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   const weeklyNormForm = useForm<WeeklyNormFormValues>({
     resolver: zodResolver(weeklyNormSchema),
@@ -363,6 +376,7 @@ const WeeklyNormRegistration = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -454,16 +468,8 @@ const WeeklyNormRegistration = () => {
     });
   };
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-
   const handleOpenDeleteModal = (id: string) => {
-    dispatch(setSelectedItemId(id));
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    dispatch(setSelectedItemId(null));
+    dispatch(openDeleteModal(id));
   };
 
   const handleDelete = async () => {
@@ -473,7 +479,7 @@ const WeeklyNormRegistration = () => {
       await deleteWeeklyNorm(selectedItemId).unwrap();
       toast.success("Weekly norm request deleted successfully");
       refetch();
-      handleCloseDeleteModal();
+      dispatch(closeDeleteModal());
     } catch (error) {
       // Handled by the apiErrorMiddleware
     }
@@ -745,18 +751,18 @@ const WeeklyNormRegistration = () => {
       <Modal
         title="Delete Weekly Norm Request"
         open={isDeleteModalOpen}
-        onCancel={handleCloseDeleteModal}
+        onCancel={() => dispatch(closeDeleteModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
-            onClick={handleCloseDeleteModal}
+            title="No, Keep It"
+            onClick={() => dispatch(closeDeleteModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Delete"
+            title="Yes, Delete Request"
             loading={isDeleting}
             onClick={handleDelete}
           />,

@@ -1,5 +1,12 @@
 "use client";
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -14,32 +21,32 @@ import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetDepartmentsQuery } from "@web/libs/features/departments/departmentApi";
 import { useGetFieldsQuery } from "@web/libs/features/fields/fieldApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import {
-    useCreateUserMutation,
-    useDeleteUserMutation,
-    useGetTeachersQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useGetTeachersQuery,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-    ROLE_LABEL,
-    ROLE_TAG,
-    RoleName,
-    TeacherRoleOptions,
+  ROLE_LABEL,
+  ROLE_TAG,
+  RoleName,
+  TeacherRoleOptions,
 } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import {
-    IDetailUser,
-    IRole,
-    IUser,
-    STATUS_LABEL,
-    STATUS_TAG,
-    StatusOptions,
-    TeacherLevel,
-    TeacherLevelOptions,
-    UserStatus,
+  IDetailUser,
+  IRole,
+  IUser,
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  TeacherLevel,
+  TeacherLevelOptions,
+  UserStatus,
 } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
@@ -123,6 +130,14 @@ const columnsTitles: TableColumn<IUser>[] = [
     fixed: "right",
   },
 ];
+
+const searchSchema = z.object({
+  search: z.string().optional(),
+  roleName: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormData = z.infer<typeof searchSchema>;
 
 // Define Zod schema for teacher form validation
 const teacherFormSchema = z
@@ -211,7 +226,9 @@ const Teachers = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+  });
 
   // Teacher form with validation
   const teacherForm = useForm<TeacherFormValues>({
@@ -275,7 +292,7 @@ const Teachers = () => {
           ...item,
           render: (fullName: string, record: IUser) => (
             <CustomTooltip title={fullName}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleViewTeacher(record.id)}
               >
@@ -303,11 +320,7 @@ const Teachers = () => {
     );
   }, [data, current, pageSize]);
 
-  const onSubmitSearch = (formData: {
-    search?: string;
-    roleName?: string;
-    status?: string;
-  }) => {
+  const onSubmitSearch = (formData: SearchFormData) => {
     setSearchParams({
       ...searchParams,
       ...formData,
@@ -329,6 +342,7 @@ const Teachers = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditTeacher = (id: string) => {

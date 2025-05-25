@@ -9,22 +9,22 @@ import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import { useGetDepartmentsQuery } from "@web/libs/features/departments/departmentApi";
 import { useGetFieldsQuery } from "@web/libs/features/fields/fieldApi";
 import {
-    useGetUserByIdQuery,
-    useUpdateUserMutation,
+  useGetUserByIdQuery,
+  useUpdateUserMutation,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK } from "@web/libs/nav";
 import {
-    ManagerRoleOptions,
-    RoleName,
-    RoleOptions,
-    StaffRoleOptions,
-    TeacherRoleOptions,
+  ManagerRoleOptions,
+  RoleName,
+  RoleOptions,
+  StaffRoleOptions,
+  TeacherRoleOptions,
 } from "@web/libs/role";
 import {
-    StatusOptions,
-    TeacherLevel,
-    TeacherLevelOptions,
-    UserStatus,
+  StatusOptions,
+  TeacherLevel,
+  TeacherLevelOptions,
+  UserStatus,
 } from "@web/libs/user";
 import { Card, Typography } from "antd";
 import { useParams, useRouter } from "next/navigation";
@@ -35,6 +35,7 @@ import { z } from "zod";
 
 // Define Zod schema for user settings validation
 const userSettingsSchema = z.object({
+  code: z.string().min(1, "Code is required"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
@@ -56,6 +57,25 @@ const UserSettings = () => {
   const user = data?.data;
   const router = useRouter();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+
+  // Add default options for department and field
+  const departmentOptions = user?.detail?.department
+    ? [
+        {
+          label: user.detail.department.name,
+          value: user.detail.department.id,
+        },
+      ]
+    : [];
+
+  const fieldOptions = user?.detail?.field
+    ? [
+        {
+          label: user.detail.field.name,
+          value: user.detail.field.id,
+        },
+      ]
+    : [];
 
   const { control, handleSubmit, reset, watch } =
     useForm<UserSettingsFormValues>({
@@ -79,6 +99,8 @@ const UserSettings = () => {
     name: "departmentId",
     useGetDataQuery: useGetDepartmentsQuery,
     labelField: "name",
+    valueField: "id",
+    initialOptions: departmentOptions,
   });
 
   const { selectProps: fieldSelectProps } = useDebouncedSelect({
@@ -86,6 +108,8 @@ const UserSettings = () => {
     name: "fieldId",
     useGetDataQuery: useGetFieldsQuery,
     labelField: "name",
+    valueField: "id",
+    initialOptions: fieldOptions,
   });
 
   // Get role options based on current role
@@ -117,6 +141,7 @@ const UserSettings = () => {
   useEffect(() => {
     if (user) {
       reset({
+        code: user.detail?.code || "",
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
@@ -168,7 +193,7 @@ const UserSettings = () => {
             <Typography.Text strong>Code:</Typography.Text>
           </div>
           <div className="w-3/4">
-            <Typography.Text>{user?.detail?.code || ""}</Typography.Text>
+            <CustomInput name="code" control={control} size="large" disabled />
           </div>
         </div>
 
@@ -310,11 +335,11 @@ const UserSettings = () => {
         </div>
       </div>
       <div className="mt-8 flex justify-end gap-4">
-        <CustomButton 
-          title="Cancel" 
-          size="large" 
+        <CustomButton
+          title="Cancel"
+          size="large"
           icon={<CloseOutlined />}
-          onClick={handleCancel} 
+          onClick={handleCancel}
         />
         <CustomButton
           type="primary"

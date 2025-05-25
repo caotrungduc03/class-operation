@@ -1,5 +1,11 @@
 "use client";
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -12,15 +18,15 @@ import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import { CreateDepartmentDto, IDepartment } from "@web/libs/department";
 import {
-    useCreateDepartmentMutation,
-    useDeleteDepartmentMutation,
-    useGetDepartmentsQuery,
-    useLazyGetDepartmentByIdQuery,
-    useUpdateDepartmentMutation,
+  useCreateDepartmentMutation,
+  useDeleteDepartmentMutation,
+  useGetDepartmentsQuery,
+  useLazyGetDepartmentByIdQuery,
+  useUpdateDepartmentMutation,
 } from "@web/libs/features/departments/departmentApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
@@ -82,6 +88,13 @@ const departmentFormSchema = z.object({
 // Create type from Zod schema
 type DepartmentFormValues = z.infer<typeof departmentFormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  search: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const DepartmentActions = ({
   record,
   onEdit,
@@ -133,7 +146,9 @@ const Departments = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Department form with validation
   const departmentForm = useForm<DepartmentFormValues>({
@@ -178,7 +193,7 @@ const Departments = () => {
           ...item,
           render: (name: string, record: IDepartment) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleEditDepartment(record.id)}
               >
@@ -228,6 +243,7 @@ const Departments = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditDepartment = (id: string) => {

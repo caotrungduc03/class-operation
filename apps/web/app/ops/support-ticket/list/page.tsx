@@ -1,5 +1,13 @@
 "use client";
-import { CheckOutlined, CloseOutlined, DeleteOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
@@ -9,42 +17,42 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-    useGetSupportTicketsQuery,
-    useLazyGetSupportTicketByIdQuery,
-    useUpdateSupportTicketStatusMutation,
+  useGetSupportTicketsQuery,
+  useLazyGetSupportTicketByIdQuery,
+  useUpdateSupportTicketStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeApproveModal,
-    closeCancelModal,
-    closeDetailModal,
-    closeRejectModal,
-    openApproveModal,
-    openCancelModal,
-    openDetailModal,
-    openRejectModal,
+  closeApproveModal,
+  closeCancelModal,
+  closeDetailModal,
+  closeRejectModal,
+  openApproveModal,
+  openCancelModal,
+  openDetailModal,
+  openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    ISupportTicket,
-    REQUEST_PRIORITY_TAG,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestPriorityOptions,
-    RequestStatus,
-    RequestStatusOptions,
+  IRequest,
+  ISupportTicket,
+  REQUEST_PRIORITY_TAG,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestPriorityOptions,
+  RequestStatus,
+  RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Card,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -52,6 +60,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -159,6 +168,15 @@ const SupportTicketActions = ({
   );
 };
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+  priority: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const SupportTicketList = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
@@ -199,7 +217,10 @@ const SupportTicketList = () => {
   const [updateSupportTicketStatus, { isLoading: isUpdatingStatus }] =
     useUpdateSupportTicketStatusMutation();
 
-  const searchForm = useForm();
+  // Update the search form to use Zod
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   const tableColumns = columnsTitles.map((item, index) => {
     if (item.dataIndex === "method") {
@@ -223,7 +244,7 @@ const SupportTicketList = () => {
         key: index,
         render: (name: string, record: IRequest) => (
           <CustomTooltip title={name}>
-            <span 
+            <span
               className="cursor-pointer text-blue-500 hover:text-blue-700"
               onClick={() => handleOpenDetail(record.id)}
             >
@@ -263,23 +284,27 @@ const SupportTicketList = () => {
     }
   }, [supportTicketsData]);
 
-  const onSubmitSearch = (data: {
-    name?: string;
-    status?: string;
-    priority?: string;
-  }) => {
-    setSearchParams({
-      ...searchParams,
-      ...data,
-      page: 1,
-    });
-  };
-
+  // Update the handleReset function to include refetch
   const handleReset = () => {
     searchForm.reset();
     setSearchParams({
       page: 1,
       limit: pagination.pageSize || 10,
+    });
+    setPagination({
+      ...pagination,
+      current: 1,
+    });
+    refetch();
+  };
+
+  const onSubmitSearch = (values: SearchFormValues) => {
+    setSearchParams({
+      ...searchParams,
+      name: values.name,
+      status: values.status,
+      priority: values.priority,
+      page: 1,
     });
     setPagination({
       ...pagination,

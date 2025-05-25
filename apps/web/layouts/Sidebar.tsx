@@ -15,7 +15,7 @@ const Sidebar = () => {
       trigger={null}
       collapsible
       collapsed={sidebarCollapsed}
-      width={240}
+      width={250}
       className="sticky left-0 top-0 min-h-screen"
     >
       <Link href="/" className="block p-4">

@@ -1,5 +1,11 @@
 "use client";
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -13,15 +19,15 @@ import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import { CourseType, CreateCourseDto, ICourse } from "@web/libs/course";
 import {
-    useCreateCourseMutation,
-    useDeleteCourseMutation,
-    useGetCoursesQuery,
-    useLazyGetCourseByIdQuery,
-    useUpdateCourseMutation,
+  useCreateCourseMutation,
+  useDeleteCourseMutation,
+  useGetCoursesQuery,
+  useLazyGetCourseByIdQuery,
+  useUpdateCourseMutation,
 } from "@web/libs/features/courses/courseApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
@@ -128,6 +134,13 @@ const CourseActions = ({
   );
 };
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const Courses = () => {
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     defaultCurrent: 1,
@@ -149,7 +162,9 @@ const Courses = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Course form with validation
   const courseForm = useForm<CourseFormValues>({
@@ -195,7 +210,7 @@ const Courses = () => {
           ...item,
           render: (name: string, record: ICourse) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleEditCourse(record.id)}
               >
@@ -245,6 +260,7 @@ const Courses = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditCourse = (id: string) => {

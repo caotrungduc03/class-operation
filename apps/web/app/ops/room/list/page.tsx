@@ -1,5 +1,11 @@
 "use client";
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -12,15 +18,15 @@ import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { TableColumn } from "@web/libs/common";
 import {
-    useCreateRoomMutation,
-    useDeleteRoomMutation,
-    useGetRoomsQuery,
-    useLazyGetRoomByIdQuery,
-    useUpdateRoomMutation,
+  useCreateRoomMutation,
+  useDeleteRoomMutation,
+  useGetRoomsQuery,
+  useLazyGetRoomByIdQuery,
+  useUpdateRoomMutation,
 } from "@web/libs/features/rooms/roomApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { CreateRoomDto, IRoom } from "@web/libs/room";
@@ -96,6 +102,13 @@ const roomFormSchema = z.object({
 // Create type from Zod schema and ensure it matches CreateRoomDto
 type RoomFormValues = z.infer<typeof roomFormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const RoomActions = ({
   record,
   onEdit,
@@ -145,7 +158,9 @@ const Rooms = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Room form with validation
   const roomForm = useForm<RoomFormValues>({
@@ -192,7 +207,7 @@ const Rooms = () => {
           ...item,
           render: (name: string, record: IRoom) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleEditRoom(record.id)}
               >
@@ -242,6 +257,7 @@ const Rooms = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditRoom = (id: string) => {

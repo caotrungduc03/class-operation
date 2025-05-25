@@ -1,5 +1,11 @@
 "use client";
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -92,6 +98,13 @@ const fieldFormSchema = z.object({
 // Create type from Zod schema
 type FieldFormValues = z.infer<typeof fieldFormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  search: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const FieldActions = ({
   record,
   onEdit,
@@ -141,7 +154,9 @@ const Fields = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Field form with validation
   const fieldForm = useForm<FieldFormValues>({
@@ -243,6 +258,7 @@ const Fields = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditField = (id: string) => {

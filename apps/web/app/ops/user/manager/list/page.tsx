@@ -6,6 +6,7 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
@@ -115,6 +116,14 @@ const columnsTitles: TableColumn<IUser>[] = [
   },
 ];
 
+const searchSchema = z.object({
+  search: z.string().optional(),
+  roleName: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormData = z.infer<typeof searchSchema>;
+
 // Define Zod schema for manager form validation
 const managerFormSchema = z
   .object({
@@ -193,7 +202,9 @@ const ManagerList = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+  });
 
   // Manager form with validation
   const managerForm = useForm<ManagerFormValues>({
@@ -247,6 +258,22 @@ const ManagerList = () => {
           key: index,
         };
       }
+      if (item.dataIndex === "fullName") {
+        return {
+          ...item,
+          render: (fullName: string, record: IUser) => (
+            <CustomTooltip title={fullName}>
+              <span
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleViewManager(record.id)}
+              >
+                {fullName}
+              </span>
+            </CustomTooltip>
+          ),
+          key: index,
+        };
+      }
       return {
         ...item,
         key: index,
@@ -264,11 +291,7 @@ const ManagerList = () => {
     );
   }, [data, current, pageSize]);
 
-  const onSubmitSearch = (formData: {
-    search?: string;
-    roleName?: string;
-    status?: string;
-  }) => {
+  const onSubmitSearch = (formData: SearchFormData) => {
     setSearchParams({
       ...searchParams,
       ...formData,
@@ -290,6 +313,7 @@ const ManagerList = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditManager = (id: string) => {

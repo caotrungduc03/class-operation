@@ -1,4 +1,10 @@
 "use client";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
@@ -7,45 +13,46 @@ import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import {
-    DATE_FORMAT,
-    DATE_TIME_FORMAT,
-    TIME_FORMAT,
-    TableColumn,
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  TIME_FORMAT,
+  TableColumn,
 } from "@web/libs/common";
 import {
-    useGetTimeOffsQuery,
-    useLazyGetTimeOffByIdQuery,
-    useUpdateTimeOffStatusMutation,
+  useGetTimeOffsQuery,
+  useLazyGetTimeOffByIdQuery,
+  useUpdateTimeOffStatusMutation,
 } from "@web/libs/features/requests/requestApi";
 import {
-    closeApproveModal,
-    closeCancelModal,
-    closeDetailModal,
-    openApproveModal,
-    openCancelModal,
-    openDetailModal,
-    openRejectModal,
+  closeApproveModal,
+  closeCancelModal,
+  closeDetailModal,
+  closeRejectModal,
+  openApproveModal,
+  openCancelModal,
+  openDetailModal,
+  openRejectModal,
 } from "@web/libs/features/table/tableSlice";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-    IRequest,
-    ISchedule,
-    REQUEST_STATUS_TAG,
-    RequestAction,
-    RequestStatus,
-    RequestStatusOptions,
+  IRequest,
+  ISchedule,
+  REQUEST_STATUS_TAG,
+  RequestAction,
+  RequestStatus,
+  RequestStatusOptions,
 } from "@web/libs/request";
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
-    Card,
-    Divider,
-    Modal,
-    Spin,
-    Table,
-    TablePaginationConfig,
-    Tag,
-    Typography,
+  Card,
+  Divider,
+  Modal,
+  Spin,
+  Table,
+  TablePaginationConfig,
+  Tag,
+  Typography,
 } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
@@ -53,6 +60,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -109,6 +117,13 @@ const columnsTitles: TableColumn<IRequest>[] = [
   },
   { title: "", dataIndex: "method", fixed: "right" },
 ];
+
+const searchSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormData = z.infer<typeof searchSchema>;
 
 const TimeOffActions = ({
   record,
@@ -180,6 +195,7 @@ const TimeOffList = () => {
     isDetailModalOpen,
     isCancelModalOpen,
     isApproveModalOpen,
+    isRejectModalOpen,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
 
@@ -195,7 +211,9 @@ const TimeOffList = () => {
   const [updateTimeOffStatus, { isLoading: isUpdatingStatus }] =
     useUpdateTimeOffStatusMutation();
 
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+  });
 
   const tableColumns = columnsTitles.map((item, index) => {
     if (item.dataIndex === "method") {
@@ -219,7 +237,7 @@ const TimeOffList = () => {
         key: index,
         render: (name: string, record: IRequest) => (
           <CustomTooltip title={name}>
-            <span 
+            <span
               className="cursor-pointer text-blue-500 hover:text-blue-700"
               onClick={() => handleOpenDetail(record.id)}
             >
@@ -259,7 +277,7 @@ const TimeOffList = () => {
     }
   }, [timeOffsData]);
 
-  const onSubmitSearch = (data: { name?: string; status?: string }) => {
+  const onSubmitSearch = (data: SearchFormData) => {
     setSearchParams({
       ...searchParams,
       ...data,
@@ -277,6 +295,7 @@ const TimeOffList = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -341,7 +360,7 @@ const TimeOffList = () => {
       }).unwrap();
       toast.success("Time off request rejected successfully");
       refetch();
-      dispatch(closeCancelModal());
+      dispatch(closeRejectModal());
     } catch (error) {
       // Handled by the apiErrorMiddleware
     }
@@ -414,6 +433,7 @@ const TimeOffList = () => {
           <CustomButton
             key="close"
             title="Close"
+            icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
           timeOffDetail?.data.status === RequestStatus.PENDING && (
@@ -421,6 +441,7 @@ const TimeOffList = () => {
               key="approve"
               type="primary"
               title="Approve"
+              icon={<CheckOutlined />}
               onClick={() => handleOpenApproveModal(timeOffDetail.data.id)}
             />
           ),
@@ -430,6 +451,7 @@ const TimeOffList = () => {
               type="primary"
               color="danger"
               title="Reject"
+              icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(timeOffDetail.data.id)}
             />
           ),
@@ -533,12 +555,14 @@ const TimeOffList = () => {
           <CustomButton
             key="back"
             title="Cancel"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeApproveModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             title="Approve Request"
+            icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
           />,
@@ -558,6 +582,7 @@ const TimeOffList = () => {
           <CustomButton
             key="back"
             title="No, Keep It"
+            icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
@@ -565,6 +590,7 @@ const TimeOffList = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
+            icon={<DeleteOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,
@@ -579,19 +605,21 @@ const TimeOffList = () => {
       {/* Reject Confirmation Modal */}
       <Modal
         title="Reject Time Off Request"
-        open={isCancelModalOpen}
-        onCancel={() => dispatch(closeCancelModal())}
+        open={isRejectModalOpen}
+        onCancel={() => dispatch(closeRejectModal())}
         footer={[
           <CustomButton
             key="back"
             title="Cancel"
-            onClick={() => dispatch(closeCancelModal())}
+            icon={<CloseOutlined />}
+            onClick={() => dispatch(closeRejectModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
             title="Reject Request"
+            icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
           />,

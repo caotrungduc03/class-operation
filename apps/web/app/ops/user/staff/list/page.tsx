@@ -1,41 +1,49 @@
 "use client";
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetDepartmentsQuery } from "@web/libs/features/departments/departmentApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import {
-    useCreateUserMutation,
-    useDeleteUserMutation,
-    useGetStaffsQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useGetStaffsQuery,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
-    ROLE_LABEL,
-    ROLE_TAG,
-    RoleName,
-    StaffRoleOptions,
+  ROLE_LABEL,
+  ROLE_TAG,
+  RoleName,
+  StaffRoleOptions,
 } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import {
-    IDetailUser,
-    IRole,
-    IUser,
-    STATUS_LABEL,
-    STATUS_TAG,
-    StatusOptions,
-    UserStatus,
+  IDetailUser,
+  IRole,
+  IUser,
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  UserStatus,
 } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
@@ -114,6 +122,14 @@ const columnsTitles: TableColumn<IUser>[] = [
     fixed: "right",
   },
 ];
+
+const searchSchema = z.object({
+  search: z.string().optional(),
+  roleName: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormData = z.infer<typeof searchSchema>;
 
 // Define Zod schema for staff form validation
 const staffFormSchema = z
@@ -198,7 +214,9 @@ const StaffList = () => {
   const dispatch = useDispatch();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchSchema),
+  });
 
   // Staff form with validation
   const staffForm = useForm<StaffFormValues>({
@@ -252,6 +270,22 @@ const StaffList = () => {
           key: index,
         };
       }
+      if (item.dataIndex === "fullName") {
+        return {
+          ...item,
+          render: (fullName: string, record: IUser) => (
+            <CustomTooltip title={fullName}>
+              <span
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleViewStaff(record.id)}
+              >
+                {fullName}
+              </span>
+            </CustomTooltip>
+          ),
+          key: index,
+        };
+      }
       return {
         ...item,
         key: index,
@@ -269,11 +303,7 @@ const StaffList = () => {
     );
   }, [data, current, pageSize]);
 
-  const onSubmitSearch = (formData: {
-    search?: string;
-    roleName?: string;
-    status?: string;
-  }) => {
+  const onSubmitSearch = (formData: SearchFormData) => {
     setSearchParams({
       ...searchParams,
       ...formData,
@@ -295,6 +325,7 @@ const StaffList = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditStaff = (id: string) => {
@@ -384,10 +415,10 @@ const StaffList = () => {
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
-                <CustomButton 
-                  title="Reset" 
+                <CustomButton
+                  title="Reset"
                   icon={<ReloadOutlined />}
-                  onClick={handleReset} 
+                  onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"

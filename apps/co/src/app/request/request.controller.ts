@@ -372,7 +372,12 @@ export class RequestController {
   }
 
   @Delete('busy-schedules/:id')
-  @Roles(RoleName.ADMIN, RoleName.MANAGE)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
   async deleteBusySchedule(
     @Param('id') id: string,
     @User('userId') userId: string,
@@ -473,7 +478,13 @@ export class RequestController {
   }
 
   @Delete('support-tickets/:id')
-  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.RECEPTIONIST,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
   async deleteSupportTicket(
     @Param('id') id: string,
     @User('userId') userId: string,

@@ -1,5 +1,6 @@
 "use client";
 import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
 import CustomInput from "@web/components/common/CustomInput";
@@ -21,6 +22,7 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -79,6 +81,18 @@ const columnsTitles: TableColumn<IClass>[] = [
   },
 ];
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  courseId: z.string().optional(),
+  teacherId: z.string().optional(),
+  startDateFrom: z.any().optional(),
+  startDateTo: z.any().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const MyClass = () => {
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     defaultCurrent: 1,
@@ -100,7 +114,9 @@ const MyClass = () => {
   const router = useRouter();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Get courses for filter dropdown
   const { data: coursesData } = useGetCoursesQuery({ limit: 100 });
@@ -113,7 +129,7 @@ const MyClass = () => {
     );
   }, [coursesData]);
 
-  const { data, isFetching } = useGetMyClassesQuery(searchParams);
+  const { data, isFetching, refetch } = useGetMyClassesQuery(searchParams);
 
   const { current, pageSize } = pagination;
 
@@ -183,7 +199,7 @@ const MyClass = () => {
     router.push(`/student/my-class/${id}/overview`);
   };
 
-  const onSubmitSearch = (formData: any) => {
+  const onSubmitSearch = (formData: SearchFormValues) => {
     const { name, courseId, teacherId, startDateFrom, startDateTo, status } =
       formData;
 
@@ -223,6 +239,7 @@ const MyClass = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handlePaginationChange = (newPagination: TablePaginationConfig) => {

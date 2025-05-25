@@ -55,7 +55,6 @@ const searchFormSchema = z.object({
 const busyScheduleFormSchema = z.object({
   name: z.string().min(1, "Request name is required"),
   description: z.string().optional(),
-  reason: z.string().min(1, "Reason is required"),
   date: z.any().refine((val) => !!val, "Date is required"),
   startTime: z.any().refine((val) => !!val, "Start time is required"),
   endTime: z.any().refine((val) => !!val, "End time is required"),
@@ -83,11 +82,14 @@ const MyCalendar = () => {
 
   const { data: weeklyNorms, isFetching: isFetchingNorms } =
     useGetWeeklyNormsQuery(dateRange);
-  const { data: schedules, isFetching: isFetchingSchedules } =
-    useGetSchedulesQuery({
-      ...searchParams,
-      ...dateRange,
-    });
+  const {
+    data: schedules,
+    isFetching: isFetchingSchedules,
+    refetch: refetchSchedules,
+  } = useGetSchedulesQuery({
+    ...searchParams,
+    ...dateRange,
+  });
   const [createBusySchedule, { isLoading: isCreatingBusySchedule }] =
     useCreateBusyScheduleMutation();
 
@@ -101,7 +103,6 @@ const MyCalendar = () => {
     defaultValues: {
       name: "",
       description: "",
-      reason: "",
       date: null,
       startTime: null,
       endTime: null,
@@ -185,6 +186,7 @@ const MyCalendar = () => {
       name: undefined,
       type: undefined,
     });
+    refetchSchedules();
   };
 
   const handleCloseBusyScheduleModal = () => {
@@ -215,7 +217,6 @@ const MyCalendar = () => {
     const formattedData = {
       name: data.name,
       description: data.description || "",
-      reason: data.reason || "",
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
     };
@@ -309,17 +310,9 @@ const MyCalendar = () => {
               required
             />
 
-            <CustomInput
-              control={busyScheduleForm.control}
-              name="description"
-              label="Description"
-              placeholder="Enter description (optional)"
-              size="large"
-            />
-
             <CustomTextArea
               control={busyScheduleForm.control}
-              name="reason"
+              name="description"
               label="Reason"
               placeholder="Enter reason for busy schedule"
               size="large"

@@ -25,9 +25,9 @@ import {
   TIME_FORMAT,
   TableColumn,
 } from "@web/libs/common";
-// Replace busy schedule endpoints hooks
 import {
   useCreateBusyScheduleMutation,
+  useDeleteBusyScheduleMutation,
   useGetBusySchedulesQuery,
   useLazyGetBusyScheduleByIdQuery,
   useUpdateBusyScheduleMutation,
@@ -36,9 +36,11 @@ import {
 import {
   closeCancelModal,
   closeCreateModal,
+  closeDeleteModal,
   closeDetailModal,
   openCancelModal,
   openCreateModal,
+  openDeleteModal,
   openDetailModal,
   setEditMode,
   setSelectedItemId,
@@ -176,13 +178,21 @@ const BusyScheduleActions = ({
 
 const busyScheduleSchema = z.object({
   name: z.string().min(1, "Request Name is required"),
-  description: z.string().optional(),
+  description: z.string().min(1, "Reason is required"),
   date: z.any().refine((val) => !!val, "Date is required"),
   startTime: z.any().refine((val) => !!val, "Start time is required"),
   endTime: z.any().refine((val) => !!val, "End time is required"),
 });
 
 type BusyScheduleFormValues = z.infer<typeof busyScheduleSchema>;
+
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 const BusyScheduleRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
@@ -207,6 +217,7 @@ const BusyScheduleRegistration = () => {
     isOpenCreateModal,
     isDetailModalOpen,
     isCancelModalOpen,
+    isDeleteModalOpen,
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
@@ -227,9 +238,12 @@ const BusyScheduleRegistration = () => {
   const [updateBusyScheduleStatus, { isLoading: isCanceling }] =
     useUpdateBusyScheduleStatusMutation();
 
-  const searchForm = useForm();
+  const [deleteBusySchedule, { isLoading: isDeleting }] =
+    useDeleteBusyScheduleMutation();
 
-  // Define the zod schema and infer its type
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Update the busyScheduleForm to use zod validation
   const busyScheduleForm = useForm<BusyScheduleFormValues>({
@@ -255,7 +269,7 @@ const BusyScheduleRegistration = () => {
               onOpenDetail={handleOpenDetail}
               onStartEdit={handleStartEdit}
               onOpenCancelModal={handleOpenCancelModal}
-              onOpenDeleteModal={() => {}}
+              onOpenDeleteModal={handleOpenDeleteModal}
             />
           ),
         };
@@ -361,6 +375,7 @@ const BusyScheduleRegistration = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -451,6 +466,23 @@ const BusyScheduleRegistration = () => {
       page: newPagination.current,
       limit: newPagination.pageSize,
     });
+  };
+
+  const handleOpenDeleteModal = (id: string) => {
+    dispatch(openDeleteModal(id));
+  };
+
+  const handleDelete = async () => {
+    if (!selectedItemId) return;
+
+    try {
+      await deleteBusySchedule(selectedItemId).unwrap();
+      toast.success("Busy schedule request deleted successfully");
+      refetch();
+      dispatch(closeDeleteModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
   };
 
   return (
@@ -644,8 +676,9 @@ const BusyScheduleRegistration = () => {
             control={busyScheduleForm.control}
             name="description"
             label="Reason"
-            placeholder="Enter description (optional)"
+            placeholder="Enter reason for busy schedule"
             size="large"
+            required
           />
 
           <Divider orientation="left">Busy Schedule Details</Divider>
@@ -709,6 +742,32 @@ const BusyScheduleRegistration = () => {
       >
         <Typography.Paragraph>
           Are you sure you want to cancel this busy schedule request? This
+          action cannot be undone.
+        </Typography.Paragraph>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Busy Schedule Request"
+        open={isDeleteModalOpen}
+        onCancel={() => dispatch(closeDeleteModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="No, Keep It"
+            onClick={() => dispatch(closeDeleteModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Yes, Delete Request"
+            loading={isDeleting}
+            onClick={handleDelete}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to delete this busy schedule request? This
           action cannot be undone.
         </Typography.Paragraph>
       </Modal>

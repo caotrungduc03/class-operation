@@ -22,6 +22,7 @@ import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import { useGetClassesQuery } from "@web/libs/features/classes/classApi";
 import {
   useCreateSupportTicketMutation,
+  useDeleteSupportTicketMutation,
   useGetSupportTicketsQuery,
   useLazyGetSupportTicketByIdQuery,
   useUpdateSupportTicketMutation,
@@ -30,9 +31,11 @@ import {
 import {
   closeCancelModal,
   closeCreateModal,
+  closeDeleteModal,
   closeDetailModal,
   openCancelModal,
   openCreateModal,
+  openDeleteModal,
   openDetailModal,
   setEditMode,
   setSelectedItemId,
@@ -144,11 +147,13 @@ const SupportTicketActions = ({
   onOpenDetail,
   onStartEdit,
   onOpenCancelModal,
+  onOpenDeleteModal,
 }: {
   record: IRequest;
   onOpenDetail: (id: string) => void;
   onStartEdit: (id: string) => void;
   onOpenCancelModal: (id: string) => void;
+  onOpenDeleteModal: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -166,18 +171,36 @@ const SupportTicketActions = ({
           onClick={() => onStartEdit(record.id)}
         />
       )}
+      {record.status === RequestStatus.PENDING && (
+        <CustomButton
+          type="link"
+          title="Delete"
+          color="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => onOpenDeleteModal(record.id)}
+        />
+      )}
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
           title="Cancel"
           color="danger"
-          icon={<DeleteOutlined />}
+          icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
     </CustomDropdown>
   );
 };
+
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+  priority: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 const MySupportTicket = () => {
   const [searchParams, setSearchParams] = useState<{
@@ -203,6 +226,7 @@ const MySupportTicket = () => {
     isOpenCreateModal,
     isDetailModalOpen,
     isCancelModalOpen,
+    isDeleteModalOpen,
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
@@ -223,7 +247,26 @@ const MySupportTicket = () => {
   const [updateSupportTicketStatus, { isLoading: isCanceling }] =
     useUpdateSupportTicketStatusMutation();
 
-  const searchForm = useForm();
+  const [deleteSupportTicket, { isLoading: isDeleting }] =
+    useDeleteSupportTicketMutation();
+
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
+
+  // Add debounced select for class selection
+  const {
+    selectProps: {
+      options: classOptions,
+      onFocus: onClassFocus,
+      onPopupScroll: onClassPopupScroll,
+    },
+  } = useDebouncedSelect({
+    control: searchForm.control,
+    name: "classId",
+    useGetDataQuery: useGetClassesQuery,
+    labelField: "name",
+  });
 
   // Use zod validation for the support ticket form
   const supportTicketForm = useForm<SupportTicketFormValues>({
@@ -235,20 +278,6 @@ const MySupportTicket = () => {
       priority: RequestPriority.MEDIUM,
       note: "",
     },
-  });
-
-  // Add debounced select for class selection
-  const {
-    selectProps: {
-      options: classOptions,
-      onFocus: onClassFocus,
-      onPopupScroll: onClassPopupScroll,
-    },
-  } = useDebouncedSelect({
-    control: supportTicketForm.control,
-    name: "classId",
-    useGetDataQuery: useGetClassesQuery,
-    labelField: "name",
   });
 
   // Change from direct map to useMemo with name field rendering
@@ -264,6 +293,7 @@ const MySupportTicket = () => {
               onOpenDetail={handleOpenDetail}
               onStartEdit={handleStartEdit}
               onOpenCancelModal={handleOpenCancelModal}
+              onOpenDeleteModal={handleOpenDeleteModal}
             />
           ),
         };
@@ -368,6 +398,7 @@ const MySupportTicket = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -383,17 +414,18 @@ const MySupportTicket = () => {
     dispatch(openCancelModal(id));
   };
 
-  const handleCancel = async () => {
+  const handleOpenDeleteModal = (id: string) => {
+    dispatch(openDeleteModal(id));
+  };
+
+  const handleDelete = async () => {
     if (!selectedItemId) return;
 
     try {
-      await updateSupportTicketStatus({
-        id: selectedItemId,
-        action: RequestAction.CANCEL,
-      }).unwrap();
-      toast.success("Support ticket canceled successfully");
+      await deleteSupportTicket(selectedItemId).unwrap();
+      toast.success("Support ticket deleted successfully");
       refetch();
-      dispatch(closeCancelModal());
+      dispatch(closeDeleteModal());
     } catch (error) {
       // Handled by the apiErrorMiddleware
     }
@@ -440,6 +472,22 @@ const MySupportTicket = () => {
       page: newPagination.current,
       limit: newPagination.pageSize,
     });
+  };
+
+  const handleCancel = async () => {
+    if (!selectedItemId) return;
+
+    try {
+      await updateSupportTicketStatus({
+        id: selectedItemId,
+        action: RequestAction.CANCEL,
+      }).unwrap();
+      toast.success("Support ticket canceled successfully");
+      refetch();
+      dispatch(closeCancelModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
   };
 
   return (
@@ -704,6 +752,32 @@ const MySupportTicket = () => {
       >
         <Typography.Paragraph>
           Are you sure you want to cancel this support ticket? This action
+          cannot be undone.
+        </Typography.Paragraph>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Delete Support Ticket"
+        open={isDeleteModalOpen}
+        onCancel={() => dispatch(closeDeleteModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="No, Keep It"
+            onClick={() => dispatch(closeDeleteModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Yes, Delete Request"
+            loading={isDeleting}
+            onClick={handleDelete}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to delete this support ticket? This action
           cannot be undone.
         </Typography.Paragraph>
       </Modal>

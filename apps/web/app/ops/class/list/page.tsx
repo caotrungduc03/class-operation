@@ -1,5 +1,11 @@
 "use client";
-import { DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -16,16 +22,16 @@ import { CreateClassDto, IClass } from "@web/libs/class";
 import { TableColumn } from "@web/libs/common";
 import { ICourse } from "@web/libs/course";
 import {
-    useCreateClassMutation,
-    useDeleteClassMutation,
-    useGetClassesQuery,
+  useCreateClassMutation,
+  useDeleteClassMutation,
+  useGetClassesQuery,
 } from "@web/libs/features/classes/classApi";
 import { useGetCoursesQuery } from "@web/libs/features/courses/courseApi";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
-import { NAV_TITLE } from "@web/libs/nav";
+import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { IRoom } from "@web/libs/room";
 import { RootState } from "@web/libs/store";
 import { IUser, STATUS_LABEL, StatusOptions, UserStatus } from "@web/libs/user";
@@ -119,6 +125,17 @@ const classFormSchema = z.object({
 // Create type from Zod schema
 type ClassFormValues = z.infer<typeof classFormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  courseId: z.string().optional(),
+  roomId: z.string().optional(),
+  teacherId: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const ClassActions = ({
   record,
   onEdit,
@@ -172,7 +189,9 @@ const Classes = () => {
   const router = useRouter();
 
   // Search form
-  const searchForm = useForm();
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Class form with validation
   const classForm = useForm<ClassFormValues>({
@@ -228,7 +247,7 @@ const Classes = () => {
           ...item,
           render: (name: string, record: IClass) => (
             <CustomTooltip title={name}>
-              <span 
+              <span
                 className="cursor-pointer text-blue-500 hover:text-blue-700"
                 onClick={() => handleEditClass(record.id)}
               >
@@ -292,11 +311,12 @@ const Classes = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditClass = (id: string) => {
     // Navigate to edit page with the class ID
-    router.push(`/ops/class/${id}`);
+    router.push(NAV_LINK.CLASS_DETAIL_SETTINGS(id));
   };
 
   const handleDeleteClass = (id: string) => {

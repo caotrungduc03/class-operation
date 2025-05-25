@@ -27,6 +27,7 @@ import {
 } from "@web/libs/common";
 import {
   useCreateTimeOffMutation,
+  useDeleteTimeOffMutation,
   useGetTimeOffsQuery,
   useLazyGetTimeOffByIdQuery,
   useUpdateTimeOffMutation,
@@ -35,9 +36,11 @@ import {
 import {
   closeCancelModal,
   closeCreateModal,
+  closeDeleteModal,
   closeDetailModal,
   openCancelModal,
   openCreateModal,
+  openDeleteModal,
   openDetailModal,
   setEditMode,
   setSelectedItemId,
@@ -55,6 +58,8 @@ import {
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
+  Card,
+  Divider,
   Modal,
   Spin,
   Table,
@@ -192,6 +197,14 @@ const timeOffSchema = z.object({
 
 type TimeOffFormValues = z.infer<typeof timeOffSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  name: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const TimeOffRegistration = () => {
   const [searchParams, setSearchParams] = useState<{
     name?: string;
@@ -215,6 +228,7 @@ const TimeOffRegistration = () => {
     isOpenCreateModal,
     isDetailModalOpen,
     isCancelModalOpen,
+    isDeleteModalOpen,
     isEditMode,
     selectedItemId,
   } = useSelector((state: RootState) => state.table);
@@ -233,15 +247,18 @@ const TimeOffRegistration = () => {
   const [updateTimeOffStatus, { isLoading: isCanceling }] =
     useUpdateTimeOffStatusMutation();
 
-  const searchForm = useForm();
+  const [deleteTimeOff, { isLoading: isDeleting }] = useDeleteTimeOffMutation();
 
-  // Update the timeOffForm to use zod validation
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
+
   const timeOffForm = useForm<TimeOffFormValues>({
     resolver: zodResolver(timeOffSchema),
     defaultValues: {
       name: "",
       description: "",
-      date: null, // Initially empty, will be validated by zod on submit
+      date: null,
       startTime: null,
       endTime: null,
     },
@@ -318,7 +335,6 @@ const TimeOffRegistration = () => {
     try {
       const response = await fetchTimeOffDetail(id).unwrap();
       if (response?.data) {
-        // Populate form with fetched data
         timeOffForm.setValue("name", response.data.name);
         timeOffForm.setValue("description", response.data.description || "");
 
@@ -334,7 +350,6 @@ const TimeOffRegistration = () => {
           );
         }
       }
-      // Open the drawer after data is loaded
       dispatch(openCreateModal());
     } catch (error) {
       // Handled by the apiErrorMiddleware
@@ -359,6 +374,7 @@ const TimeOffRegistration = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleOpenDetail = (id: string) => {
@@ -375,7 +391,7 @@ const TimeOffRegistration = () => {
   };
 
   const handleOpenDeleteModal = (id: string) => {
-    // Implement the logic to open the delete confirmation modal
+    dispatch(openDeleteModal(id));
   };
 
   const handleCancel = async () => {
@@ -394,15 +410,24 @@ const TimeOffRegistration = () => {
     }
   };
 
-  const onSubmitCreate = async (data: TimeOffFormValues) => {
-    // Create a date object for the selected date
-    const selectedDate = data.date.toDate();
+  const handleDelete = async () => {
+    if (!selectedItemId) return;
 
-    // Create start and end datetime by combining the date with selected times
+    try {
+      await deleteTimeOff(selectedItemId).unwrap();
+      toast.success("Time off request deleted successfully");
+      refetch();
+      dispatch(closeDeleteModal());
+    } catch (error) {
+      // Handled by the apiErrorMiddleware
+    }
+  };
+
+  const onSubmitCreate = async (data: TimeOffFormValues) => {
+    const selectedDate = data.date.toDate();
     const startDateTime = data.startTime.toDate();
     const endDateTime = data.endTime.toDate();
 
-    // Set the date component of startDateTime and endDateTime to match the selected date
     startDateTime.setFullYear(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
@@ -516,7 +541,6 @@ const TimeOffRegistration = () => {
           />
         </Card>
       </div>
-      {/* Detail Modal */}
       <Modal
         title="Time Off Request Details"
         open={isDetailModalOpen}
@@ -616,7 +640,6 @@ const TimeOffRegistration = () => {
           </div>
         )}
       </Modal>
-      {/* Create/Edit Drawer - Notice there's no field array or add/remove buttons */}
       <CustomDrawer
         title={isEditMode ? "Edit Time Off Request" : "Create Time Off Request"}
         open={isOpenCreateModal}
@@ -680,7 +703,6 @@ const TimeOffRegistration = () => {
           </div>
         </div>
       </CustomDrawer>
-      {/* Cancel Confirmation Modal */}
       <Modal
         title="Cancel Time Off Request"
         open={isCancelModalOpen}
@@ -703,6 +725,31 @@ const TimeOffRegistration = () => {
       >
         <Typography.Paragraph>
           Are you sure you want to cancel this time off request? This action
+          cannot be undone.
+        </Typography.Paragraph>
+      </Modal>
+      <Modal
+        title="Delete Time Off Request"
+        open={isDeleteModalOpen}
+        onCancel={() => dispatch(closeDeleteModal())}
+        footer={[
+          <CustomButton
+            key="back"
+            title="No, Keep It"
+            onClick={() => dispatch(closeDeleteModal())}
+          />,
+          <CustomButton
+            key="submit"
+            type="primary"
+            color="danger"
+            title="Yes, Delete Request"
+            loading={isDeleting}
+            onClick={handleDelete}
+          />,
+        ]}
+      >
+        <Typography.Paragraph>
+          Are you sure you want to delete this time off request? This action
           cannot be undone.
         </Typography.Paragraph>
       </Modal>

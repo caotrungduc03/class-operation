@@ -1,33 +1,41 @@
 "use client";
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
+import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
 import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
-    closeCreateModal,
-    openCreateModal,
+  closeCreateModal,
+  openCreateModal,
 } from "@web/libs/features/table/tableSlice";
 import {
-    useCreateUserMutation,
-    useDeleteUserMutation,
-    useGetStudentsQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useGetStudentsQuery,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { RoleName } from "@web/libs/role";
 import { RootState } from "@web/libs/store";
 import {
-    IDetailUser,
-    IUser,
-    STATUS_LABEL,
-    STATUS_TAG,
-    StatusOptions,
-    UserStatus,
+  IDetailUser,
+  IUser,
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  UserStatus,
 } from "@web/libs/user";
 import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
@@ -118,6 +126,14 @@ const studentFormSchema = z
 // Define type from schema
 type StudentFormValues = z.infer<typeof studentFormSchema>;
 
+// Add search form schema
+const searchFormSchema = z.object({
+  search: z.string().optional(),
+  status: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchFormSchema>;
+
 const StudentActions = ({
   record,
   onEdit,
@@ -174,8 +190,14 @@ const Students = () => {
   const { isOpenCreateModal } = useSelector((state: RootState) => state.table);
   const dispatch = useDispatch();
 
-  // Search form
-  const searchForm = useForm();
+  const handleViewStudent = (id: string) => {
+    router.push(NAV_LINK.USER_DETAIL_OVERVIEW(id));
+  };
+
+  // Update the search form to use Zod
+  const searchForm = useForm<SearchFormValues>({
+    resolver: zodResolver(searchFormSchema),
+  });
 
   // Student form with validation
   const studentForm = useForm<StudentFormValues>({
@@ -215,6 +237,22 @@ const Students = () => {
           key: index,
         };
       }
+      if (item.dataIndex === "fullName") {
+        return {
+          ...item,
+          render: (fullName: string, record: IUser) => (
+            <CustomTooltip title={fullName}>
+              <span
+                className="cursor-pointer text-blue-500 hover:text-blue-700"
+                onClick={() => handleViewStudent(record.id)}
+              >
+                {fullName}
+              </span>
+            </CustomTooltip>
+          ),
+          key: index,
+        };
+      }
       return {
         ...item,
         key: index,
@@ -244,6 +282,7 @@ const Students = () => {
     });
   };
 
+  // Update the handleReset function to include refetch
   const handleReset = () => {
     searchForm.reset();
     setSearchParams({
@@ -254,6 +293,7 @@ const Students = () => {
       ...pagination,
       current: 1,
     });
+    refetch();
   };
 
   const handleEditStudent = (id: string) => {
@@ -277,10 +317,6 @@ const Students = () => {
         }
       },
     });
-  };
-
-  const handleViewStudent = (id: string) => {
-    router.push(NAV_LINK.USER_DETAIL_OVERVIEW(id));
   };
 
   const onSubmitCreate = async (data: StudentFormValues) => {
