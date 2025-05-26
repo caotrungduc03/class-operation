@@ -1,5 +1,10 @@
 "use client";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
@@ -163,17 +168,20 @@ const ManagerActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onView(record.id)}
       />
       <CustomButton
         type="link"
         title="Edit"
+        icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
         title="Delete"
         color="danger"
+        icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
       />
     </CustomDropdown>

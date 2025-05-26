@@ -2,10 +2,10 @@
 import {
   CheckOutlined,
   CloseOutlined,
-  DeleteOutlined,
   EyeOutlined,
   ReloadOutlined,
   SearchOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -42,6 +42,7 @@ import {
 import { RootState } from "@web/libs/store";
 import { IUser } from "@web/libs/user";
 import {
+  Card,
   Divider,
   Modal,
   Spin,
@@ -170,7 +171,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Cancel"
           color="danger"
-          icon={<DeleteOutlined />}
+          icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -590,7 +591,7 @@ const WeeklyNormList = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
-            icon={<DeleteOutlined />}
+            icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,

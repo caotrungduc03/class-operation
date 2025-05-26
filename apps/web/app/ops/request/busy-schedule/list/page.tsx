@@ -2,7 +2,8 @@
 import {
   CheckOutlined,
   CloseOutlined,
-  DeleteOutlined,
+  EyeOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -138,12 +139,14 @@ const BusyScheduleActions = ({
       <CustomButton
         type="link"
         title="View"
+        icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
           title="Approve"
+          icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
       )}
@@ -152,6 +155,7 @@ const BusyScheduleActions = ({
           type="link"
           title="Reject"
           color="danger"
+          icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
         />
       )}
@@ -160,6 +164,7 @@ const BusyScheduleActions = ({
           type="link"
           title="Cancel"
           color="danger"
+          icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -558,7 +563,7 @@ const BusyScheduleList = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
-            icon={<DeleteOutlined />}
+            icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,

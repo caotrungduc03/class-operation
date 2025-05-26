@@ -2,10 +2,10 @@
 import {
   CheckOutlined,
   CloseOutlined,
-  DeleteOutlined,
   EyeOutlined,
   ReloadOutlined,
   SearchOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -160,7 +160,7 @@ const SupportTicketActions = ({
           type="link"
           title="Cancel"
           color="danger"
-          icon={<DeleteOutlined />}
+          icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -635,7 +635,7 @@ const SupportTicketList = () => {
             type="primary"
             color="danger"
             title="Cancel Ticket"
-            icon={<DeleteOutlined />}
+            icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
           />,

@@ -7,6 +7,7 @@ import {
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -160,7 +161,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Cancel"
           color="danger"
-          icon={<CloseOutlined />}
+          icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -737,6 +738,7 @@ const WeeklyNormRegistration = () => {
             type="primary"
             color="danger"
             title="Yes, Cancel Request"
+            icon={<StopOutlined />}
             loading={isCanceling}
             onClick={handleCancel}
           />,
