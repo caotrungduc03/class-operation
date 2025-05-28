@@ -3,9 +3,11 @@ import {
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  LockOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
+  UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -27,6 +29,7 @@ import {
   useCreateUserMutation,
   useDeleteUserMutation,
   useGetStaffsQuery,
+  useUpdateUserStatusMutation,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
@@ -161,11 +164,15 @@ const StaffActions = ({
   onEdit,
   onDelete,
   onView,
+  onLock,
+  onUnlock,
 }: {
   record: IUser;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
+  onLock: (id: string) => void;
+  onUnlock: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -181,6 +188,24 @@ const StaffActions = ({
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
+      {record.status === UserStatus.ACTIVE && (
+        <CustomButton
+          type="link"
+          title="Lock"
+          color="orange"
+          icon={<LockOutlined />}
+          onClick={() => onLock(record.id)}
+        />
+      )}
+      {record.status === UserStatus.BLOCKED && (
+        <CustomButton
+          type="link"
+          title="Unlock"
+          color="green"
+          icon={<UnlockOutlined />}
+          onClick={() => onUnlock(record.id)}
+        />
+      )}
       <CustomButton
         type="link"
         title="Delete"
@@ -245,6 +270,8 @@ const StaffList = () => {
   const { data, isFetching, refetch } = useGetStaffsQuery(searchParams);
   const [createStaff, { isLoading: isCreating }] = useCreateUserMutation();
   const [deleteStaff, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
 
   const { current, pageSize } = pagination;
 
@@ -264,6 +291,8 @@ const StaffList = () => {
                 onEdit={handleEditStaff}
                 onDelete={handleDeleteStaff}
                 onView={handleViewStaff}
+                onLock={handleLockUser}
+                onUnlock={handleUnlockUser}
               />
             );
           },
@@ -351,10 +380,70 @@ const StaffList = () => {
     });
   };
 
+  const handleLockUser = (id: string) => {
+    Modal.confirm({
+      title: "Lock Staff",
+      content: "Are you sure you want to lock this staff member?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.BLOCKED }).unwrap();
+          toast.success("Staff locked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to lock staff");
+        }
+      },
+    });
+  };
+
+  const handleUnlockUser = (id: string) => {
+    Modal.confirm({
+      title: "Unlock Staff",
+      content: "Are you sure you want to unlock this staff member?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.ACTIVE }).unwrap();
+          toast.success("Staff unlocked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to unlock staff");
+        }
+      },
+    });
+  };
+
   const onSubmitCreate = async (data: StaffFormValues) => {
     try {
-      // Only create new staff
-      await createStaff(data).unwrap();
+      // Create FormData object
+      const formData = new FormData();
+
+      // Append all form values to FormData
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("email", data.email);
+
+      if (data.password) {
+        formData.append("password", data.password);
+      }
+
+      if (data.phoneNumber) {
+        formData.append("phoneNumber", data.phoneNumber);
+      }
+
+      if (data.status) {
+        formData.append("status", data.status);
+      }
+
+      if (data.roleName) {
+        formData.append("roleName", data.roleName);
+      }
+
+      if (data.departmentId) {
+        formData.append("departmentId", data.departmentId);
+      }
+
+      // Submit FormData
+      await createStaff(formData).unwrap();
       toast.success("Staff created successfully");
 
       handleCloseDrawer();

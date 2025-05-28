@@ -225,7 +225,13 @@ const Header = () => {
       <Avatar
         icon={
           user?.avatar ? (
-            <Image src={user?.avatar} alt="Avatar" width={160} height={160} />
+            <Image
+              src={user?.avatar}
+              alt="Avatar"
+              width={160}
+              height={160}
+              className="rounded-full"
+            />
           ) : (
             <UserOutlined />
           )

@@ -6,6 +6,7 @@ import {
   RoleName,
   UpdateUserDto,
   UserEntity,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   BadRequestException,
@@ -15,6 +16,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseService } from '../../common';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CounterService } from '../counter/counter.service';
 import { DepartmentService } from '../department/department.service';
 import { FieldService } from '../field/field.service';
@@ -31,6 +33,7 @@ export class UserService extends BaseService<UserEntity> {
     private readonly userDetailService: UserDetailService,
     private readonly departmentService: DepartmentService,
     private readonly fieldService: FieldService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {
     super(userRepository);
   }
@@ -75,7 +78,10 @@ export class UserService extends BaseService<UserEntity> {
     });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(
+    createUserDto: CreateUserDto,
+    avatar?: Express.Multer.File,
+  ): Promise<UserEntity> {
     if (createUserDto.password !== createUserDto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
@@ -128,6 +134,20 @@ export class UserService extends BaseService<UserEntity> {
       userDetailData.field = field;
     }
 
+    // Upload avatar if provided
+    let avatarUrl = '';
+    if (avatar) {
+      const uploadOptions = {
+        folder: 'user-avatars',
+        allowed_formats: ['jpg', 'png'],
+      };
+      const uploadResult = await this.cloudinaryService.uploadFile(
+        avatar,
+        uploadOptions,
+      );
+      avatarUrl = uploadResult.secure_url;
+    }
+
     const userDetail =
       await this.userDetailService.createUserDetail(userDetailData);
 
@@ -138,6 +158,7 @@ export class UserService extends BaseService<UserEntity> {
       password: encodedPassword,
       role,
       detail: userDetail,
+      avatar: avatarUrl,
     });
   }
 
@@ -176,9 +197,10 @@ export class UserService extends BaseService<UserEntity> {
   async updateById(
     id: string,
     updateUserDto: UpdateUserDto,
+    avatar?: Express.Multer.File,
   ): Promise<UserEntity> {
     const user = await this.findById(id, {
-      relations: ['role', 'detail'],
+      relations: ['role', 'detail', 'detail.department', 'detail.field'],
     });
 
     // Handle role change
@@ -239,6 +261,20 @@ export class UserService extends BaseService<UserEntity> {
       });
     }
 
+    // Upload avatar if provided
+    let avatarUrl = user.avatar;
+    if (avatar) {
+      const uploadOptions = {
+        folder: 'user-avatars',
+        allowed_formats: ['jpg', 'png'],
+      };
+      const uploadResult = await this.cloudinaryService.uploadFile(
+        avatar,
+        uploadOptions,
+      );
+      avatarUrl = uploadResult.secure_url;
+    }
+
     // Update basic user information
     const dataToUpdate: any = {
       ...(updateUserDto.firstName && { firstName: updateUserDto.firstName }),
@@ -247,6 +283,7 @@ export class UserService extends BaseService<UserEntity> {
         phoneNumber: updateUserDto.phoneNumber,
       }),
       ...(updateUserDto.status && { status: updateUserDto.status }),
+      avatar: avatarUrl,
     };
 
     // Update password if provided
@@ -259,8 +296,16 @@ export class UserService extends BaseService<UserEntity> {
 
     await this.userRepository.update(id, dataToUpdate);
 
-    return this.findById(id, {
+    return user;
+  }
+
+  async updateUserStatus(id: string, status: UserStatus): Promise<UserEntity> {
+    const user = await this.findById(id, {
       relations: ['role', 'detail', 'detail.department', 'detail.field'],
     });
+
+    await this.userRepository.update(id, { status });
+
+    return user;
   }
 }

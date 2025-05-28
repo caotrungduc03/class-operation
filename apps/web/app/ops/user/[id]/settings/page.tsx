@@ -1,5 +1,5 @@
 "use client";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
@@ -26,9 +26,10 @@ import {
   TeacherLevelOptions,
   UserStatus,
 } from "@web/libs/user";
-import { Card, Typography } from "antd";
+import { Card, Typography, Upload } from "antd";
+import { UploadFile } from "antd/es/upload";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
@@ -57,6 +58,7 @@ const UserSettings = () => {
   const user = data?.data;
   const router = useRouter();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   // Add default options for department and field
   const departmentOptions = user?.detail?.department
@@ -155,11 +157,62 @@ const UserSettings = () => {
     }
   }, [user, reset]);
 
+  // Set up the initial file list if user has an avatar
+  useEffect(() => {
+    if (user?.avatar) {
+      setFileList([
+        {
+          uid: user.id,
+          url: user.avatar,
+          name: user.avatar,
+        },
+      ]);
+    }
+  }, [user?.avatar, user?.id]);
+
   const onSubmit = async (data: UserSettingsFormValues) => {
     try {
+      // Create FormData object
+      const formData = new FormData();
+
+      // Append all form values to FormData
+      formData.append("code", data.code);
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("email", data.email);
+
+      if (data.phoneNumber) {
+        formData.append("phoneNumber", data.phoneNumber);
+      }
+
+      if (data.roleName) {
+        formData.append("roleName", data.roleName);
+      }
+
+      if (data.status) {
+        formData.append("status", data.status);
+      }
+
+      if (data.departmentId) {
+        formData.append("departmentId", data.departmentId);
+      }
+
+      if (data.fieldId) {
+        formData.append("fieldId", data.fieldId);
+      }
+
+      if (data.teacherLevel) {
+        formData.append("teacherLevel", data.teacherLevel);
+      }
+
+      // Add avatar file if selected
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        formData.append("avatar", fileList[0].originFileObj);
+      }
+
       await updateUser({
         id: userId,
-        body: data,
+        formData: formData,
       }).unwrap();
 
       toast.success("User updated successfully");
@@ -167,6 +220,29 @@ const UserSettings = () => {
     } catch (error) {
       // Handled by the apiErrorMiddleware
     }
+  };
+
+  // Handle file upload
+  const handleFileChange = ({ fileList }: { fileList: UploadFile[] }) => {
+    const newFileList = fileList.slice(-1);
+
+    // Validate file type
+    if (newFileList.length > 0) {
+      const file = newFileList[0];
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
+      if (!isJpgOrPng && file.status !== "removed") {
+        return toast.error("You can only upload JPG/PNG file!");
+      }
+
+      // Validate file size (5MB)
+      const isLt5M = file.size ? file.size / 1024 / 1024 < 5 : true;
+      if (!isLt5M && file.status !== "removed") {
+        return toast.error("Image must smaller than 5MB!");
+      }
+    }
+
+    setFileList(newFileList);
   };
 
   const handleCancel = () => {
@@ -188,6 +264,29 @@ const UserSettings = () => {
       }
     >
       <div className="flex flex-col gap-4">
+        <div className="flex items-center">
+          <div className="w-1/4">
+            <Typography.Text strong>Avatar:</Typography.Text>
+          </div>
+          <div className="w-3/4">
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleFileChange}
+              beforeUpload={() => false}
+              maxCount={1}
+              accept="image/png, image/jpeg"
+            >
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </div>
+        </div>
+
         <div className="flex items-center">
           <div className="w-1/4">
             <Typography.Text strong>Code:</Typography.Text>

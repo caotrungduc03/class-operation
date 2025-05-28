@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
-  IsEmpty,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -47,8 +46,9 @@ export class CreateUserDto extends BaseRequestDto {
   @ApiProperty()
   phoneNumber: string;
 
-  @IsEmpty()
-  avatar: string;
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @IsOptional()
+  avatar?: any; // File will be processed by multer
 
   @ApiProperty()
   @IsEnum(RoleName)

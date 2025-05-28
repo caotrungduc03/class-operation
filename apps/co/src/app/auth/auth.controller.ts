@@ -6,7 +6,17 @@ import {
   User,
   UserDto,
 } from '@class-operation/libs';
-import { Body, Controller, Get, HttpStatus, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 
@@ -39,13 +49,16 @@ export class AuthController {
   }
 
   @Patch('/update-profile')
+  @UseInterceptors(FileInterceptor('avatar'))
   async updateProfile(
     @User('userId') userId: string,
     @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() avatar: Express.Multer.File,
   ) {
     const updatedUser = await this.authService.updateProfile(
       userId,
       updateProfileDto,
+      avatar,
     );
 
     return new ResponseDto(

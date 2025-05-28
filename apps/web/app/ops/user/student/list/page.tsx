@@ -3,9 +3,11 @@ import {
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  LockOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
+  UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -25,6 +27,7 @@ import {
   useCreateUserMutation,
   useDeleteUserMutation,
   useGetStudentsQuery,
+  useUpdateUserStatusMutation,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { RoleName } from "@web/libs/role";
@@ -117,6 +120,7 @@ const studentFormSchema = z
     confirmPassword: z.string().optional().or(z.literal("")),
     phoneNumber: z.string().optional(),
     status: z.nativeEnum(UserStatus).optional(),
+    roleName: z.nativeEnum(RoleName).optional(),
   })
   .refine((data) => !data.password || data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -139,11 +143,15 @@ const StudentActions = ({
   onEdit,
   onDelete,
   onView,
+  onLock,
+  onUnlock,
 }: {
   record: IUser;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
+  onLock: (id: string) => void;
+  onUnlock: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -159,6 +167,24 @@ const StudentActions = ({
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
+      {record.status === UserStatus.ACTIVE && (
+        <CustomButton
+          type="link"
+          title="Lock"
+          color="orange"
+          icon={<LockOutlined />}
+          onClick={() => onLock(record.id)}
+        />
+      )}
+      {record.status === UserStatus.BLOCKED && (
+        <CustomButton
+          type="link"
+          title="Unlock"
+          color="green"
+          icon={<UnlockOutlined />}
+          onClick={() => onUnlock(record.id)}
+        />
+      )}
       <CustomButton
         type="link"
         title="Delete"
@@ -216,6 +242,8 @@ const Students = () => {
   const { data, isFetching, refetch } = useGetStudentsQuery(searchParams);
   const [createStudent, { isLoading: isCreating }] = useCreateUserMutation();
   const [deleteStudent, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
 
   const { current, pageSize } = pagination;
 
@@ -231,6 +259,8 @@ const Students = () => {
                 onEdit={handleEditStudent}
                 onDelete={handleDeleteStudent}
                 onView={handleViewStudent}
+                onLock={handleLockUser}
+                onUnlock={handleUnlockUser}
               />
             );
           },
@@ -319,13 +349,64 @@ const Students = () => {
     });
   };
 
+  const handleLockUser = (id: string) => {
+    Modal.confirm({
+      title: "Lock Student",
+      content: "Are you sure you want to lock this student?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.BLOCKED }).unwrap();
+          toast.success("Student locked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to lock student");
+        }
+      },
+    });
+  };
+
+  const handleUnlockUser = (id: string) => {
+    Modal.confirm({
+      title: "Unlock Student",
+      content: "Are you sure you want to unlock this student?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.ACTIVE }).unwrap();
+          toast.success("Student unlocked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to unlock student");
+        }
+      },
+    });
+  };
+
   const onSubmitCreate = async (data: StudentFormValues) => {
     try {
-      // Only create new student
-      await createStudent({
-        ...data,
-        roleName: RoleName.STUDENT,
-      }).unwrap();
+      // Create FormData object
+      const formData = new FormData();
+
+      // Append all form values to FormData
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("email", data.email);
+
+      if (data.password) {
+        formData.append("password", data.password);
+      }
+
+      if (data.phoneNumber) {
+        formData.append("phoneNumber", data.phoneNumber);
+      }
+
+      if (data.status) {
+        formData.append("status", data.status);
+      }
+
+      formData.append("roleName", RoleName.STUDENT);
+
+      // Submit FormData
+      await createStudent(formData).unwrap();
       toast.success("Student created successfully");
 
       handleCloseDrawer();

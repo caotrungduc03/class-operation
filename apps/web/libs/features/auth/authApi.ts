@@ -12,6 +12,7 @@ export interface UpdateProfileRequest {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+  avatar?: File;
 }
 
 export const authApi = createApi({
@@ -34,14 +35,12 @@ export const authApi = createApi({
         method: "GET",
       }),
     }),
-    updateProfile: builder.mutation<
-      CustomResponse<IUser>,
-      UpdateProfileRequest
-    >({
-      query: (data) => ({
+    updateProfile: builder.mutation<CustomResponse<IUser>, FormData>({
+      query: (formData) => ({
         url: "/auth/update-profile",
         method: "PATCH",
-        body: data,
+        body: formData,
+        formData: true,
       }),
     }),
   }),

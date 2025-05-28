@@ -25,8 +25,8 @@ export const ROLE_LABEL = {
   [RoleName.MANAGE]: "Manager",
   [RoleName.STAFF_ACADEMIC]: "Nhân viên đào tạo",
   [RoleName.STAFF_GENERAL]: "Nhân viên tổng hợp",
-  [RoleName.TEACHER_FULL_TIME]: "Giáo viên cơ hữu",
-  [RoleName.TEACHER_PART_TIME]: "Giáo viên thỉnh giảng",
+  [RoleName.TEACHER_FULL_TIME]: "Giáo viên full-time",
+  [RoleName.TEACHER_PART_TIME]: "Giáo viên part-time",
   [RoleName.RECEPTIONIST]: "Nhân viên lễ tân",
   [RoleName.STUDENT]: "Học viên",
 };

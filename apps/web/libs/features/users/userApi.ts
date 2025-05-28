@@ -1,33 +1,45 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { CustomResponse, Pagination } from "@web/libs/common";
 import { baseFetchQuery } from "@web/libs/customBaseQuery";
-import { CreateUserDto, IUser } from "@web/libs/user";
+import { IUser, UserStatus } from "@web/libs/user";
 
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: baseFetchQuery,
   endpoints: (builder) => ({
-    createUser: builder.mutation<CustomResponse<IUser>, CreateUserDto>({
-      query: (body) => ({
+    createUser: builder.mutation<CustomResponse<IUser>, FormData>({
+      query: (formData) => ({
         url: "/users",
         method: "POST",
-        body,
+        body: formData,
+        formData: true,
       }),
     }),
     updateUser: builder.mutation<
       CustomResponse<IUser>,
-      { id: string; body: CreateUserDto }
+      { id: string; formData: FormData }
     >({
-      query: ({ id, body }) => ({
+      query: ({ id, formData }) => ({
         url: `/users/${id}`,
         method: "PUT",
-        body,
+        body: formData,
+        formData: true,
       }),
     }),
     deleteUser: builder.mutation<CustomResponse<void>, string>({
       query: (id) => ({
         url: `/users/${id}`,
         method: "DELETE",
+      }),
+    }),
+    updateUserStatus: builder.mutation<
+      CustomResponse<IUser>,
+      { id: string; status: UserStatus }
+    >({
+      query: ({ id, status }) => ({
+        url: `/users/${id}/update-status`,
+        method: "PATCH",
+        body: { status },
       }),
     }),
     getTeachers: builder.query<
@@ -84,6 +96,7 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useUpdateUserStatusMutation,
   useGetStudentsQuery,
   useGetStaffsQuery,
   useGetManagersQuery,

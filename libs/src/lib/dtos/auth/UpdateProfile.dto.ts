@@ -16,4 +16,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   phoneNumber: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @IsOptional()
+  avatar?: any; // File will be processed by multer
 }

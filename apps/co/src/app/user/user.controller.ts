@@ -6,6 +6,7 @@ import {
   Roles,
   UpdateUserDto,
   UserDto,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   Body,
@@ -13,11 +14,15 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -109,8 +114,12 @@ export class UserController {
 
   @Post('/')
   @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
-  async createUser(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    const user = await this.userService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  async createUser(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    const user = await this.userService.create(createUserDto, avatar);
 
     return new ResponseDto(
       HttpStatus.CREATED,
@@ -135,12 +144,32 @@ export class UserController {
 
   @Put('/:id')
   @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.userService.updateById(id, updateUserDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    const user = await this.userService.updateById(id, updateUserDto, avatar);
 
     return new ResponseDto(
       HttpStatus.OK,
       'User updated successfully',
+      UserDto.plainToInstance(user, ['admin']),
+    );
+  }
+
+  @Patch('/:id/update-status')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_GENERAL)
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: UserStatus,
+  ) {
+    const user = await this.userService.updateUserStatus(id, status);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      `User ${status === UserStatus.ACTIVE ? 'unlocked' : 'locked'} successfully`,
       UserDto.plainToInstance(user, ['admin']),
     );
   }

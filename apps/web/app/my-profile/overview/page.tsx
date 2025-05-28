@@ -29,10 +29,10 @@ const MyProfileOverview = () => {
             Profile Overview
           </Typography.Title>
           <Link href={NAV_LINK.MY_PROFILE_SETTINGS}>
-            <CustomButton 
-              type="primary" 
-              title="Update Profile" 
-              size="large" 
+            <CustomButton
+              type="primary"
+              title="Update Profile"
+              size="large"
               icon={<EditOutlined />}
             />
           </Link>

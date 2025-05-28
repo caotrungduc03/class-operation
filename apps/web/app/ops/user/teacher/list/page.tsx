@@ -3,9 +3,11 @@ import {
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
+  LockOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
+  UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -28,6 +30,7 @@ import {
   useCreateUserMutation,
   useDeleteUserMutation,
   useGetTeachersQuery,
+  useUpdateUserStatusMutation,
 } from "@web/libs/features/users/userApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import {
@@ -173,11 +176,15 @@ const TeacherActions = ({
   onEdit,
   onDelete,
   onView,
+  onLock,
+  onUnlock,
 }: {
   record: IUser;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
+  onLock: (id: string) => void;
+  onUnlock: (id: string) => void;
 }) => {
   return (
     <CustomDropdown>
@@ -193,6 +200,24 @@ const TeacherActions = ({
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
+      {record.status === UserStatus.ACTIVE && (
+        <CustomButton
+          type="link"
+          title="Lock"
+          color="orange"
+          icon={<LockOutlined />}
+          onClick={() => onLock(record.id)}
+        />
+      )}
+      {record.status === UserStatus.BLOCKED && (
+        <CustomButton
+          type="link"
+          title="Unlock"
+          color="green"
+          icon={<UnlockOutlined />}
+          onClick={() => onUnlock(record.id)}
+        />
+      )}
       <CustomButton
         type="link"
         title="Delete"
@@ -266,6 +291,8 @@ const Teachers = () => {
   const { data, isFetching, refetch } = useGetTeachersQuery(searchParams);
   const [createTeacher, { isLoading: isCreating }] = useCreateUserMutation();
   const [deleteTeacher, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
 
   const { current, pageSize } = pagination;
 
@@ -281,6 +308,8 @@ const Teachers = () => {
                 onEdit={handleEditTeacher}
                 onDelete={handleDeleteTeacher}
                 onView={handleViewTeacher}
+                onLock={handleLockUser}
+                onUnlock={handleUnlockUser}
               />
             );
           },
@@ -372,10 +401,78 @@ const Teachers = () => {
     router.push(NAV_LINK.USER_DETAIL_OVERVIEW(id));
   };
 
+  const handleLockUser = (id: string) => {
+    Modal.confirm({
+      title: "Lock Teacher",
+      content: "Are you sure you want to lock this teacher?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.BLOCKED }).unwrap();
+          toast.success("Teacher locked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to lock teacher");
+        }
+      },
+    });
+  };
+
+  const handleUnlockUser = (id: string) => {
+    Modal.confirm({
+      title: "Unlock Teacher",
+      content: "Are you sure you want to unlock this teacher?",
+      onOk: async () => {
+        try {
+          await updateUserStatus({ id, status: UserStatus.ACTIVE }).unwrap();
+          toast.success("Teacher unlocked successfully");
+          refetch();
+        } catch (error) {
+          toast.error("Failed to unlock teacher");
+        }
+      },
+    });
+  };
+
   const onSubmitCreate = async (data: TeacherFormValues) => {
     try {
-      // Only create new teacher
-      await createTeacher(data).unwrap();
+      // Create FormData object
+      const formData = new FormData();
+
+      // Append all form values to FormData
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("email", data.email);
+
+      if (data.password) {
+        formData.append("password", data.password);
+      }
+
+      if (data.phoneNumber) {
+        formData.append("phoneNumber", data.phoneNumber);
+      }
+
+      if (data.status) {
+        formData.append("status", data.status);
+      }
+
+      if (data.roleName) {
+        formData.append("roleName", data.roleName);
+      }
+
+      if (data.departmentId) {
+        formData.append("departmentId", data.departmentId);
+      }
+
+      if (data.fieldId) {
+        formData.append("fieldId", data.fieldId);
+      }
+
+      if (data.teacherLevel) {
+        formData.append("teacherLevel", data.teacherLevel);
+      }
+
+      // Submit FormData
+      await createTeacher(formData).unwrap();
       toast.success("Teacher created successfully");
 
       handleCloseDrawer();

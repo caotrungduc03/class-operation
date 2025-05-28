@@ -1,6 +1,7 @@
 import { UserEntity } from '@class-operation/libs';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { CounterModule } from '../counter/counter.module';
 import { DepartmentModule } from '../department/department.module';
 import { FieldModule } from '../field/field.module';
@@ -17,6 +18,7 @@ import { UserService } from './user.service';
     UserDetailModule,
     FieldModule,
     DepartmentModule,
+    CloudinaryModule,
   ],
   controllers: [UserController],
   providers: [UserService],
