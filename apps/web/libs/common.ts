@@ -82,3 +82,7 @@ export interface TableColumn<T, O = OtherColumn> {
   render?: (value: T[keyof T] | O[keyof O], record?: T) => React.ReactNode;
   fixed?: FixedType;
 }
+
+export const formatRangeDate = (startDate: string, endDate: string) => {
+  return `${dayjs(startDate).format(DATE_FORMAT)} | ${dayjs(startDate).format(TIME_FORMAT)} - ${dayjs(endDate).format(TIME_FORMAT)}`;
+};

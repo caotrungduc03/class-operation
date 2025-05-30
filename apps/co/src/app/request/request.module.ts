@@ -1,4 +1,9 @@
-import { RequestEntity } from '@class-operation/libs';
+import {
+  RequestEntity,
+  ScheduleEntity,
+  SupportTicketEntity,
+  WeeklyNormEntity,
+} from '@class-operation/libs';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FieldModule } from '../field/field.module';
@@ -12,7 +17,12 @@ import { RequestService } from './request.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RequestEntity]),
+    TypeOrmModule.forFeature([
+      RequestEntity,
+      ScheduleEntity,
+      WeeklyNormEntity,
+      SupportTicketEntity,
+    ]),
     ScheduleModule,
     WeeklyNormModule,
     FieldModule,

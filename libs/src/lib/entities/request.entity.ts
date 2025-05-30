@@ -73,10 +73,8 @@ export class RequestEntity extends CustomBaseEntity {
   @OneToMany('WeeklyNormEntity', 'request')
   weeklyNorms: WeeklyNormEntity[];
 
-  @OneToOne('ScheduleEntity', 'request', {
-    nullable: true,
-  })
-  schedule: ScheduleEntity;
+  @OneToMany('ScheduleEntity', 'request')
+  schedules: ScheduleEntity[];
 
   @OneToOne('SupportTicketEntity', 'request')
   supportTicket: SupportTicketEntity;

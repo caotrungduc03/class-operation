@@ -134,6 +134,10 @@ export class UserService extends BaseService<UserEntity> {
       userDetailData.field = field;
     }
 
+    if (createUserDto.teacherLevel) {
+      userDetailData.teacherLevel = createUserDto.teacherLevel;
+    }
+
     // Upload avatar if provided
     let avatarUrl = '';
     if (avatar) {
@@ -258,6 +262,12 @@ export class UserService extends BaseService<UserEntity> {
 
       await this.userDetailService.update(user.detail.id, {
         fieldId: updateUserDto.fieldId,
+      });
+    }
+
+    if (updateUserDto.teacherLevel) {
+      await this.userDetailService.update(user.detail.id, {
+        teacherLevel: updateUserDto.teacherLevel,
       });
     }
 

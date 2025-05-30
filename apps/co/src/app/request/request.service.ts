@@ -39,10 +39,10 @@ export class RequestService extends BaseService<RequestEntity> {
     @InjectRepository(RequestEntity)
     private readonly requestRepository: Repository<RequestEntity>,
     private readonly scheduleService: ScheduleService,
+    private readonly rabbitMQService: RabbitMQService,
     private readonly weeklyNormService: WeeklyNormService,
     private readonly fieldService: FieldService,
     private readonly userDetailService: UserDetailService,
-    private readonly rabbitMQService: RabbitMQService,
     private readonly supportTicketService: SupportTicketService,
   ) {
     super(requestRepository);
@@ -404,7 +404,7 @@ export class RequestService extends BaseService<RequestEntity> {
 
     const queryBuilder = this.requestRepository
       .createQueryBuilder('entity')
-      .leftJoinAndSelect('entity.schedule', 'schedule')
+      .leftJoinAndSelect('entity.schedules', 'schedules')
       .leftJoinAndSelect('entity.creator', 'creator')
       .leftJoinAndSelect('entity.requester', 'requester')
       .leftJoinAndSelect('entity.approver', 'approver')
@@ -463,29 +463,39 @@ export class RequestService extends BaseService<RequestEntity> {
       status: status,
     });
 
-    // Create schedule using the service
-    const schedule = await this.scheduleService.store({
-      name: createScheduleDto.name,
-      description: createScheduleDto.description,
-      type: ScheduleType.BUSY,
-      startDate: createScheduleDto.startDate,
-      endDate: createScheduleDto.endDate,
-      teacherId: isAdmin ? null : userId,
-      requestId: request.id,
-      status: scheduleStatus,
-    });
+    const schedules = await Promise.all(
+      createScheduleDto.schedules.map((schedule) =>
+        this.scheduleService.store({
+          name: createScheduleDto.name,
+          description: createScheduleDto.description,
+          type: ScheduleType.BUSY,
+          startDate: schedule.startDate,
+          endDate: schedule.endDate,
+          teacherId: isAdmin ? null : userId,
+          requestId: request.id,
+          status: scheduleStatus,
+        }),
+      ),
+    );
 
-    return { request, schedule };
+    return { request, schedules };
   }
 
   async getTimeOffScheduleById(id: string) {
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
-      relations: ['schedule', 'creator', 'requester', 'approver'],
+      relations: ['schedules', 'creator', 'requester', 'approver'],
     });
 
     if (!request) {
       throw new NotFoundException('Time off schedule request not found');
+    }
+
+    // Fetch all schedules associated with this time off request
+    if (!request.schedules) {
+      request.schedules = await this.scheduleService.findAll({
+        where: { requestId: id },
+      });
     }
 
     return request;
@@ -494,7 +504,7 @@ export class RequestService extends BaseService<RequestEntity> {
   async updateTimeOffSchedule(id: string, updateData: UpdateTimeOffRequestDto) {
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
-      relations: ['schedule'],
+      relations: ['schedules'],
     });
 
     if (!request) {
@@ -513,14 +523,28 @@ export class RequestService extends BaseService<RequestEntity> {
       description: updateData.description,
     });
 
-    // Update schedule using the service
-    if (request.schedule) {
-      await this.scheduleService.updateById(request.schedule.id, {
-        name: updateData.name,
-        description: updateData.description,
-        startDate: updateData.startDate,
-        endDate: updateData.endDate,
-      });
+    // Update or create schedules
+    if (updateData.schedules && updateData.schedules.length > 0) {
+      // Delete existing schedules
+      if (request.schedules && request.schedules.length > 0) {
+        for (const schedule of request.schedules) {
+          await this.scheduleService.delete(schedule.id);
+        }
+      }
+
+      // Create new schedules
+      for (const scheduleData of updateData.schedules) {
+        await this.scheduleService.store({
+          name: updateData.name,
+          description: updateData.description,
+          type: ScheduleType.BUSY,
+          startDate: scheduleData.startDate,
+          endDate: scheduleData.endDate,
+          requestId: request.id,
+          teacherId: request.requesterId,
+          status: UserStatus.BLOCKED,
+        });
+      }
     }
 
     return updatedRequest;
@@ -531,10 +555,10 @@ export class RequestService extends BaseService<RequestEntity> {
     action: RequestAction,
     userId?: string,
   ) {
-    // Modified to include 'requester' relation
+    // Modified to include 'schedules' relation
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
-      relations: ['schedule', 'requester'],
+      relations: ['schedules', 'requester'],
     });
 
     if (!request) {
@@ -551,18 +575,21 @@ export class RequestService extends BaseService<RequestEntity> {
       }
 
       // Check for overlapping schedules if needed
-      if (request.schedule && request.schedule.teacherId) {
-        const hasOverlap = await this.scheduleService.checkOverlappingSchedules(
-          request.schedule.teacherId,
-          request.schedule.startDate,
-          request.schedule.endDate,
-          request.id, // exclude current request's schedule
-        );
+      if (request.schedules && request.schedules.length > 0) {
+        for (const schedule of request.schedules) {
+          const hasOverlap =
+            await this.scheduleService.checkOverlappingSchedules(
+              schedule.teacherId,
+              schedule.startDate,
+              schedule.endDate,
+              request.id, // exclude current request's schedule
+            );
 
-        if (hasOverlap) {
-          throw new BadRequestException(
-            `Cannot approve request. There is already an active schedule for teacher ID ${request.schedule.teacherId} in the requested period.`,
-          );
+          if (hasOverlap) {
+            throw new BadRequestException(
+              `Cannot approve request. There is already an active schedule for teacher ID ${schedule.teacherId} in the requested period.`,
+            );
+          }
         }
       }
 
@@ -573,11 +600,13 @@ export class RequestService extends BaseService<RequestEntity> {
         approverId: userId,
       });
 
-      // Update schedule status using the service
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
-          status: UserStatus.ACTIVE,
-        });
+      // Update all schedules status to ACTIVE
+      if (request.schedules && request.schedules.length > 0) {
+        for (const schedule of request.schedules) {
+          await this.scheduleService.updateById(schedule.id, {
+            status: UserStatus.ACTIVE,
+          });
+        }
       }
 
       // Added notification for Time Off approval
@@ -612,11 +641,13 @@ export class RequestService extends BaseService<RequestEntity> {
         approverId: userId,
       });
 
-      // Keep schedule as BLOCKED
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
-          status: UserStatus.BLOCKED,
-        });
+      // Keep all schedules as BLOCKED
+      if (request.schedules && request.schedules.length > 0) {
+        for (const schedule of request.schedules) {
+          await this.scheduleService.updateById(schedule.id, {
+            status: UserStatus.BLOCKED,
+          });
+        }
       }
 
       // Send notification for Time Off rejection
@@ -646,11 +677,13 @@ export class RequestService extends BaseService<RequestEntity> {
         status: RequestStatus.CANCELED,
       });
 
-      // Update schedule status using the service
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
-          status: UserStatus.BLOCKED,
-        });
+      // Update all schedules to BLOCKED
+      if (request.schedules && request.schedules.length > 0) {
+        for (const schedule of request.schedules) {
+          await this.scheduleService.updateById(schedule.id, {
+            status: UserStatus.BLOCKED,
+          });
+        }
       }
 
       // Added notification for Time Off cancellation
@@ -690,7 +723,7 @@ export class RequestService extends BaseService<RequestEntity> {
 
     const queryBuilder = this.requestRepository
       .createQueryBuilder('entity')
-      .leftJoinAndSelect('entity.schedule', 'schedule')
+      .leftJoinAndSelect('entity.schedules', 'schedules')
       .leftJoinAndSelect('entity.creator', 'creator')
       .leftJoinAndSelect('entity.requester', 'requester')
       .leftJoinAndSelect('entity.approver', 'approver')
@@ -767,7 +800,7 @@ export class RequestService extends BaseService<RequestEntity> {
   async getBusyScheduleById(id: string) {
     const request = await this.findOne({
       where: { id, type: RequestType.BUSY_SCHEDULE },
-      relations: ['schedule', 'creator', 'requester', 'approver'],
+      relations: ['schedules', 'creator', 'requester', 'approver'],
     });
 
     if (!request) {
@@ -783,7 +816,7 @@ export class RequestService extends BaseService<RequestEntity> {
   ) {
     const request = await this.findOne({
       where: { id, type: RequestType.BUSY_SCHEDULE },
-      relations: ['schedule'],
+      relations: ['schedules'],
     });
 
     if (!request) {
@@ -803,8 +836,8 @@ export class RequestService extends BaseService<RequestEntity> {
     });
 
     // Update schedule using the service
-    if (request.schedule) {
-      await this.scheduleService.updateById(request.schedule.id, {
+    if (request.schedules && request.schedules.length > 0) {
+      await this.scheduleService.updateById(request.schedules[0].id, {
         name: updateData.name,
         description: updateData.description,
         startDate: updateData.startDate,
@@ -822,7 +855,7 @@ export class RequestService extends BaseService<RequestEntity> {
   ) {
     const request = await this.findOne({
       where: { id, type: RequestType.BUSY_SCHEDULE },
-      relations: ['schedule', 'requester'],
+      relations: ['schedules', 'requester'],
     });
 
     if (!request) {
@@ -839,18 +872,22 @@ export class RequestService extends BaseService<RequestEntity> {
       }
 
       // Check for overlapping schedules if needed
-      if (request.schedule && request.schedule.teacherId) {
-        const hasOverlap = await this.scheduleService.checkOverlappingSchedules(
-          request.schedule.teacherId,
-          request.schedule.startDate,
-          request.schedule.endDate,
-          request.id, // exclude current request's schedule
-        );
+      if (request.schedules && request.schedules.length > 0) {
+        const schedule = request.schedules[0];
+        if (schedule && schedule.teacherId) {
+          const hasOverlap =
+            await this.scheduleService.checkOverlappingSchedules(
+              schedule.teacherId,
+              schedule.startDate,
+              schedule.endDate,
+              request.id, // exclude current request's schedule
+            );
 
-        if (hasOverlap) {
-          throw new BadRequestException(
-            `Cannot approve request. There is already an active schedule for teacher ID ${request.schedule.teacherId} in the requested period.`,
-          );
+          if (hasOverlap) {
+            throw new BadRequestException(
+              `Cannot approve request. There is already an active schedule for teacher ID ${schedule.teacherId} in the requested period.`,
+            );
+          }
         }
       }
 
@@ -862,8 +899,8 @@ export class RequestService extends BaseService<RequestEntity> {
       });
 
       // Update schedule status using the service
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
+      if (request.schedules && request.schedules.length > 0) {
+        await this.scheduleService.updateById(request.schedules[0].id, {
           status: UserStatus.ACTIVE,
         });
       }
@@ -886,8 +923,8 @@ export class RequestService extends BaseService<RequestEntity> {
       });
 
       // Keep schedule as BLOCKED
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
+      if (request.schedules && request.schedules.length > 0) {
+        await this.scheduleService.updateById(request.schedules[0].id, {
           status: UserStatus.BLOCKED,
         });
       }
@@ -920,8 +957,8 @@ export class RequestService extends BaseService<RequestEntity> {
       });
 
       // Update schedule status using the service
-      if (request.schedule) {
-        await this.scheduleService.updateById(request.schedule.id, {
+      if (request.schedules && request.schedules.length > 0) {
+        await this.scheduleService.updateById(request.schedules[0].id, {
           status: UserStatus.BLOCKED,
         });
       }
@@ -970,7 +1007,7 @@ export class RequestService extends BaseService<RequestEntity> {
   async deleteTimeOff(id: string, userId: string) {
     const request = await this.findOne({
       where: { id, type: RequestType.TIME_OFF },
-      relations: ['schedule', 'creator'],
+      relations: ['schedules', 'creator'],
     });
 
     if (!request) {
@@ -987,9 +1024,11 @@ export class RequestService extends BaseService<RequestEntity> {
       throw new ForbiddenException('You can only delete your own requests');
     }
 
-    // Delete associated schedule first
-    if (request.schedule) {
-      await this.scheduleService.delete(request.schedule.id);
+    // Delete associated schedules first
+    if (request.schedules && request.schedules.length > 0) {
+      for (const schedule of request.schedules) {
+        await this.scheduleService.delete(schedule.id);
+      }
     }
 
     // Delete the request
@@ -1000,7 +1039,7 @@ export class RequestService extends BaseService<RequestEntity> {
   async deleteBusySchedule(id: string, userId: string) {
     const request = await this.findOne({
       where: { id, type: RequestType.BUSY_SCHEDULE },
-      relations: ['schedule', 'creator'],
+      relations: ['schedules', 'creator'],
     });
 
     if (!request) {
@@ -1018,8 +1057,10 @@ export class RequestService extends BaseService<RequestEntity> {
     }
 
     // Delete associated schedule first
-    if (request.schedule) {
-      await this.scheduleService.delete(request.schedule.id);
+    if (request.schedules && request.schedules.length > 0) {
+      for (const schedule of request.schedules) {
+        await this.scheduleService.delete(schedule.id);
+      }
     }
 
     // Delete the request

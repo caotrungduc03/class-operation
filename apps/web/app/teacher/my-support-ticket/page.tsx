@@ -110,7 +110,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
   },
   {
     title: "Status",
@@ -629,7 +629,7 @@ const MySupportTicket = () => {
                 <div>
                   <Typography.Text type="secondary">Class</Typography.Text>
                   <Typography.Text className="ml-2">
-                    {supportTicketDetail.data.supportTicket?.class?.name || "-"}
+                    {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
                 </div>
                 {supportTicketDetail.data.supportTicket?.note && (

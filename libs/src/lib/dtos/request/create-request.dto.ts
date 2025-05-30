@@ -44,15 +44,7 @@ export class CreateWeeklyNormRequestDto {
 /**
  * Time-Offs Request DTOs
  */
-export class CreateTimeOffRequestDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsOptional()
-  @IsString()
-  description: string;
-
+export class CreateTimeOffScheduleDto {
   @IsNotEmpty()
   @IsDate()
   @Type(() => Date)
@@ -62,6 +54,22 @@ export class CreateTimeOffRequestDto {
   @IsDate()
   @Type(() => Date)
   endDate: Date;
+}
+
+export class CreateTimeOffRequestDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateTimeOffScheduleDto)
+  @IsNotEmpty()
+  schedules: CreateTimeOffScheduleDto[];
 }
 
 /**

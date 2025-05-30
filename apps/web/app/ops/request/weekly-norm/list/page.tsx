@@ -15,7 +15,7 @@ import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
 import {
   useGetWeeklyNormsQuery,
   useLazyGetWeeklyNormByIdQuery,
@@ -92,17 +92,34 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator: IUser) => creator?.fullName || "-",
+    render: (creator: IUser) => creator?.fullName,
   },
   {
     title: "Requester",
     dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName || "-",
+    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
+  },
+  {
+    title: "Weekly Norms",
+    dataIndex: "weeklyNorms",
+    render: (weeklyNorms: any[]) => {
+      if (!weeklyNorms || weeklyNorms.length === 0) return;
+      return (
+        <div className="space-y-1">
+          {weeklyNorms.map((norm, index) => (
+            <div key={index} className="text-sm">
+              {dayjs(norm.startDate).format(DATE_FORMAT)} -{" "}
+              {dayjs(norm.endDate).format(DATE_FORMAT)} | Qty: {norm.quantity}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
   {
     title: "Status",

@@ -50,7 +50,7 @@ export class RequestDto extends BaseDto {
 
   @Expose()
   @Type(() => ScheduleDto)
-  schedule: ScheduleDto;
+  schedules: ScheduleDto[];
 
   @Expose()
   @Type(() => SupportTicketDto)

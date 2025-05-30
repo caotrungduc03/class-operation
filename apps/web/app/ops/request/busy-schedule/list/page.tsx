@@ -95,12 +95,12 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Requester",
     dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName || "-",
+    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
   },
   {
     title: "Status",

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserStatus } from '../enums';
 import { ScheduleType } from '../enums/schedule.enum';
 import type { ClassEntity } from './class.entity';
@@ -46,7 +46,7 @@ export class ScheduleEntity extends CustomBaseEntity {
   })
   requestId: string;
 
-  @OneToOne('RequestEntity', 'schedule')
+  @ManyToOne('RequestEntity', 'schedules')
   @JoinColumn({
     name: 'request_id',
   })

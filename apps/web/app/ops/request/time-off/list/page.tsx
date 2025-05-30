@@ -18,6 +18,7 @@ import {
   DATE_TIME_FORMAT,
   TIME_FORMAT,
   TableColumn,
+  formatRangeDate,
 } from "@web/libs/common";
 import {
   useGetTimeOffsQuery,
@@ -80,29 +81,33 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator: IUser) => creator?.fullName || "-",
+    render: (creator: IUser) => creator?.fullName,
   },
   {
     title: "Requester",
     dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName || "-",
+    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Date",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      dayjs(schedule.startDate).format(DATE_FORMAT),
-  },
-  {
-    title: "Time",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      `${dayjs(schedule?.startDate).format(TIME_FORMAT)} - ${dayjs(schedule?.endDate).format(TIME_FORMAT)}`,
+    title: "Time Off Schedules",
+    dataIndex: "schedules",
+    render: (schedules: ISchedule[]) => {
+      if (!schedules || schedules.length === 0) return;
+      return (
+        <div className="space-y-1">
+          {schedules.map((schedule, index) => (
+            <div key={index} className="text-sm">
+              {formatRangeDate(schedule.startDate, schedule.endDate)}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
   {
     title: "Status",
@@ -495,34 +500,33 @@ const TimeOffList = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Time Off Details</Divider>
+            <Divider orientation="left">Time Off Schedules</Divider>
 
-            {timeOffDetail.data?.schedule && (
-              <Card size="small" className="mb-4">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <Typography.Text type="secondary">Date:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.schedule.startDate).format(
-                        DATE_FORMAT,
-                      )}
+            {timeOffDetail.data?.schedules &&
+              timeOffDetail.data.schedules.map((schedule, index) => (
+                <Card key={index} size="small" className="mb-4">
+                  <div className="flex justify-between">
+                    <Typography.Text strong>
+                      Schedule #{index + 1}
                     </Typography.Text>
                   </div>
-                  <div>
-                    <Typography.Text type="secondary">Time:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.schedule.startDate).format(
-                        TIME_FORMAT,
-                      )}{" "}
-                      -{" "}
-                      {dayjs(timeOffDetail.data.schedule.endDate).format(
-                        TIME_FORMAT,
-                      )}
-                    </Typography.Text>
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(schedule.startDate).format(DATE_FORMAT)}
+                      </Typography.Text>
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(schedule.startDate).format(TIME_FORMAT)} -{" "}
+                        {dayjs(schedule.endDate).format(TIME_FORMAT)}
+                      </Typography.Text>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            )}
+                </Card>
+              ))}
 
             <div className="flex justify-between">
               <div>

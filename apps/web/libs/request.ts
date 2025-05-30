@@ -50,7 +50,7 @@ export interface IRequest extends ITimestamps {
   approver?: IUser;
   teacherId?: string;
   weeklyNorms?: WeeklyNormDto[];
-  schedule?: ISchedule;
+  schedules?: ISchedule[];
   supportTicket?: ISupportTicket;
 }
 
@@ -72,11 +72,15 @@ export interface CreateRequestWeeklyNormDto {
   weeklyNorms?: WeeklyNormDto[];
 }
 
+export interface TimeOffScheduleDto {
+  startDate: Date;
+  endDate: Date;
+}
+
 export interface CreateRequestTimeOffDto {
   name: string;
   description?: string;
-  startDate: Date;
-  endDate: Date;
+  schedules: TimeOffScheduleDto[];
 }
 
 export interface CreateRequestBusyScheduleDto {

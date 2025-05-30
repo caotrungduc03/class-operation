@@ -24,6 +24,7 @@ import {
   DATE_TIME_FORMAT,
   TIME_FORMAT,
   TableColumn,
+  formatRangeDate,
 } from "@web/libs/common";
 import {
   useCreateTimeOffMutation,
@@ -70,7 +71,7 @@ import {
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { z } from "zod";
@@ -97,19 +98,23 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Date",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      dayjs(schedule.startDate).format(DATE_FORMAT),
-  },
-  {
-    title: "Time",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      `${dayjs(schedule?.startDate).format(TIME_FORMAT)} - ${dayjs(schedule?.endDate).format(TIME_FORMAT)}`,
+    title: "Time Off Schedules",
+    dataIndex: "schedules",
+    render: (schedules: ISchedule[]) => {
+      if (!schedules || schedules.length === 0) return;
+      return (
+        <div className="space-y-1">
+          {schedules.map((schedule, index) => (
+            <div key={index} className="text-sm">
+              {formatRangeDate(schedule.startDate, schedule.endDate)}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
   {
     title: "Status",
@@ -184,15 +189,15 @@ const TimeOffActions = ({
 const timeOffSchema = z.object({
   name: z.string().min(1, "Request Name is required"),
   description: z.string().optional(),
-  date: z.any().refine((val) => !!val, {
-    message: "Date is required",
-  }),
-  startTime: z.any().refine((val) => !!val, {
-    message: "Start time is required",
-  }),
-  endTime: z.any().refine((val) => !!val, {
-    message: "End time is required",
-  }),
+  schedules: z
+    .array(
+      z.object({
+        date: z.any().refine((val) => !!val, "Date is required"),
+        startTime: z.any().refine((val) => !!val, "Start time is required"),
+        endTime: z.any().refine((val) => !!val, "End time is required"),
+      }),
+    )
+    .min(1, "At least one schedule is required"),
 });
 
 type TimeOffFormValues = z.infer<typeof timeOffSchema>;
@@ -258,10 +263,19 @@ const TimeOffRegistration = () => {
     defaultValues: {
       name: "",
       description: "",
-      date: null,
-      startTime: null,
-      endTime: null,
+      schedules: [
+        {
+          date: null,
+          startTime: null,
+          endTime: null,
+        },
+      ],
     },
+  });
+
+  const { fields, append, remove, replace } = useFieldArray({
+    control: timeOffForm.control,
+    name: "schedules",
   });
 
   const tableColumns = useMemo(() => {
@@ -338,16 +352,15 @@ const TimeOffRegistration = () => {
         timeOffForm.setValue("name", response.data.name);
         timeOffForm.setValue("description", response.data.description || "");
 
-        if (response.data.schedule) {
-          timeOffForm.setValue("date", dayjs(response.data.schedule.startDate));
-          timeOffForm.setValue(
-            "startTime",
-            dayjs(response.data.schedule.startDate),
+        if (response.data.schedules && response.data.schedules.length > 0) {
+          const formattedSchedules = response.data.schedules.map(
+            (schedule) => ({
+              date: dayjs(schedule.startDate),
+              startTime: dayjs(schedule.startDate),
+              endTime: dayjs(schedule.endDate),
+            }),
           );
-          timeOffForm.setValue(
-            "endTime",
-            dayjs(response.data.schedule.endDate),
-          );
+          replace(formattedSchedules);
         }
       }
       dispatch(openCreateModal());
@@ -424,33 +437,39 @@ const TimeOffRegistration = () => {
   };
 
   const onSubmitCreate = async (data: TimeOffFormValues) => {
-    const selectedDate = data.date.toDate();
-    const startDateTime = data.startTime.toDate();
-    const endDateTime = data.endTime.toDate();
+    const formattedSchedules = data.schedules.map((schedule) => {
+      const selectedDate = schedule.date.toDate();
+      const startDateTime = schedule.startTime.toDate();
+      const endDateTime = schedule.endTime.toDate();
 
-    startDateTime.setFullYear(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate(),
-    );
-    endDateTime.setFullYear(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate(),
-    );
+      startDateTime.setFullYear(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+      );
+      endDateTime.setFullYear(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+      );
+
+      return {
+        startDate: startDateTime,
+        endDate: endDateTime,
+      };
+    });
 
     const formattedData = {
       name: data.name,
       description: data.description || "",
       type: RequestType.TIME_OFF,
-      startDate: startDateTime,
-      endDate: endDateTime,
+      schedules: formattedSchedules,
     };
 
     try {
-      if (isEditMode && timeOffDetail.data) {
+      if (isEditMode && selectedItemId) {
         const res = await updateTimeOff({
-          id: timeOffDetail.data.id,
+          id: selectedItemId,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
@@ -478,6 +497,22 @@ const TimeOffRegistration = () => {
       page: newPagination.current,
       limit: newPagination.pageSize,
     });
+  };
+
+  const addScheduleEntry = () => {
+    append({
+      date: null,
+      startTime: null,
+      endTime: null,
+    });
+  };
+
+  const removeScheduleEntry = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
+    } else {
+      toast.error("At least one schedule is required");
+    }
   };
 
   return (
@@ -589,34 +624,33 @@ const TimeOffRegistration = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Time Off Details</Divider>
+            <Divider orientation="left">Time Off Schedules</Divider>
 
-            {timeOffDetail.data?.schedule && (
-              <Card size="small" className="mb-4">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <Typography.Text type="secondary">Date:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.schedule.startDate).format(
-                        DATE_FORMAT,
-                      )}
+            {timeOffDetail.data?.schedules &&
+              timeOffDetail.data.schedules.map((schedule, index) => (
+                <Card key={index} size="small" className="mb-4">
+                  <div className="flex justify-between">
+                    <Typography.Text strong>
+                      Schedule #{index + 1}
                     </Typography.Text>
                   </div>
-                  <div>
-                    <Typography.Text type="secondary">Time:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(timeOffDetail.data.schedule.startDate).format(
-                        TIME_FORMAT,
-                      )}{" "}
-                      -{" "}
-                      {dayjs(timeOffDetail.data.schedule.endDate).format(
-                        TIME_FORMAT,
-                      )}
-                    </Typography.Text>
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(schedule.startDate).format(DATE_FORMAT)}
+                      </Typography.Text>
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(schedule.startDate).format(TIME_FORMAT)} -{" "}
+                        {dayjs(schedule.endDate).format(TIME_FORMAT)}
+                      </Typography.Text>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            )}
+                </Card>
+              ))}
 
             <div className="flex justify-between">
               <div>
@@ -665,42 +699,70 @@ const TimeOffRegistration = () => {
             size="large"
           />
 
-          <Divider orientation="left">Time Off Details</Divider>
+          <Divider orientation="left">Time Off Schedules</Divider>
 
-          <div className="flex flex-col gap-2">
-            <CustomDatePicker
-              control={timeOffForm.control}
-              name="date"
-              label="Date"
-              size="large"
-              placeholder="Select date"
-              required
-            />
-          </div>
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="flex flex-col gap-2 rounded-md border border-gray-200 p-4"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <Typography.Title level={5} className="m-0">
+                  Schedule #{index + 1}
+                </Typography.Title>
+                <CustomButton
+                  type="text"
+                  color="danger"
+                  variant="text"
+                  icon={<DeleteOutlined />}
+                  onClick={() => removeScheduleEntry(index)}
+                  disabled={fields.length <= 1}
+                />
+              </div>
 
-          <div className="flex gap-2">
-            <div className="flex flex-1 flex-col gap-2">
-              <CustomTimePicker
+              <CustomDatePicker
                 control={timeOffForm.control}
-                name="startTime"
-                label="Start Time"
+                name={`schedules.${index}.date`}
+                label="Date"
                 size="large"
-                placeholder="Start time"
+                placeholder="Select date"
                 required
               />
+
+              <div className="flex gap-2">
+                <div className="flex flex-1 flex-col gap-2">
+                  <CustomTimePicker
+                    control={timeOffForm.control}
+                    name={`schedules.${index}.startTime`}
+                    label="Start Time"
+                    size="large"
+                    placeholder="Start time"
+                    required
+                  />
+                </div>
+                <div className="flex flex-1 flex-col gap-2">
+                  <CustomTimePicker
+                    control={timeOffForm.control}
+                    name={`schedules.${index}.endTime`}
+                    label="End Time"
+                    size="large"
+                    format="HH:mm"
+                    placeholder="End time"
+                    required
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex flex-1 flex-col gap-2">
-              <CustomTimePicker
-                control={timeOffForm.control}
-                name="endTime"
-                label="End Time"
-                size="large"
-                format="HH:mm"
-                placeholder="End time"
-                required
-              />
-            </div>
-          </div>
+          ))}
+
+          <CustomButton
+            type="dashed"
+            title="Add Schedule"
+            onClick={addScheduleEntry}
+            icon={<PlusOutlined />}
+            className="mt-2"
+            size="large"
+          />
         </div>
       </CustomDrawer>
       <Modal

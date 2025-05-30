@@ -75,23 +75,22 @@ const columnsTitles: TableColumn<IRequest>[] = [
   {
     title: "Class",
     dataIndex: "supportTicket",
-    render: (supportTicket: ISupportTicket) =>
-      supportTicket?.class?.name || "-",
+    render: (supportTicket: ISupportTicket) => supportTicket?.class?.name,
   },
   {
     title: "Creator",
     dataIndex: "creator",
-    render: (creator: IUser) => creator?.fullName || "-",
+    render: (creator: IUser) => creator?.fullName,
   },
   {
     title: "Requester",
     dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName || "-",
+    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
     dataIndex: "approver",
-    render: (approver: IUser) => approver?.fullName || "-",
+    render: (approver: IUser) => approver?.fullName,
   },
   {
     title: "Priority",
@@ -550,7 +549,7 @@ const SupportTicketList = () => {
                 <div>
                   <Typography.Text type="secondary">Class:</Typography.Text>
                   <Typography.Text className="ml-2">
-                    {supportTicketDetail.data.supportTicket?.class?.name || "-"}
+                    {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
                 </div>
                 {supportTicketDetail.data.supportTicket?.note && (

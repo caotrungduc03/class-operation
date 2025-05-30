@@ -9,7 +9,7 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { RoleName } from '../../enums';
+import { RoleName, TeacherLevel } from '../../enums';
 import { BaseRequestDto } from '../common/baseRequest.dto';
 
 export class CreateUserDto extends BaseRequestDto {
@@ -66,4 +66,9 @@ export class CreateUserDto extends BaseRequestDto {
   @IsOptional()
   @IsString()
   fieldId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsEnum(TeacherLevel)
+  teacherLevel?: TeacherLevel;
 }
