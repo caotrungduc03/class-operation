@@ -149,7 +149,7 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
   }
 
   async createTeachingSchedules(createDto: CreateTeachingSchedulesDto) {
-    const { classId, name, description, startDate, endDate } = createDto;
+    const { classId, schedules } = createDto;
 
     // Find the class
     const classEntity = await this.classService.findById(classId);
@@ -164,30 +164,39 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
       );
     }
 
-    // Check for overlapping schedules
-    const hasOverlap = await this.checkOverlappingSchedules(
-      teacherId,
-      new Date(startDate),
-      new Date(endDate),
-    );
+    const createdSchedules: ScheduleEntity[] = [];
 
-    if (hasOverlap) {
-      throw new BadRequestException(
-        'Schedule overlaps with existing schedules for this teacher',
+    for (const scheduleDto of schedules) {
+      const { name, description, startDate, endDate } = scheduleDto;
+      const scheduleStartDate = new Date(startDate);
+      const scheduleEndDate = new Date(endDate);
+
+      // Check for overlapping schedules
+      const hasOverlap = await this.checkOverlappingSchedules(
+        teacherId,
+        scheduleStartDate,
+        scheduleEndDate,
       );
+
+      if (hasOverlap) {
+        throw new BadRequestException(
+          `Schedule "${name}" overlaps with existing schedules for this teacher`,
+        );
+      }
+
+      const savedSchedule = await this.store({
+        name,
+        description,
+        startDate: scheduleStartDate,
+        endDate: scheduleEndDate,
+        teacherId,
+        classId,
+        type: ScheduleType.TEACHING,
+      });
+      createdSchedules.push(savedSchedule);
     }
 
-    const savedSchedule = await this.store({
-      name,
-      description,
-      startDate,
-      endDate,
-      teacherId,
-      classId,
-      type: ScheduleType.TEACHING,
-    });
-
-    return savedSchedule;
+    return createdSchedules;
   }
 
   async findByStudentClasses(query: GetScheduleDto, userId: string) {

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmpty, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmpty,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UserStatus } from '../../enums';
 import { CourseType } from '../../enums/course.enum';
 
@@ -30,4 +36,9 @@ export class UpdateCourseDto {
   @IsOptional()
   @IsEnum(CourseType)
   type?: CourseType;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber({}, { message: 'Hours must be a valid number' })
+  hours?: number;
 }

@@ -1,44 +1,15 @@
 import { Type } from 'class-transformer';
 import {
-  IsDate,
+  IsArray,
   IsDateString,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
-import { ScheduleType } from '../../enums/schedule.enum';
 
 export class CreateScheduleDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsNotEmpty()
-  @IsEnum(ScheduleType)
-  type: ScheduleType;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  startDate: Date;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  endDate: Date;
-
-  @IsUUID()
-  @IsOptional()
-  teacherId?: string;
-}
-
-export class CreateTeachingSchedulesDto {
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -55,7 +26,19 @@ export class CreateTeachingSchedulesDto {
   @IsDateString()
   endDate: string;
 
+  @IsUUID()
+  @IsOptional()
+  teacherId?: string;
+}
+
+export class CreateTeachingSchedulesDto {
   @IsNotEmpty()
   @IsString()
   classId: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateScheduleDto)
+  schedules: CreateScheduleDto[];
 }

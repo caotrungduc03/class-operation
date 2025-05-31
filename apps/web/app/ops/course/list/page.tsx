@@ -69,6 +69,11 @@ const columnsTitles: TableColumn<ICourse>[] = [
     dataIndex: "type",
   },
   {
+    title: "Hours",
+    dataIndex: "hours",
+    render: (hours: number) => (hours ? `${hours} giờ` : ""),
+  },
+  {
     title: "Status",
     dataIndex: "status",
     render: (status: UserStatus) => STATUS_LABEL[status],
@@ -96,6 +101,11 @@ const courseFormSchema = z.object({
   description: z.string().optional(),
   type: z.nativeEnum(CourseType, { required_error: "Type is required" }),
   status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
+  hours: z
+    .number()
+    .min(0, "Hours must be positive")
+    .optional()
+    .or(z.string().transform((val) => (val === "" ? undefined : Number(val)))),
 });
 
 // Create type from Zod schema
@@ -278,6 +288,7 @@ const Courses = () => {
             description: course.description,
             type: course.type,
             status: course.status,
+            hours: course.hours,
           });
           dispatch(openCreateModal());
         }
@@ -314,6 +325,7 @@ const Courses = () => {
         description: formData.description,
         type: formData.type,
         status: formData.status,
+        hours: formData.hours,
       };
 
       if (isEditMode && selectedCourseId) {
@@ -353,6 +365,7 @@ const Courses = () => {
       description: "",
       type: undefined,
       status: UserStatus.ACTIVE,
+      hours: undefined,
     });
     dispatch(openCreateModal());
   };
@@ -435,6 +448,14 @@ const Courses = () => {
             placeholder="Select course type"
             options={courseTypeOptions}
             required
+          />
+
+          <CustomInput
+            control={courseForm.control}
+            name="hours"
+            label="Course Hours"
+            placeholder="Enter course hours"
+            type="number"
           />
 
           <CustomTextArea

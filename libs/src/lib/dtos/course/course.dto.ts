@@ -18,4 +18,7 @@ export class CourseDto extends BaseDto {
 
   @Expose()
   type: CourseType;
+
+  @Expose()
+  hours: number;
 }

@@ -3,6 +3,7 @@ import {
   IsEmpty,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -40,4 +41,9 @@ export class CreateCourseDto {
   @IsNotEmpty()
   @IsEnum(CourseType)
   type: CourseType;
+
+  @ApiProperty({ required: false, description: 'Course hours' })
+  @IsOptional()
+  @IsNumber({}, { message: 'Hours must be a valid number' })
+  hours?: number;
 }

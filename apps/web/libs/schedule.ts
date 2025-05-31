@@ -45,5 +45,27 @@ export interface CreateTeachingScheduleDto {
   description?: string;
   startDate: Date;
   endDate: Date;
-  classId: string;
 }
+
+export interface CreateTeachingSchedulesDto {
+  classId: string;
+  schedules: CreateTeachingScheduleDto[];
+}
+
+export interface UpdateSchedulePayload {
+  name?: string;
+  description?: string;
+  startDate?: Date;
+  endDate?: Date;
+  type?: string;
+}
+
+export const WEEKDAY_OPTIONS = [
+  { label: "Thứ hai", value: 1 },
+  { label: "Thứ ba", value: 2 },
+  { label: "Thứ tư", value: 3 },
+  { label: "Thứ năm", value: 4 },
+  { label: "Thứ sáu", value: 5 },
+  { label: "Thứ bảy", value: 6 },
+  { label: "Chủ nhật", value: 7 },
+];

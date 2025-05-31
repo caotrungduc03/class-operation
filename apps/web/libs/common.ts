@@ -14,6 +14,7 @@ export const DATE_FORMAT = "DD/MM/YYYY";
 export const DATE_TIME_FORMAT = "DD/MM/YYYY HH:mm";
 export const TIME_FORMAT = "HH:mm";
 export const MAX_LIMIT_REQUEST = 100000;
+export const HOURS_PER_SESSION = 2;
 
 // Enums
 export enum AccessRole {

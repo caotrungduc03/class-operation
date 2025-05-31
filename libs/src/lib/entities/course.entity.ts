@@ -32,6 +32,15 @@ export class CourseEntity extends CustomBaseEntity {
   })
   type: CourseType;
 
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 1,
+    nullable: true,
+    default: 0,
+  })
+  hours: number;
+
   @OneToMany('ClassEntity', 'course')
   classes: ClassEntity[];
 }

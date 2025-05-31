@@ -14,6 +14,7 @@ export interface ICourse extends ITimestamps {
   description: string;
   status: UserStatus;
   type: CourseType;
+  hours?: number;
 }
 
 export interface CreateCourseDto {
@@ -22,4 +23,5 @@ export interface CreateCourseDto {
   description?: string;
   status?: UserStatus;
   type?: CourseType;
+  hours?: number;
 }
