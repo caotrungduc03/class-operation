@@ -1,25 +1,36 @@
 "use client";
 import {
   DeleteOutlined,
+  LockOutlined,
   PlusOutlined,
   SearchOutlined,
+  UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
+import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import FilterGrid from "@web/components/common/FilterGrid";
 import Loading from "@web/components/common/Loading";
+import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import { TableColumn } from "@web/libs/common";
 import {
   useAddStudentToClassMutation,
+  useGetAvailableStudentsQuery,
   useGetClassStudentsQuery,
   useRemoveStudentFromClassMutation,
 } from "@web/libs/features/classes/classApi";
-import { useGetStudentsQuery } from "@web/libs/features/users/userApi";
-import { IUser, STATUS_LABEL, STATUS_TAG, UserStatus } from "@web/libs/user";
-import { Card, Modal, Table, Tag, Typography } from "antd";
+import { useUpdateUserStatusMutation } from "@web/libs/features/users/userApi";
+import {
+  IDetailUser,
+  IUser,
+  STATUS_LABEL,
+  STATUS_TAG,
+  UserStatus,
+} from "@web/libs/user";
+import { Button, Card, Modal, Table, Tag, Typography } from "antd";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -42,31 +53,40 @@ type AddStudentFormValues = z.infer<typeof addStudentFormSchema>;
 
 const columnsTitles: TableColumn<IUser>[] = [
   {
+    title: "STT",
+    dataIndex: "index",
+    render: (_, __, index) => index + 1,
+  },
+  {
+    title: "Mã học viên",
+    dataIndex: "detail",
+    render: (detail: IDetailUser) => detail.code,
+  },
+  {
+    title: "Avatar",
+    dataIndex: "avatar",
+    render: (avatar: string, record) =>
+      avatar ? (
+        <Image
+          src={avatar}
+          alt={record.fullName}
+          width={40}
+          height={40}
+          className="rounded-full"
+        />
+      ) : (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+          {record.fullName.charAt(0).toUpperCase()}
+        </div>
+      ),
+  },
+  {
     title: "Họ và tên",
     dataIndex: "fullName",
-    render: (item, record) => (
-      <div className="flex items-center gap-3">
-        {record.avatar ? (
-          <Image
-            src={record.avatar}
-            alt={record.fullName}
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
-        ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-            {record.fullName.charAt(0).toUpperCase()}
-          </div>
-        )}
-        <div>
-          <Typography.Text strong>{record.fullName}</Typography.Text>
-          <div>
-            <Typography.Text type="secondary">{record.email}</Typography.Text>
-          </div>
-        </div>
-      </div>
-    ),
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
   },
   {
     title: "Status",
@@ -86,17 +106,37 @@ const columnsTitles: TableColumn<IUser>[] = [
 const StudentActions = ({
   record,
   onRemove,
+  onToggleStatus,
 }: {
   record: IUser;
   onRemove: (id: string) => void;
+  onToggleStatus: (id: string, status: UserStatus) => void;
 }) => {
   return (
-    <CustomButton
-      color="danger"
-      icon={<DeleteOutlined />}
-      onClick={() => onRemove(record.id)}
-      title="Remove"
-    />
+    <CustomDropdown>
+      {record.status === UserStatus.ACTIVE ? (
+        <CustomButton
+          type="link"
+          icon={<LockOutlined />}
+          onClick={() => onToggleStatus(record.id, UserStatus.BLOCKED)}
+          title="Block"
+        />
+      ) : (
+        <CustomButton
+          type="link"
+          icon={<UnlockOutlined />}
+          onClick={() => onToggleStatus(record.id, UserStatus.ACTIVE)}
+          title="Unblock"
+        />
+      )}
+      <CustomButton
+        type="link"
+        title="Remove"
+        color="danger"
+        icon={<DeleteOutlined />}
+        onClick={() => onRemove(record.id)}
+      />
+    </CustomDropdown>
   );
 };
 
@@ -105,6 +145,10 @@ const ClassStudents = () => {
   const [searchText, setSearchText] = useState("");
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [studentToRemove, setStudentToRemove] = useState<string | null>(null);
+  const [studentToToggleStatus, setStudentToToggleStatus] = useState<{
+    id: string;
+    status: UserStatus;
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -124,16 +168,6 @@ const ClassStudents = () => {
     },
   );
 
-  const { data: availableStudentsData } = useGetStudentsQuery({
-    page: 1,
-    limit: 100,
-  });
-
-  const [addStudent, { isLoading: isAddingStudent }] =
-    useAddStudentToClassMutation();
-  const [removeStudent, { isLoading: isRemovingStudent }] =
-    useRemoveStudentFromClassMutation();
-
   // Setup forms with zod resolver
   const searchForm = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -143,18 +177,25 @@ const ClassStudents = () => {
     resolver: zodResolver(addStudentFormSchema),
   });
 
-  // Format available students for dropdown
-  const availableStudentOptions =
-    availableStudentsData?.data?.items
-      .filter((student) => {
-        // Filter out students already in the class
-        const classStudents = studentsData?.data?.items || [];
-        return !classStudents.some((cs) => cs.id === student.id);
-      })
-      .map((student) => ({
-        label: `${student.fullName} (${student.email})`,
-        value: student.id,
-      })) || [];
+  // Use debounced select for available students
+  const {
+    selectProps: { options: availableStudentOptions, onFocus, onPopupScroll },
+  } = useDebouncedSelect({
+    control: addStudentForm.control,
+    name: "studentId",
+    useGetDataQuery: useGetAvailableStudentsQuery,
+    labelField: "fullName",
+    queryArgs: {
+      classId,
+    },
+  });
+
+  const [addStudent, { isLoading: isAddingStudent }] =
+    useAddStudentToClassMutation();
+  const [removeStudent, { isLoading: isRemovingStudent }] =
+    useRemoveStudentFromClassMutation();
+  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateUserStatusMutation();
 
   // Map the columns with actions
   const tableColumns = columnsTitles.map((item, index) => {
@@ -163,7 +204,13 @@ const ClassStudents = () => {
         ...item,
         key: index,
         render: (_, record) => (
-          <StudentActions record={record} onRemove={setStudentToRemove} />
+          <StudentActions
+            record={record}
+            onRemove={setStudentToRemove}
+            onToggleStatus={(id, status) =>
+              setStudentToToggleStatus({ id, status })
+            }
+          />
         ),
       };
     }
@@ -218,6 +265,32 @@ const ClassStudents = () => {
     }
   };
 
+  const handleConfirmToggleStatus = async () => {
+    if (!studentToToggleStatus) return;
+
+    try {
+      await updateUserStatus({
+        id: studentToToggleStatus.id,
+        status: studentToToggleStatus.status,
+      }).unwrap();
+
+      const statusText =
+        studentToToggleStatus.status === UserStatus.ACTIVE
+          ? "unblocked"
+          : "blocked";
+
+      toast.success(`Student ${statusText} successfully`);
+      setStudentToToggleStatus(null);
+      refetch();
+    } catch (error) {
+      toast.error("Failed to update student status");
+    }
+  };
+
+  const handleTablePagination = (page: number) => {
+    setCurrentPage(page);
+  };
+
   if (isLoading && !studentsData) return <Loading />;
 
   return (
@@ -248,23 +321,20 @@ const ClassStudents = () => {
             icon={<SearchOutlined />}
             type="primary"
             title="Search"
-            size="large"
             onClick={searchForm.handleSubmit(onSubmitSearch)}
           />
         </FilterGrid>
 
         <Table
+          dataSource={studentsData?.data?.items || []}
           columns={tableColumns}
-          dataSource={(studentsData?.data?.items || []).map((item) => ({
-            ...item,
-            method: item,
-          }))}
           rowKey="id"
+          loading={isLoading}
           pagination={{
-            current: currentPage,
-            pageSize: pageSize,
             total: studentsData?.data?.total || 0,
-            onChange: (page) => setCurrentPage(page),
+            pageSize,
+            current: currentPage,
+            onChange: handleTablePagination,
             showSizeChanger: false,
           }}
         />
@@ -272,7 +342,7 @@ const ClassStudents = () => {
 
       {/* Add Student Drawer */}
       <CustomDrawer
-        title="Add Student to Class"
+        title="Add Student"
         open={isAddDrawerOpen}
         onCancel={handleCloseAddDrawer}
         onSubmit={addStudentForm.handleSubmit(handleAddStudent)}
@@ -282,15 +352,17 @@ const ClassStudents = () => {
           <CustomSelect
             control={addStudentForm.control}
             name="studentId"
-            label="Select Student"
-            placeholder="Select a student"
+            label="Student"
+            placeholder="Select student"
             options={availableStudentOptions}
+            onFocus={onFocus}
+            onPopupScroll={onPopupScroll}
             required
           />
         </div>
       </CustomDrawer>
 
-      {/* Remove Student Confirmation */}
+      {/* Remove Confirmation Modal */}
       <ConfirmModal
         title="Remove Student"
         content="Are you sure you want to remove this student from the class?"
@@ -299,11 +371,20 @@ const ClassStudents = () => {
         onConfirm={handleConfirmRemove}
         confirmLoading={isRemovingStudent}
       />
+
+      {/* Toggle Status Confirmation Modal */}
+      <ConfirmModal
+        title={`${studentToToggleStatus?.status === UserStatus.ACTIVE ? "Unblock" : "Block"} Student`}
+        content={`Are you sure you want to ${studentToToggleStatus?.status === UserStatus.ACTIVE ? "unblock" : "block"} this student?`}
+        open={!!studentToToggleStatus}
+        onCancel={() => setStudentToToggleStatus(null)}
+        onConfirm={handleConfirmToggleStatus}
+        confirmLoading={isUpdatingStatus}
+      />
     </Card>
   );
 };
 
-// Define the ConfirmModal component
 interface ConfirmModalProps {
   title: string;
   content: string;
@@ -326,10 +407,20 @@ const ConfirmModal = ({
       title={title}
       open={open}
       onCancel={onCancel}
-      confirmLoading={confirmLoading}
-      onOk={onConfirm}
-      okText="Confirm"
-      cancelText="Cancel"
+      footer={[
+        <Button key="cancel" onClick={onCancel}>
+          Cancel
+        </Button>,
+        <Button
+          key="confirm"
+          type="primary"
+          danger
+          loading={confirmLoading}
+          onClick={onConfirm}
+        >
+          Confirm
+        </Button>,
+      ]}
     >
       <p>{content}</p>
     </Modal>

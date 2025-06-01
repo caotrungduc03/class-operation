@@ -1,6 +1,7 @@
 import {
   ClassEntity,
   CounterType,
+  CourseEntity,
   CreateClassDto,
   QueryClassDto,
   RoleName,
@@ -17,7 +18,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { BaseService } from '../../common';
 import { CounterService } from '../counter/counter.service';
 
@@ -33,6 +34,8 @@ export class ClassService extends BaseService<ClassEntity> {
     private readonly studentClassRepository: Repository<StudentClassEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(CourseEntity)
+    private readonly courseRepository: Repository<CourseEntity>,
   ) {
     super(classRepository);
   }
@@ -284,5 +287,221 @@ export class ClassService extends BaseService<ClassEntity> {
     }
 
     await this.studentClassRepository.remove(existingRelation);
+  }
+
+  async findAvailableStudents(query: Record<string, any>) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'createdAt:desc',
+      search,
+      classId,
+    } = query;
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('entity')
+      .innerJoin('entity.role', 'role')
+      .where('role.roleName = :roleName', {
+        roleName: RoleName.STUDENT,
+      })
+      .andWhere('entity.status = :status', {
+        status: UserStatus.ACTIVE,
+      });
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(entity.firstName ILIKE :search OR entity.lastName ILIKE :search OR entity.email ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    const classEntity = await this.classRepository.findOne({
+      where: { id: classId },
+    });
+
+    if (!classEntity) {
+      throw new NotFoundException('Class not found');
+    }
+
+    const course = await this.courseRepository.findOne({
+      where: { id: classEntity.courseId },
+      relations: ['classes'],
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    const classIds = course.classes.map((c) => c.id);
+
+    const students = await this.studentClassRepository.find({
+      where: {
+        classId: In(classIds),
+      },
+    });
+
+    const studentIds = students.map((sc) => sc.studentId);
+
+    if (studentIds.length) {
+      queryBuilder.andWhere('entity.id NOT IN (:...studentIds)', {
+        studentIds,
+      });
+    }
+
+    const metadata = this.userRepository.metadata;
+    queryBuilder.skip((page - 1) * limit);
+    queryBuilder.take(limit);
+
+    const [sortColumn, sortOrder] = sort.split(':');
+    if (this.columnExists(sortColumn, metadata)) {
+      queryBuilder.orderBy(
+        `entity.${sortColumn}`,
+        sortOrder.toUpperCase() as 'ASC' | 'DESC',
+      );
+    }
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      page,
+      limit,
+      total,
+      data,
+    };
+  }
+
+  async addStudentsBulk(classId: string, studentIds: string[]): Promise<void> {
+    const classEntity = await this.findById(classId);
+
+    // Get current students in the class
+    const existingRelations = await this.studentClassRepository.find({
+      where: {
+        classId,
+        studentId: { $in: studentIds } as any,
+      },
+    });
+
+    const existingStudentIds = existingRelations.map(
+      (relation) => relation.studentId,
+    );
+
+    // Filter out students already in the class
+    const newStudentIds = studentIds.filter(
+      (id) => !existingStudentIds.includes(id),
+    );
+
+    // Create relationships for new students
+    const studentClasses = newStudentIds.map((studentId) =>
+      this.studentClassRepository.create({
+        classId,
+        studentId,
+        status: UserStatus.ACTIVE,
+      }),
+    );
+
+    if (studentClasses.length > 0) {
+      await this.studentClassRepository.save(studentClasses);
+    }
+  }
+
+  async removeStudentsBulk(
+    classId: string,
+    studentIds: string[],
+  ): Promise<void> {
+    const classEntity = await this.findById(classId);
+
+    // Get current students in the class
+    const existingRelations = await this.studentClassRepository.find({
+      where: {
+        classId,
+        studentId: { $in: studentIds } as any,
+      },
+    });
+
+    if (existingRelations.length > 0) {
+      await this.studentClassRepository.remove(existingRelations);
+    }
+  }
+
+  async updateClassStatus(
+    classId: string,
+    status: UserStatus,
+  ): Promise<ClassEntity> {
+    const classEntity = await this.findById(classId);
+
+    classEntity.status = status;
+
+    return this.store(classEntity);
+  }
+
+  async getClassStatistics(classId: string) {
+    const classEntity = await this.findById(classId);
+
+    // Get total students
+    const totalStudents = await this.studentClassRepository.count({
+      where: { classId },
+    });
+
+    // Get completed schedules
+    const now = new Date();
+    const completedSchedules = await this.scheduleRepository.count({
+      where: {
+        classId,
+        status: UserStatus.ACTIVE,
+        type: ScheduleType.TEACHING,
+      },
+      // For TypeORM query
+      relations: ['endTime'],
+      // Filter where endTime is in the past
+      // Using raw where condition
+      withDeleted: false,
+    });
+
+    // Get total schedules
+    const totalSchedules = await this.scheduleRepository.count({
+      where: {
+        classId,
+        status: UserStatus.ACTIVE,
+        type: ScheduleType.TEACHING,
+      },
+    });
+
+    return {
+      totalStudents,
+      completedSchedules,
+      totalSchedules,
+      progress:
+        totalSchedules > 0
+          ? Math.round((completedSchedules / totalSchedules) * 100)
+          : 0,
+      className: classEntity.name,
+      classCode: classEntity.code,
+    };
+  }
+
+  async updateStudentStatus(
+    studentId: string,
+    status: UserStatus,
+  ): Promise<UserEntity> {
+    // Find the student
+    const student = await this.userRepository.findOne({
+      where: { id: studentId },
+      relations: ['role', 'detail'],
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    // Check if the user is a student
+    if (student.role?.roleName !== RoleName.STUDENT) {
+      throw new BadRequestException('User is not a student');
+    }
+
+    // Update student status
+    student.status = status;
+
+    // Save the updated student
+    return this.userRepository.save(student);
   }
 }

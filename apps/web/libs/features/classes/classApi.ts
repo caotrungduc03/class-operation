@@ -8,7 +8,7 @@ import {
 import { CustomResponse, Pagination } from "@web/libs/common";
 import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { ISchedule } from "@web/libs/schedule";
-import { IUser } from "@web/libs/user";
+import { IUser, UserStatus } from "@web/libs/user";
 
 export const classApi = createApi({
   reducerPath: "classApi",
@@ -80,6 +80,23 @@ export const classApi = createApi({
       }),
     }),
 
+    getAvailableStudents: builder.query<
+      CustomResponse<Pagination<IUser[]>>,
+      {
+        page?: number;
+        limit?: number;
+        search?: string;
+        classId?: string;
+        status?: UserStatus;
+      }
+    >({
+      query: (params) => ({
+        url: "/classes/students/available",
+        method: "GET",
+        params,
+      }),
+    }),
+
     addStudentToClass: builder.mutation<
       CustomResponse<void>,
       { classId: string; studentId: string }
@@ -97,6 +114,17 @@ export const classApi = createApi({
       query: ({ classId, studentId }) => ({
         url: `/classes/${classId}/students/${studentId}`,
         method: "DELETE",
+      }),
+    }),
+
+    updateStudentStatus: builder.mutation<
+      CustomResponse<IUser>,
+      { studentId: string; status: UserStatus }
+    >({
+      query: ({ studentId, status }) => ({
+        url: `/classes/students/${studentId}/status`,
+        method: "PATCH",
+        body: { status },
       }),
     }),
 
@@ -122,7 +150,9 @@ export const {
   useLazyGetClassByIdQuery,
   useGetClassSchedulesQuery,
   useGetClassStudentsQuery,
+  useGetAvailableStudentsQuery,
   useAddStudentToClassMutation,
   useRemoveStudentFromClassMutation,
+  useUpdateStudentStatusMutation,
   useGetMyClassesQuery,
 } = classApi;

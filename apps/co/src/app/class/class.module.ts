@@ -1,5 +1,6 @@
 import {
   ClassEntity,
+  CourseEntity,
   ScheduleEntity,
   StudentClassEntity,
   UserEntity,
@@ -17,6 +18,7 @@ import { ClassService } from './class.service';
       ScheduleEntity,
       StudentClassEntity,
       UserEntity,
+      CourseEntity,
     ]),
     CounterModule,
   ],

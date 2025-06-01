@@ -80,7 +80,11 @@ export interface TableColumn<T, O = OtherColumn> {
   dataIndex: keyof T | keyof O;
   key?: string | number;
   width?: number | string;
-  render?: (value: T[keyof T] | O[keyof O], record?: T) => React.ReactNode;
+  render?: (
+    value: T[keyof T] | O[keyof O],
+    record?: T,
+    index?: number,
+  ) => React.ReactNode;
   fixed?: FixedType;
 }
 

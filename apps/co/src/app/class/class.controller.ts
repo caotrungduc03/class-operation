@@ -9,6 +9,7 @@ import {
   UpdateClassDto,
   User,
   UserDto,
+  UserStatus,
 } from '@class-operation/libs';
 import {
   Body,
@@ -17,6 +18,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -199,6 +201,101 @@ export class ClassController {
     return new ResponseDto(
       HttpStatus.OK,
       'Student removed from class successfully',
+    );
+  }
+
+  @Get('/students/available')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
+  async findAvailableStudents(@Query() query: Record<string, any>) {
+    const { page, limit, total, data } =
+      await this.classService.findAvailableStudents(query);
+
+    const results: Pagination<UserDto> = {
+      page,
+      limit,
+      total,
+      items: UserDto.plainToInstance(data, ['admin']),
+    };
+
+    return new ResponseDto(HttpStatus.OK, 'Success', results);
+  }
+
+  @Post('/:id/students/bulk')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
+  async addStudentsBulk(
+    @Param('id') id: string,
+    @Body() { studentIds }: { studentIds: string[] },
+  ) {
+    await this.classService.addStudentsBulk(id, studentIds);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Students added to class successfully',
+    );
+  }
+
+  @Delete('/:id/students/bulk')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
+  async removeStudentsBulk(
+    @Param('id') id: string,
+    @Body() { studentIds }: { studentIds: string[] },
+  ) {
+    await this.classService.removeStudentsBulk(id, studentIds);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Students removed from class successfully',
+    );
+  }
+
+  @Put('/:id/status')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
+  async updateClassStatus(
+    @Param('id') id: string,
+    @Body() { status }: { status: UserStatus },
+  ) {
+    const classEntity = await this.classService.updateClassStatus(id, status);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Updated class status',
+      ClassDto.plainToInstance(classEntity, ['admin']),
+    );
+  }
+
+  @Get('/:id/statistics')
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+  )
+  async getClassStatistics(@Param('id') id: string) {
+    const statistics = await this.classService.getClassStatistics(id);
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Class statistics retrieved successfully',
+      statistics,
+    );
+  }
+
+  @Patch('/students/:studentId/status')
+  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
+  async updateStudentStatus(
+    @Param('studentId') studentId: string,
+    @Body() { status }: { status: UserStatus },
+  ) {
+    const student = await this.classService.updateStudentStatus(
+      studentId,
+      status,
+    );
+
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Student status updated successfully',
+      UserDto.plainToInstance(student, ['admin']),
     );
   }
 }
