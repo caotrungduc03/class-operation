@@ -47,7 +47,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IDepartment>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {

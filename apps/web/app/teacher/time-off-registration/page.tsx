@@ -24,7 +24,9 @@ import {
   DATE_TIME_FORMAT,
   TIME_FORMAT,
   TableColumn,
+  calculateApprovalDeadline,
   formatRangeDate,
+  isPastApprovalDeadline,
 } from "@web/libs/common";
 import {
   useCreateTimeOffMutation,
@@ -84,7 +86,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {
@@ -124,6 +126,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
+  },
+  {
     title: "Created At",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
@@ -148,6 +162,23 @@ const TimeOffActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenDeleteModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -587,15 +618,16 @@ const TimeOffRegistration = () => {
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
-          timeOffDetail?.data?.status === RequestStatus.PENDING && (
-            <CustomButton
-              key="edit"
-              type="primary"
-              title="Edit"
-              icon={<EditOutlined />}
-              onClick={() => handleStartEdit(timeOffDetail.data.id)}
-            />
-          ),
+          timeOffDetail?.data?.status === RequestStatus.PENDING &&
+            !isPastApprovalDeadline(timeOffDetail?.data?.createdAt) && (
+              <CustomButton
+                key="edit"
+                type="primary"
+                title="Edit"
+                icon={<EditOutlined />}
+                onClick={() => handleStartEdit(timeOffDetail.data.id)}
+              />
+            ),
         ]}
         width={800}
       >
@@ -666,6 +698,20 @@ const TimeOffRegistration = () => {
                   {dayjs(timeOffDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(timeOffDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(timeOffDetail.data.createdAt)}
+                {isPastApprovalDeadline(timeOffDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

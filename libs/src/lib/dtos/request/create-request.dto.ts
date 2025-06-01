@@ -122,10 +122,6 @@ export class CreateSupportTicketRequestDto {
   @IsEnum(RequestPriority)
   priority: RequestPriority;
 
-  @IsOptional()
-  @IsString()
-  note?: string;
-
   @IsEmpty()
   status: RequestStatus;
 

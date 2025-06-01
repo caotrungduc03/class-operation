@@ -93,7 +93,7 @@ const ClassSettings = () => {
       endDate: null,
       quantity: 0,
       status: UserStatus.ACTIVE,
-      courseId: "",
+      courseId: undefined,
       teacherId: null,
       roomId: null,
     },
@@ -307,11 +307,11 @@ const ClassSettings = () => {
       </div>
 
       <div className="mt-8 flex justify-end gap-4">
-        <CustomButton 
-          title="Cancel" 
-          size="large" 
+        <CustomButton
+          title="Cancel"
+          size="large"
           icon={<CloseOutlined />}
-          onClick={handleCancel} 
+          onClick={handleCancel}
         />
         <CustomButton
           type="primary"

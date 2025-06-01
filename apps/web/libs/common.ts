@@ -91,3 +91,18 @@ export interface TableColumn<T, O = OtherColumn> {
 export const formatRangeDate = (startDate: string, endDate: string) => {
   return `${dayjs(startDate).format(DATE_FORMAT)} | ${dayjs(startDate).format(TIME_FORMAT)} - ${dayjs(endDate).format(TIME_FORMAT)}`;
 };
+
+/**
+ * Calculate the approval deadline (3 days from creation date)
+ */
+export const calculateApprovalDeadline = (createdAt: string): string => {
+  return dayjs(createdAt).add(3, "day").format(DATE_TIME_FORMAT);
+};
+
+/**
+ * Check if request is past approval deadline
+ */
+export const isPastApprovalDeadline = (createdAt: string): boolean => {
+  const deadlineDate = dayjs(createdAt).add(3, "day");
+  return dayjs().isAfter(deadlineDate);
+};

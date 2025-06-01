@@ -120,8 +120,4 @@ export class UpdateSupportTicketRequestDto {
   @IsOptional()
   @IsEnum(RequestPriority)
   priority?: RequestPriority;
-
-  @IsOptional()
-  @IsString()
-  note?: string;
 }

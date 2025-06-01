@@ -49,7 +49,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRoom>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {

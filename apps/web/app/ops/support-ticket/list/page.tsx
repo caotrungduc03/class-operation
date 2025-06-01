@@ -15,7 +15,12 @@ import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import {
+  DATE_TIME_FORMAT,
+  TableColumn,
+  calculateApprovalDeadline,
+  isPastApprovalDeadline,
+} from "@web/libs/common";
 import {
   useGetSupportTicketsQuery,
   useLazyGetSupportTicketByIdQuery,
@@ -69,7 +74,7 @@ const breadcrumbs: ItemType[] = [
 ];
 
 const columnsTitles: TableColumn<IRequest>[] = [
-  { title: "#", dataIndex: "index" },
+  { title: "STT", dataIndex: "index" },
   { title: "Ticket Name", dataIndex: "name" },
   { title: "Description", dataIndex: "description" },
   {
@@ -81,11 +86,6 @@ const columnsTitles: TableColumn<IRequest>[] = [
     title: "Creator",
     dataIndex: "creator",
     render: (creator: IUser) => creator?.fullName,
-  },
-  {
-    title: "Requester",
-    dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
@@ -109,6 +109,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
+  },
+  {
     title: "Created At",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
@@ -129,6 +141,23 @@ const SupportTicketActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenRejectModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -552,14 +581,6 @@ const SupportTicketList = () => {
                     {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
                 </div>
-                {supportTicketDetail.data.supportTicket?.note && (
-                  <div>
-                    <Typography.Text type="secondary">Note:</Typography.Text>
-                    <Typography.Paragraph className="mt-1">
-                      {supportTicketDetail.data.supportTicket.note}
-                    </Typography.Paragraph>
-                  </div>
-                )}
               </div>
             </Card>
 
@@ -581,6 +602,20 @@ const SupportTicketList = () => {
                   )}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(supportTicketDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(supportTicketDetail.data.createdAt)}
+                {isPastApprovalDeadline(supportTicketDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

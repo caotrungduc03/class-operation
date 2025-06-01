@@ -495,7 +495,13 @@ export class RequestController {
   }
 
   @Get('support-tickets/:id')
-  @Roles(RoleName.ADMIN, RoleName.MANAGE, RoleName.RECEPTIONIST)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.RECEPTIONIST,
+  )
   async getSupportTicketById(@Param('id') id: string) {
     const request = await this.requestService.getSupportTicketById(id);
 

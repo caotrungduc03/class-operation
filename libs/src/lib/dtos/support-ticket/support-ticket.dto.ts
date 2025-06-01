@@ -12,8 +12,5 @@ export class SupportTicketDto extends BaseDto {
   priority: RequestPriority;
 
   @Expose()
-  note: string;
-
-  @Expose()
   requestId: string;
 }

@@ -13,7 +13,12 @@ import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import {
+  DATE_TIME_FORMAT,
+  TableColumn,
+  calculateApprovalDeadline,
+  isPastApprovalDeadline,
+} from "@web/libs/common";
 import {
   useGetBusySchedulesQuery,
   useLazyGetBusyScheduleByIdQuery,
@@ -76,7 +81,7 @@ type SearchFormData = z.infer<typeof searchSchema>;
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {
@@ -93,11 +98,6 @@ const columnsTitles: TableColumn<IRequest>[] = [
     render: (creator: IUser) => creator?.fullName || "N/A",
   },
   {
-    title: "Requester",
-    dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName,
-  },
-  {
     title: "Approver",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
@@ -108,6 +108,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
+  },
+  {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
   },
   {
     title: "Created At",
@@ -134,6 +146,23 @@ const BusyScheduleActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenRejectModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -482,6 +511,13 @@ const BusyScheduleList = () => {
             </div>
 
             <div>
+              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text className="ml-2">
+                {busyScheduleDetail.data.requester?.fullName || "N/A"}
+              </Typography.Text>
+            </div>
+
+            <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[busyScheduleDetail.data.status]}>
@@ -510,6 +546,20 @@ const BusyScheduleList = () => {
                   )}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(busyScheduleDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(busyScheduleDetail.data.createdAt)}
+                {isPastApprovalDeadline(busyScheduleDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

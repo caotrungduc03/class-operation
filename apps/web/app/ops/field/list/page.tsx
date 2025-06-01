@@ -51,7 +51,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IField>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {

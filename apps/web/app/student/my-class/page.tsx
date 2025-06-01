@@ -32,7 +32,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IClass>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {

@@ -1204,10 +1204,6 @@ export class RequestService extends BaseService<RequestEntity> {
       await this.supportTicketService.update(request.supportTicket.id, {
         classId: updateData.classId || request.supportTicket.classId,
         priority: updateData.priority || request.supportTicket.priority,
-        note:
-          updateData.note !== undefined
-            ? updateData.note
-            : request.supportTicket.note,
       });
     }
 

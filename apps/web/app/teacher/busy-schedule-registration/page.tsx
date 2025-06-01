@@ -25,6 +25,8 @@ import {
   DATE_TIME_FORMAT,
   TIME_FORMAT,
   TableColumn,
+  calculateApprovalDeadline,
+  isPastApprovalDeadline,
 } from "@web/libs/common";
 import {
   useCreateBusyScheduleMutation,
@@ -83,7 +85,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {
@@ -96,16 +98,19 @@ const columnsTitles: TableColumn<IRequest>[] = [
   },
   {
     title: "Date",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      schedule && dayjs(schedule.startDate).format(DATE_FORMAT),
+    dataIndex: "schedules",
+    render: (schedules: ISchedule[]) =>
+      schedules &&
+      schedules.length > 0 &&
+      dayjs(schedules[0].startDate).format(DATE_FORMAT),
   },
   {
     title: "Time",
-    dataIndex: "schedule",
-    render: (schedule: ISchedule) =>
-      schedule &&
-      `${dayjs(schedule?.startDate).format(TIME_FORMAT)} - ${dayjs(schedule?.endDate).format(TIME_FORMAT)}`,
+    dataIndex: "schedules",
+    render: (schedules: ISchedule[]) =>
+      schedules &&
+      schedules.length > 0 &&
+      `${dayjs(schedules[0]?.startDate).format(TIME_FORMAT)} - ${dayjs(schedules[0]?.endDate).format(TIME_FORMAT)}`,
   },
   {
     title: "Status",
@@ -113,6 +118,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
+  },
+  {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
   },
   {
     title: "Created At",
@@ -139,6 +156,23 @@ const BusyScheduleActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenDeleteModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -336,18 +370,18 @@ const BusyScheduleRegistration = () => {
           response.data.description || "",
         );
 
-        if (response.data.schedule) {
+        if (response.data.schedules && response.data.schedules.length > 0) {
           busyScheduleForm.setValue(
             "date",
-            dayjs(response.data.schedule.startDate),
+            dayjs(response.data.schedules[0].startDate),
           );
           busyScheduleForm.setValue(
             "startTime",
-            dayjs(response.data.schedule.startDate),
+            dayjs(response.data.schedules[0].startDate),
           );
           busyScheduleForm.setValue(
             "endTime",
-            dayjs(response.data.schedule.endDate),
+            dayjs(response.data.schedules[0].endDate),
           );
         }
       }
@@ -559,7 +593,7 @@ const BusyScheduleRegistration = () => {
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
-          busyScheduleDetail?.data?.status === RequestStatus.PENDING && (
+          !isPastApprovalDeadline(busyScheduleDetail?.data?.createdAt) && (
             <CustomButton
               key="edit"
               type="primary"
@@ -598,32 +632,33 @@ const BusyScheduleRegistration = () => {
 
             <Divider orientation="left">Busy Schedule Details</Divider>
 
-            {busyScheduleDetail.data?.schedule && (
-              <Card size="small" className="mb-4">
-                <div className="flex flex-col gap-2">
-                  <div>
-                    <Typography.Text type="secondary">Date:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(busyScheduleDetail.data.schedule.startDate).format(
-                        DATE_FORMAT,
-                      )}
-                    </Typography.Text>
+            {busyScheduleDetail.data?.schedules &&
+              busyScheduleDetail.data.schedules.length > 0 && (
+                <Card size="small" className="mb-4">
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(
+                          busyScheduleDetail.data.schedules[0].startDate,
+                        ).format(DATE_FORMAT)}
+                      </Typography.Text>
+                    </div>
+                    <div>
+                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text className="ml-2">
+                        {dayjs(
+                          busyScheduleDetail.data.schedules[0].startDate,
+                        ).format(TIME_FORMAT)}{" "}
+                        -{" "}
+                        {dayjs(
+                          busyScheduleDetail.data.schedules[0].endDate,
+                        ).format(TIME_FORMAT)}
+                      </Typography.Text>
+                    </div>
                   </div>
-                  <div>
-                    <Typography.Text type="secondary">Time:</Typography.Text>
-                    <Typography.Text className="ml-2">
-                      {dayjs(busyScheduleDetail.data.schedule.startDate).format(
-                        TIME_FORMAT,
-                      )}{" "}
-                      -{" "}
-                      {dayjs(busyScheduleDetail.data.schedule.endDate).format(
-                        TIME_FORMAT,
-                      )}
-                    </Typography.Text>
-                  </div>
-                </div>
-              </Card>
-            )}
+                </Card>
+              )}
 
             <div className="flex justify-between">
               <div>
@@ -643,6 +678,20 @@ const BusyScheduleRegistration = () => {
                   )}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(busyScheduleDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(busyScheduleDetail.data.createdAt)}
+                {isPastApprovalDeadline(busyScheduleDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

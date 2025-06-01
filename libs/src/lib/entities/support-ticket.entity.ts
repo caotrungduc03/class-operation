@@ -41,10 +41,4 @@ export class SupportTicketEntity extends CustomBaseEntity {
     enum: RequestPriority,
   })
   priority: RequestPriority;
-
-  @Column({
-    type: 'text',
-    nullable: true,
-  })
-  note: string;
 }

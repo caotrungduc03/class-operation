@@ -42,7 +42,7 @@ type SearchFormData = z.infer<typeof searchSchema>;
 
 const columnsTitles: TableColumn<IClass>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {

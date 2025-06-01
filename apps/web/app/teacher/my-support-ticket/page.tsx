@@ -19,7 +19,12 @@ import CustomTooltip from "@web/components/common/CustomTooltip";
 import FilterGrid from "@web/components/common/FilterGrid";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import {
+  DATE_TIME_FORMAT,
+  TableColumn,
+  calculateApprovalDeadline,
+  isPastApprovalDeadline,
+} from "@web/libs/common";
 import { useGetClassesQuery } from "@web/libs/features/classes/classApi";
 import {
   useCreateSupportTicketMutation,
@@ -82,7 +87,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {
@@ -120,6 +125,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
+  },
+  {
     title: "Created At",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
@@ -138,7 +155,6 @@ const supportTicketSchema = z.object({
   priority: z.nativeEnum(RequestPriority, {
     errorMap: () => ({ message: "Priority is required" }),
   }),
-  note: z.string().optional(),
 });
 
 type SupportTicketFormValues = z.infer<typeof supportTicketSchema>;
@@ -156,6 +172,23 @@ const SupportTicketActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenDeleteModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -255,18 +288,22 @@ const MySupportTicket = () => {
     resolver: zodResolver(searchFormSchema),
   });
 
+  const classOptions = useMemo(() => {
+    return (
+      supportTicketsData?.data?.items.map((item) => ({
+        label: item.supportTicket.class.name,
+        value: item.supportTicket.class.id,
+      })) || []
+    );
+  }, [supportTicketsData]);
+
   // Add debounced select for class selection
-  const {
-    selectProps: {
-      options: classOptions,
-      onFocus: onClassFocus,
-      onPopupScroll: onClassPopupScroll,
-    },
-  } = useDebouncedSelect({
+  const { selectProps: classSelectProps } = useDebouncedSelect({
     control: searchForm.control,
     name: "classId",
     useGetDataQuery: useGetClassesQuery,
     labelField: "name",
+    initialOptions: classOptions,
   });
 
   // Use zod validation for the support ticket form
@@ -275,9 +312,8 @@ const MySupportTicket = () => {
     defaultValues: {
       name: "",
       description: "",
-      classId: "",
+      classId: undefined,
       priority: RequestPriority.MEDIUM,
-      note: "",
     },
   });
 
@@ -366,10 +402,6 @@ const MySupportTicket = () => {
           "priority",
           response.data.supportTicket.priority,
         );
-        supportTicketForm.setValue(
-          "note",
-          response.data.supportTicket.note || "",
-        );
       }
       dispatch(openCreateModal());
     } catch (error) {
@@ -438,7 +470,6 @@ const MySupportTicket = () => {
       description: data.description || "",
       classId: data.classId,
       priority: data.priority,
-      note: data.note || "",
       type: RequestType.SUPPORT_TICKET,
     };
 
@@ -568,11 +599,12 @@ const MySupportTicket = () => {
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
-          supportTicketDetail?.data?.status === RequestStatus.PENDING && (
+          !isPastApprovalDeadline(supportTicketDetail?.data?.createdAt) && (
             <CustomButton
               key="edit"
               type="primary"
               title="Edit"
+              icon={<EditOutlined />}
               onClick={() => handleStartEdit(supportTicketDetail.data.id)}
             />
           ),
@@ -632,14 +664,6 @@ const MySupportTicket = () => {
                     {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
                 </div>
-                {supportTicketDetail.data.supportTicket?.note && (
-                  <div>
-                    <Typography.Text type="secondary">Note:</Typography.Text>
-                    <Typography.Paragraph className="mt-1">
-                      {supportTicketDetail.data.supportTicket.note}
-                    </Typography.Paragraph>
-                  </div>
-                )}
               </div>
             </Card>
 
@@ -661,6 +685,20 @@ const MySupportTicket = () => {
                   )}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(supportTicketDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(supportTicketDetail.data.createdAt)}
+                {isPastApprovalDeadline(supportTicketDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (
@@ -704,9 +742,9 @@ const MySupportTicket = () => {
             label="Class"
             placeholder="Search and select class"
             size="large"
-            options={classOptions}
-            onFocus={onClassFocus}
-            onPopupScroll={onClassPopupScroll}
+            options={classSelectProps.options}
+            onFocus={classSelectProps.onFocus}
+            onPopupScroll={classSelectProps.onPopupScroll}
             required
           />
 
@@ -718,15 +756,6 @@ const MySupportTicket = () => {
             size="large"
             options={RequestPriorityOptions}
             required
-          />
-
-          <CustomInput
-            control={supportTicketForm.control}
-            name="note"
-            label="Note"
-            placeholder="Enter additional notes (optional)"
-            size="large"
-            type="textarea"
           />
         </div>
       </CustomDrawer>

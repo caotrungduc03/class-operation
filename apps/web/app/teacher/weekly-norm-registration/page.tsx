@@ -15,12 +15,18 @@ import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomInputNumber from "@web/components/common/CustomInputNumber";
+import CustomRangePicker from "@web/components/common/CustomRangePicker";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTooltip from "@web/components/common/CustomTooltip";
-import CustomRangePicker from "@web/components/common/CustomeRangePicker";
 import FilterGrid from "@web/components/common/FilterGrid";
 import PageLayout from "@web/layouts/PageLayout";
-import { DATE_FORMAT, DATE_TIME_FORMAT, TableColumn } from "@web/libs/common";
+import {
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  TableColumn,
+  calculateApprovalDeadline,
+  isPastApprovalDeadline,
+} from "@web/libs/common";
 import {
   useCreateWeeklyNormMutation,
   useDeleteWeeklyNormMutation,
@@ -78,7 +84,7 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   {
-    title: "#",
+    title: "STT",
     dataIndex: "index",
   },
   {
@@ -102,13 +108,20 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
-    title: "Created At",
+    title: "Approval Deadline",
     dataIndex: "createdAt",
-    render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
   },
   {
-    title: "Updated At",
-    dataIndex: "updatedAt",
+    title: "Created At",
+    dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
@@ -131,6 +144,23 @@ const WeeklyNormActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenDeleteModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -161,7 +191,7 @@ const WeeklyNormActions = ({
           type="link"
           title="Cancel"
           color="danger"
-          icon={<StopOutlined />}
+          icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
         />
       )}
@@ -343,10 +373,10 @@ const WeeklyNormRegistration = () => {
 
         if (response.data.weeklyNorms && response.data.weeklyNorms.length > 0) {
           const formattedNorms = response.data.weeklyNorms.map((norm) => ({
-            rangeDate: [
-              dayjs(norm.startDate).toDate(),
-              dayjs(norm.endDate).toDate(),
-            ] as [Date, Date],
+            rangeDate: [dayjs(norm.startDate), dayjs(norm.endDate)] as [
+              Dayjs,
+              Dayjs,
+            ],
             quantity: norm.quantity,
           }));
           replace(formattedNorms);
@@ -566,7 +596,7 @@ const WeeklyNormRegistration = () => {
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
-          normDetail?.data?.status === RequestStatus.PENDING && (
+          !isPastApprovalDeadline(normDetail?.data?.createdAt) && (
             <CustomButton
               key="edit"
               type="primary"
@@ -635,6 +665,20 @@ const WeeklyNormRegistration = () => {
                   {dayjs(normDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(normDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(normDetail.data.createdAt)}
+                {isPastApprovalDeadline(normDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

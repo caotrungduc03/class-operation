@@ -18,7 +18,9 @@ import {
   DATE_TIME_FORMAT,
   TIME_FORMAT,
   TableColumn,
+  calculateApprovalDeadline,
   formatRangeDate,
+  isPastApprovalDeadline,
 } from "@web/libs/common";
 import {
   useGetTimeOffsQuery,
@@ -75,18 +77,13 @@ const breadcrumbs: ItemType[] = [
 ];
 
 const columnsTitles: TableColumn<IRequest>[] = [
-  { title: "#", dataIndex: "index" },
+  { title: "STT", dataIndex: "index" },
   { title: "Request Name", dataIndex: "name" },
   { title: "Description", dataIndex: "description" },
   {
     title: "Creator",
     dataIndex: "creator",
     render: (creator: IUser) => creator?.fullName,
-  },
-  {
-    title: "Requester",
-    dataIndex: "requester",
-    render: (requester: IUser) => requester?.fullName,
   },
   {
     title: "Approver",
@@ -117,6 +114,18 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
+    title: "Approval Deadline",
+    dataIndex: "createdAt",
+    render: (date: string) => {
+      const isOverdue = isPastApprovalDeadline(date);
+      return (
+        <span className={isOverdue ? "font-medium text-red-500" : ""}>
+          {calculateApprovalDeadline(date)}
+        </span>
+      );
+    },
+  },
+  {
     title: "Created At",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
@@ -144,6 +153,23 @@ const TimeOffActions = ({
   onOpenCancelModal: (id: string) => void;
   onOpenRejectModal: (id: string) => void;
 }) => {
+  // Check if the request is past due for approval
+  const isPastDue = isPastApprovalDeadline(record.createdAt);
+
+  // If it's past due, only allow viewing regardless of status
+  if (isPastDue) {
+    return (
+      <CustomDropdown>
+        <CustomButton
+          type="link"
+          title="View"
+          icon={<EyeOutlined />}
+          onClick={() => onOpenDetail(record.id)}
+        />
+      </CustomDropdown>
+    );
+  }
+
   return (
     <CustomDropdown>
       <CustomButton
@@ -492,6 +518,13 @@ const TimeOffList = () => {
             </div>
 
             <div>
+              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text className="ml-2">
+                {timeOffDetail.data.requester?.fullName || "N/A"}
+              </Typography.Text>
+            </div>
+
+            <div>
               <Typography.Text type="secondary">Status:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[timeOffDetail.data.status]}>
@@ -546,6 +579,20 @@ const TimeOffList = () => {
                   )}
                 </Typography.Text>
               </div>
+            </div>
+
+            <div>
+              <Typography.Text type="secondary">
+                Approval Deadline:
+              </Typography.Text>
+              <Typography.Text
+                className={`ml-2 ${isPastApprovalDeadline(timeOffDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
+              >
+                {calculateApprovalDeadline(timeOffDetail.data.createdAt)}
+                {isPastApprovalDeadline(timeOffDetail.data.createdAt) && (
+                  <span className="ml-2">(Overdue)</span>
+                )}
+              </Typography.Text>
             </div>
           </div>
         ) : (

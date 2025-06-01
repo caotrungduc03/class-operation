@@ -58,7 +58,6 @@ export interface ISupportTicket {
   id: string;
   class: IClass;
   request: IRequest;
-  note?: string;
   priority: RequestPriority;
 }
 
@@ -95,7 +94,6 @@ export interface CreateRequestSupportTicketDto {
   description?: string;
   classId: string;
   priority: RequestPriority;
-  note?: string;
   teacherId?: string;
 }
 
