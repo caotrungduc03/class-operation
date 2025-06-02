@@ -55,29 +55,29 @@ const columnsTitles: TableColumn<IField>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã chứng chỉ",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên chứng chỉ",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Leader",
+    title: "Trưởng bộ môn",
     dataIndex: "leader",
     render: (leader: IUser | null) => leader?.fullName,
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
@@ -90,7 +90,7 @@ const columnsTitles: TableColumn<IField>[] = [
 
 // Define Zod schema for field form validation
 const fieldFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên chứng chỉ là bắt buộc"),
   description: z.string().optional(),
   leaderId: z.string().optional().nullable(),
 });
@@ -118,13 +118,13 @@ const FieldActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -285,15 +285,15 @@ const Fields = () => {
 
   const handleDeleteField = (id: string) => {
     Modal.confirm({
-      title: "Delete Field",
-      content: "Are you sure you want to delete this field?",
-      okText: "Yes",
+      title: "Xóa chứng chỉ",
+      content: "Bạn có chắc chắn muốn xóa chứng chỉ này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteField(id).unwrap();
-          toast.success("Field deleted successfully");
+          toast.success("chứng chỉ đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -312,10 +312,10 @@ const Fields = () => {
 
       if (isEditMode && selectedFieldId) {
         await updateField({ id: selectedFieldId, data: fieldData }).unwrap();
-        toast.success("Field updated successfully");
+        toast.success("chứng chỉ đã được cập nhật thành công");
       } else {
         await createField(fieldData).unwrap();
-        toast.success("Field created successfully");
+        toast.success("chứng chỉ đã được tạo thành công");
       }
       handleCloseDrawer();
       refetch();
@@ -360,20 +360,20 @@ const Fields = () => {
                 control={searchForm.control}
                 name="search"
                 size="large"
-                placeholder="Search by name"
+                placeholder="Tìm kiếm theo tên hoặc mã chứng chỉ"
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -381,7 +381,7 @@ const Fields = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Add Field"
+                title="Thêm chứng chỉ"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={handleAddField}
@@ -403,7 +403,7 @@ const Fields = () => {
       </div>
 
       <CustomDrawer
-        title={isEditMode ? "Edit Field" : "Add Field"}
+        title={isEditMode ? "Cập nhật chứng chỉ" : "Thêm chứng chỉ"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={fieldForm.handleSubmit(onSubmitField)}
@@ -413,23 +413,23 @@ const Fields = () => {
           <CustomInput
             control={fieldForm.control}
             name="name"
-            label="Field Name"
-            placeholder="Enter field name"
+            label="Tên chứng chỉ"
+            placeholder="Nhập tên chứng chỉ"
             required
           />
 
           <CustomTextArea
             control={fieldForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter field description"
+            label="Mô tả"
+            placeholder="Nhập mô tả chứng chỉ"
           />
 
           <CustomSelect
             control={fieldForm.control}
             name="leaderId"
-            label="Leader"
-            placeholder="Select leader"
+            label="Trưởng bộ môn"
+            placeholder="Chọn trưởng bộ môn"
             options={leaderSelectProps.options}
             onFocus={leaderSelectProps.onFocus}
             onPopupScroll={leaderSelectProps.onPopupScroll}

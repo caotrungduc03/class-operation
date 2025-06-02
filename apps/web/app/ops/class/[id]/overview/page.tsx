@@ -21,20 +21,21 @@ const ClassOverview = () => {
 
   if (isLoading) return <Loading />;
 
-  if (!classDetail) return <Typography.Text>Class not found</Typography.Text>;
+  if (!classDetail)
+    return <Typography.Text>Lớp không tìm thấy</Typography.Text>;
 
   return (
     <Card
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Class Overview
+            Thông tin chung
           </Typography.Title>
           <Link href={NAV_LINK.CLASS_DETAIL_SETTINGS(id)}>
-            <CustomButton 
-              type="primary" 
-              title="Edit Class" 
-              size="large" 
+            <CustomButton
+              type="primary"
+              title="Cập nhật thông tin"
+              size="large"
               icon={<EditOutlined />}
             />
           </Link>
@@ -42,46 +43,46 @@ const ClassOverview = () => {
       }
     >
       <Descriptions bordered column={2}>
-        <Descriptions.Item label="Class Code" span={1}>
+        <Descriptions.Item label="Mã lớp" span={1}>
           {classDetail.code}
         </Descriptions.Item>
-        <Descriptions.Item label="Status" span={1}>
+        <Descriptions.Item label="Trạng thái" span={1}>
           <Tag color={STATUS_TAG[classDetail.status]}>
             {STATUS_LABEL[classDetail.status]}
           </Tag>
         </Descriptions.Item>
-        <Descriptions.Item label="Class Name" span={2}>
+        <Descriptions.Item label="Tên lớp" span={2}>
           {classDetail.name}
         </Descriptions.Item>
-        <Descriptions.Item label="Course" span={2}>
+        <Descriptions.Item label="Khóa học" span={2}>
           {classDetail.course?.name} ({classDetail.course?.code})
         </Descriptions.Item>
-        <Descriptions.Item label="Teacher" span={1}>
+        <Descriptions.Item label="Giáo viên" span={1}>
           {classDetail.teacher?.fullName || ""}
         </Descriptions.Item>
-        <Descriptions.Item label="Room" span={1}>
+        <Descriptions.Item label="Phòng học" span={1}>
           {classDetail.room?.name || ""}
         </Descriptions.Item>
-        <Descriptions.Item label="Start Date" span={1}>
+        <Descriptions.Item label="Ngày bắt đầu" span={1}>
           {classDetail.startDate
             ? dayjs(classDetail.startDate).format("DD/MM/YYYY")
-            : "Not set"}
+            : "Không có"}
         </Descriptions.Item>
-        <Descriptions.Item label="End Date" span={1}>
+        <Descriptions.Item label="Ngày kết thúc" span={1}>
           {classDetail.endDate
             ? dayjs(classDetail.endDate).format("DD/MM/YYYY")
-            : "Not set"}
+            : "Không có"}
         </Descriptions.Item>
-        <Descriptions.Item label="Quantity" span={2}>
-          {classDetail.quantity || 0} students
+        <Descriptions.Item label="Số lượng" span={2}>
+          {classDetail.quantity || 0} học viên
         </Descriptions.Item>
-        <Descriptions.Item label="Description" span={2}>
+        <Descriptions.Item label="Mô tả" span={2}>
           {classDetail.description || ""}
         </Descriptions.Item>
-        <Descriptions.Item label="Created At" span={1}>
+        <Descriptions.Item label="Ngày tạo" span={1}>
           {dayjs(classDetail.createdAt).format("DD/MM/YYYY HH:mm")}
         </Descriptions.Item>
-        <Descriptions.Item label="Updated At" span={1}>
+        <Descriptions.Item label="Ngày cập nhật" span={1}>
           {dayjs(classDetail.updatedAt).format("DD/MM/YYYY HH:mm")}
         </Descriptions.Item>
       </Descriptions>

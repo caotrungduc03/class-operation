@@ -23,11 +23,11 @@ const CustomDrawer = ({
 }: CustomDrawerProps) => {
   const showCloseConfirm = () => {
     Modal.confirm({
-      title: "Are you sure cancel this task?",
+      title: "Bạn có chắc chắn muốn hủy bỏ?",
       icon: <ExclamationCircleFilled />,
-      okText: "Yes",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk() {
         onCancel?.();
       },
@@ -47,12 +47,12 @@ const CustomDrawer = ({
       extra={
         <Space>
           <CustomButton
-            title="Cancel"
+            title="Hủy bỏ"
             onClick={showCloseConfirm}
             size="large"
           />
           <CustomButton
-            title="Submit"
+            title="Lưu"
             type="primary"
             onClick={onSubmit}
             loading={loading}

@@ -88,27 +88,27 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "index",
   },
   {
-    title: "Request Name",
+    title: "Tên yêu cầu",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -120,7 +120,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -165,14 +165,14 @@ const WeeklyNormActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Edit"
+          title="Cập nhật"
           icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
@@ -180,7 +180,7 @@ const WeeklyNormActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Delete"
+          title="Xóa"
           color="danger"
           icon={<DeleteOutlined />}
           onClick={() => onOpenDeleteModal(record.id)}
@@ -189,7 +189,7 @@ const WeeklyNormActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -201,19 +201,19 @@ const WeeklyNormActions = ({
 
 // Zod validation schema
 const weeklyNormSchema = z.object({
-  name: z.string().min(1, "Request name is required"),
+  name: z.string().min(1, "Tên yêu cầu là bắt buộc"),
   description: z.string().optional(),
   weeklyNorms: z
     .array(
       z.object({
         rangeDate: z.tuple([
-          z.any().refine((val) => !!val, "Start date is required"),
-          z.any().refine((val) => !!val, "End date is required"),
+          z.any().refine((val) => !!val, "Ngày bắt đầu là bắt buộc"),
+          z.any().refine((val) => !!val, "Ngày kết thúc là bắt buộc"),
         ]),
-        quantity: z.number().min(1, "Quantity must be at least 1"),
+        quantity: z.number().min(1, "Số lượng phải lớn hơn 0"),
       }),
     )
-    .min(1, "At least one weekly norm is required"),
+    .min(1, "Ít nhất một định mức tuần là bắt buộc"),
 });
 
 type WeeklyNormFormValues = z.infer<typeof weeklyNormSchema>;
@@ -431,7 +431,7 @@ const WeeklyNormRegistration = () => {
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Weekly norm request canceled successfully");
+      toast.success("đăng ký định mức tuần đã được hủy bỏ thành công");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -487,7 +487,7 @@ const WeeklyNormRegistration = () => {
     if (fields.length > 1) {
       remove(index);
     } else {
-      toast.error("At least one weekly norm is required");
+      toast.error("Ít nhất một định mức tuần là bắt buộc");
     }
   };
 
@@ -508,7 +508,7 @@ const WeeklyNormRegistration = () => {
 
     try {
       await deleteWeeklyNorm(selectedItemId).unwrap();
-      toast.success("Weekly norm request deleted successfully");
+      toast.success("đăng ký định mức tuần đã được xóa thành công");
       refetch();
       dispatch(closeDeleteModal());
     } catch (error) {
@@ -536,27 +536,27 @@ const WeeklyNormRegistration = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by request name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -564,7 +564,7 @@ const WeeklyNormRegistration = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Weekly Norm Request"
+                title="Tạo đăng ký định mức tuần"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -586,13 +586,13 @@ const WeeklyNormRegistration = () => {
       </div>
       {/* Detail Modal */}
       <Modal
-        title="Weekly Norm Request Details"
+        title="Chi tiết đăng ký định mức tuần"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -600,7 +600,7 @@ const WeeklyNormRegistration = () => {
             <CustomButton
               key="edit"
               type="primary"
-              title="Edit"
+              title="Cập nhật"
               icon={<EditOutlined />}
               onClick={() => handleStartEdit(normDetail.data.id)}
             />
@@ -611,21 +611,21 @@ const WeeklyNormRegistration = () => {
         {normDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Request Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {normDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Text type="secondary">Mô tả:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {normDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Status:</Typography.Text>
+              <Typography.Text type="secondary">Trạng thái:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[normDetail.data.status]}>
                   {normDetail.data.status}
@@ -633,15 +633,15 @@ const WeeklyNormRegistration = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Weekly Norms</Divider>
+            <Divider orientation="left">Chi tiết định mức tuần</Divider>
 
             {normDetail.data.weeklyNorms &&
               normDetail.data.weeklyNorms.map((norm, index) => (
                 <Card key={index} size="small" className="mb-4">
                   <div className="flex justify-between">
-                    <Typography.Text strong>Week #{index + 1}</Typography.Text>
+                    <Typography.Text strong>Tuần #{index + 1}</Typography.Text>
                     <Typography.Text strong>
-                      Quantity: {norm.quantity}
+                      Số lượng: {norm.quantity}
                     </Typography.Text>
                   </div>
                   <Typography.Text>
@@ -653,14 +653,16 @@ const WeeklyNormRegistration = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(normDetail.data.createdAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(normDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
@@ -669,14 +671,14 @@ const WeeklyNormRegistration = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(normDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
               >
                 {calculateApprovalDeadline(normDetail.data.createdAt)}
                 {isPastApprovalDeadline(normDetail.data.createdAt) && (
-                  <span className="ml-2">(Overdue)</span>
+                  <span className="ml-2">(Quá hạn)</span>
                 )}
               </Typography.Text>
             </div>
@@ -690,7 +692,9 @@ const WeeklyNormRegistration = () => {
       {/* Create/Edit Drawer */}
       <CustomDrawer
         title={
-          isEditMode ? "Edit Weekly Norm Request" : "Create Weekly Norm Request"
+          isEditMode
+            ? "Cập nhật đăng ký định mức tuần"
+            : "Tạo đăng ký định mức tuần"
         }
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
@@ -701,8 +705,8 @@ const WeeklyNormRegistration = () => {
           <CustomInput
             control={weeklyNormForm.control}
             name="name"
-            label="Request Name"
-            placeholder="Enter request name"
+            label="Tên yêu cầu"
+            placeholder="Nhập tên yêu cầu"
             size="large"
             required
           />
@@ -710,12 +714,12 @@ const WeeklyNormRegistration = () => {
           <CustomInput
             control={weeklyNormForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter description (optional)"
+            label="Mô tả"
+            placeholder="Nhập mô tả (tùy chọn)"
             size="large"
           />
 
-          <Divider orientation="left">Weekly Norms</Divider>
+          <Divider orientation="left">Chi tiết định mức tuần</Divider>
 
           {fields.map((field, index) => (
             <div
@@ -724,7 +728,7 @@ const WeeklyNormRegistration = () => {
             >
               <div className="mb-2 flex items-center justify-between">
                 <Typography.Title level={5} className="m-0">
-                  Weekly Norm #{index + 1}
+                  Định mức tuần #{index + 1}
                 </Typography.Title>
                 <CustomButton
                   type="text"
@@ -739,7 +743,7 @@ const WeeklyNormRegistration = () => {
               <CustomRangePicker
                 control={weeklyNormForm.control}
                 name={`weeklyNorms.${index}.rangeDate`}
-                label="Date Range"
+                label="Ngày bắt đầu - Ngày kết thúc"
                 size="large"
                 disableDate={disableDate}
                 required
@@ -748,7 +752,7 @@ const WeeklyNormRegistration = () => {
               <CustomInputNumber
                 control={weeklyNormForm.control}
                 name={`weeklyNorms.${index}.quantity`}
-                label="Quantity"
+                label="Định mức"
                 min={1}
                 size="large"
                 required
@@ -758,7 +762,7 @@ const WeeklyNormRegistration = () => {
 
           <CustomButton
             type="dashed"
-            title="Add Weekly Norm"
+            title="Thêm định mức tuần"
             onClick={addNormEntry}
             icon={<PlusOutlined />}
             className="mt-2"
@@ -768,20 +772,20 @@ const WeeklyNormRegistration = () => {
       </CustomDrawer>
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Weekly Norm Request"
+        title="Hủy bỏ đăng ký định mức tuần"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Request"
+            title="Có, hủy bỏ"
             icon={<StopOutlined />}
             loading={isCanceling}
             onClick={handleCancel}
@@ -789,34 +793,34 @@ const WeeklyNormRegistration = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this weekly norm request? This action
-          cannot be undone.{" "}
-        </Typography.Paragraph>{" "}
-      </Modal>{" "}
+          Bạn có chắc chắn muốn hủy bỏ đăng ký định mức tuần này? Hành động này
+          không thể hoàn tác.
+        </Typography.Paragraph>
+      </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Delete Weekly Norm Request"
+        title="Xóa đăng ký định mức tuần"
         open={isDeleteModalOpen}
         onCancel={() => dispatch(closeDeleteModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Hủy bỏ"
             onClick={() => dispatch(closeDeleteModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Delete Request"
+            title="Xóa"
             loading={isDeleting}
             onClick={handleDelete}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to delete this weekly norm request? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn xóa đăng ký định mức tuần này? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

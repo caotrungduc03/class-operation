@@ -51,24 +51,24 @@ const columnsTitles: TableColumn<IDepartment>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã phòng ban",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên phòng ban",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
@@ -81,7 +81,7 @@ const columnsTitles: TableColumn<IDepartment>[] = [
 
 // Define Zod schema for department form validation
 const departmentFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên phòng ban là bắt buộc"),
   description: z.string().optional(),
 });
 
@@ -108,13 +108,13 @@ const DepartmentActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -269,15 +269,15 @@ const Departments = () => {
 
   const handleDeleteDepartment = (id: string) => {
     Modal.confirm({
-      title: "Delete Department",
-      content: "Are you sure you want to delete this department?",
-      okText: "Yes",
+      title: "Xóa phòng ban",
+      content: "Bạn có chắc chắn muốn xóa phòng ban này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteDepartment(id).unwrap();
-          toast.success("Department deleted successfully");
+          toast.success("Phòng ban đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -298,10 +298,10 @@ const Departments = () => {
           id: selectedDepartmentId,
           data: departmentData,
         }).unwrap();
-        toast.success("Department updated successfully");
+        toast.success("Phòng ban đã được cập nhật thành công");
       } else {
         await createDepartment(departmentData).unwrap();
-        toast.success("Department created successfully");
+        toast.success("Phòng ban đã được tạo thành công");
       }
       handleCloseDrawer();
       refetch();
@@ -345,20 +345,20 @@ const Departments = () => {
                 control={searchForm.control}
                 name="search"
                 size="large"
-                placeholder="Search by name"
+                placeholder="Tìm kiếm theo tên hoặc mã phòng ban"
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -366,7 +366,7 @@ const Departments = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Add Department"
+                title="Thêm phòng ban"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={handleAddDepartment}
@@ -388,7 +388,7 @@ const Departments = () => {
       </div>
 
       <CustomDrawer
-        title={isEditMode ? "Edit Department" : "Add Department"}
+        title={isEditMode ? "Cập nhật phòng ban" : "Thêm phòng ban"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={departmentForm.handleSubmit(onSubmitDepartment)}
@@ -398,16 +398,16 @@ const Departments = () => {
           <CustomInput
             control={departmentForm.control}
             name="name"
-            label="Department Name"
-            placeholder="Enter department name"
+            label="Tên phòng ban"
+            placeholder="Nhập tên phòng ban"
             required
           />
 
           <CustomTextArea
             control={departmentForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter department description"
+            label="Mô tả"
+            placeholder="Nhập mô tả phòng ban"
           />
         </div>
       </CustomDrawer>

@@ -8,7 +8,6 @@ import { ROLE_LABEL, ROLE_TAG } from "@web/libs/role";
 import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Avatar, Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
-import Image from "next/image";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 
@@ -51,7 +50,7 @@ const UserDetailLayout = ({ children }: React.PropsWithChildren) => {
       key: "1",
       label: (
         <div onClick={() => router.push(NAV_LINK.USER_DETAIL_OVERVIEW(userId))}>
-          Overview
+          Thông tin chung
         </div>
       ),
     },
@@ -59,7 +58,7 @@ const UserDetailLayout = ({ children }: React.PropsWithChildren) => {
       key: "2",
       label: (
         <div onClick={() => router.push(NAV_LINK.USER_DETAIL_SETTINGS(userId))}>
-          Settings
+          Cập nhật thông tin
         </div>
       ),
     },
@@ -92,7 +91,7 @@ const UserDetailLayout = ({ children }: React.PropsWithChildren) => {
               size={160}
               icon={
                 user?.avatar ? (
-                  <Image
+                  <img
                     src={user.avatar}
                     alt="Avatar"
                     width={160}
@@ -125,13 +124,13 @@ const UserDetailLayout = ({ children }: React.PropsWithChildren) => {
                 <div>
                   <PhoneOutlined />
                   <Typography.Text className="ml-2">
-                    {user.phoneNumber || "Unknown"}
+                    {user.phoneNumber || "Không có"}
                   </Typography.Text>
                 </div>
               </div>
               <div className="mb-2 mt-auto w-[300px]">
                 <div className="mb-2 flex justify-between">
-                  <Typography.Text>Complete</Typography.Text>
+                  <Typography.Text>Hoàn thành</Typography.Text>
                   <Typography.Text>{percentage}%</Typography.Text>
                 </div>
                 <div className="h-1 w-full rounded bg-gray-200">

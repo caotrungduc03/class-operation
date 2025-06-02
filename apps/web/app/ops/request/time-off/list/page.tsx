@@ -3,6 +3,8 @@ import {
   CheckOutlined,
   CloseOutlined,
   EyeOutlined,
+  ReloadOutlined,
+  SearchOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,20 +80,20 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   { title: "STT", dataIndex: "index" },
-  { title: "Request Name", dataIndex: "name" },
-  { title: "Description", dataIndex: "description" },
+  { title: "Tên yêu cầu", dataIndex: "name" },
+  { title: "Mô tả", dataIndex: "description" },
   {
-    title: "Creator",
+    title: "Người tạo",
     dataIndex: "creator",
     render: (creator: IUser) => creator?.fullName,
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Time Off Schedules",
+    title: "Lịch trình nghỉ",
     dataIndex: "schedules",
     render: (schedules: ISchedule[]) => {
       if (!schedules || schedules.length === 0) return;
@@ -107,14 +109,14 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -126,7 +128,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -162,7 +164,7 @@ const TimeOffActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -174,14 +176,14 @@ const TimeOffActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Approve"
+          title="Phê duyệt"
           icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
@@ -189,7 +191,7 @@ const TimeOffActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Reject"
+          title="Từ chối"
           color="danger"
           icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
@@ -198,7 +200,7 @@ const TimeOffActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -363,7 +365,7 @@ const TimeOffList = () => {
         id: selectedItemId,
         action: RequestAction.APPROVE,
       }).unwrap();
-      toast.success("Time off request approved successfully");
+      toast.success("Yêu cầu nghỉ cổ định đã được phê duyệt thành công");
       refetch();
       dispatch(closeApproveModal());
     } catch (error) {
@@ -379,7 +381,7 @@ const TimeOffList = () => {
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Time off request canceled successfully");
+      toast.success("Yêu cầu nghỉ cố định đã được hủy bỏ thành công");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -394,7 +396,7 @@ const TimeOffList = () => {
         id: selectedItemId,
         action: RequestAction.REJECT,
       }).unwrap();
-      toast.success("Time off request rejected successfully");
+      toast.success("Yêu cầu nghỉ cố định đã được từ chối thành công");
       refetch();
       dispatch(closeRejectModal());
     } catch (error) {
@@ -420,27 +422,29 @@ const TimeOffList = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by request name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
+                  icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
+                  icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
@@ -462,7 +466,7 @@ const TimeOffList = () => {
 
       {/* Detail Modal */}
       <Modal
-        title="Time Off Request Details"
+        title="Chi tiết yêu cầu nghỉ cố định"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
@@ -476,7 +480,7 @@ const TimeOffList = () => {
             <CustomButton
               key="approve"
               type="primary"
-              title="Approve"
+              title="Phê duyệt"
               icon={<CheckOutlined />}
               onClick={() => handleOpenApproveModal(timeOffDetail.data.id)}
             />
@@ -486,7 +490,7 @@ const TimeOffList = () => {
               key="reject"
               type="primary"
               color="danger"
-              title="Reject"
+              title="Từ chối"
               icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(timeOffDetail.data.id)}
             />
@@ -497,35 +501,35 @@ const TimeOffList = () => {
         {timeOffDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Request Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {timeOffDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Text type="secondary">Mô tả:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {timeOffDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Creator:</Typography.Text>
+              <Typography.Text type="secondary">Người tạo:</Typography.Text>
               <Typography.Text className="ml-2">
                 {timeOffDetail.data.creator?.fullName || "N/A"}
               </Typography.Text>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text type="secondary">Người yêu cầu:</Typography.Text>
               <Typography.Text className="ml-2">
                 {timeOffDetail.data.requester?.fullName || "N/A"}
               </Typography.Text>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Status:</Typography.Text>
+              <Typography.Text type="secondary">Trạng thái:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[timeOffDetail.data.status]}>
                   {timeOffDetail.data.status}
@@ -533,7 +537,7 @@ const TimeOffList = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Time Off Schedules</Divider>
+            <Divider orientation="left">Chi tiết lịch nghỉ cố định</Divider>
 
             {timeOffDetail.data?.schedules &&
               timeOffDetail.data.schedules.map((schedule, index) => (
@@ -545,13 +549,15 @@ const TimeOffList = () => {
                   </div>
                   <div className="flex flex-col gap-2">
                     <div>
-                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text type="secondary">Ngày:</Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(schedule.startDate).format(DATE_FORMAT)}
                       </Typography.Text>
                     </div>
                     <div>
-                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text type="secondary">
+                        Thời gian:
+                      </Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(schedule.startDate).format(TIME_FORMAT)} -{" "}
                         {dayjs(schedule.endDate).format(TIME_FORMAT)}
@@ -563,7 +569,7 @@ const TimeOffList = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(timeOffDetail.data.createdAt).format(
                     "DD/MM/YYYY HH:mm",
@@ -572,7 +578,9 @@ const TimeOffList = () => {
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(timeOffDetail.data.updatedAt).format(
                     "DD/MM/YYYY HH:mm",
@@ -583,7 +591,7 @@ const TimeOffList = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(timeOffDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
@@ -604,7 +612,7 @@ const TimeOffList = () => {
 
       {/* Approve Confirmation Modal */}
       <Modal
-        title="Approve Time Off Request"
+        title="Phê duyệt yêu cầu nghỉ cố định"
         open={isApproveModalOpen}
         onCancel={() => dispatch(closeApproveModal())}
         footer={[
@@ -617,7 +625,7 @@ const TimeOffList = () => {
           <CustomButton
             key="submit"
             type="primary"
-            title="Approve Request"
+            title="Phê duyệt yêu cầu"
             icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
@@ -625,19 +633,19 @@ const TimeOffList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to approve this time off request?
+          Bạn có chắc chắn muốn phê duyệt yêu cầu nghỉ cố định này không?
         </Typography.Paragraph>
       </Modal>
 
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Time Off Request"
+        title="Hủy bỏ yêu cầu nghỉ cố định"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
@@ -645,7 +653,7 @@ const TimeOffList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Request"
+            title="Có, hủy bỏ"
             icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
@@ -653,20 +661,20 @@ const TimeOffList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this time off request? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ yêu cầu nghỉ cố định này không? Hành động
+          này không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
 
       {/* Reject Confirmation Modal */}
       <Modal
-        title="Reject Time Off Request"
+        title="Từ chối yêu cầu nghỉ cố định"
         open={isRejectModalOpen}
         onCancel={() => dispatch(closeRejectModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Hủy bỏ"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeRejectModal())}
           />,
@@ -674,7 +682,7 @@ const TimeOffList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Reject Request"
+            title="Từ chối"
             icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
@@ -682,7 +690,7 @@ const TimeOffList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to reject this time off request?
+          Bạn có chắc chắn muốn từ chối yêu cầu nghỉ cố định này không?
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

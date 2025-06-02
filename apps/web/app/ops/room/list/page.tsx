@@ -53,33 +53,33 @@ const columnsTitles: TableColumn<IRoom>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã phòng",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên phòng",
     dataIndex: "name",
   },
   {
-    title: "Quantity",
+    title: "Số lượng",
     dataIndex: "quantity",
   },
   {
-    title: "Location",
+    title: "Vị trí",
     dataIndex: "location",
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => STATUS_LABEL[status],
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
@@ -122,13 +122,13 @@ const RoomActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -287,15 +287,15 @@ const Rooms = () => {
 
   const handleDeleteRoom = (id: string) => {
     Modal.confirm({
-      title: "Delete Room",
-      content: "Are you sure you want to delete this room?",
-      okText: "Yes",
+      title: "Xóa phòng",
+      content: "Bạn có chắc chắn muốn xóa phòng này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteRoom(id).unwrap();
-          toast.success("Room deleted successfully");
+          toast.success("Phòng đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -317,10 +317,10 @@ const Rooms = () => {
 
       if (isEditMode && selectedRoomId) {
         await updateRoom({ id: selectedRoomId, data: roomData }).unwrap();
-        toast.success("Room updated successfully");
+        toast.success("Phòng đã được cập nhật thành công");
       } else {
         await createRoom(roomData).unwrap();
-        toast.success("Room created successfully");
+        toast.success("Phòng đã được tạo thành công");
       }
       handleCloseDrawer();
       refetch();
@@ -367,20 +367,20 @@ const Rooms = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by name or code"
+                placeholder="Tìm kiếm theo tên hoặc mã phòng"
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -388,7 +388,7 @@ const Rooms = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Add Room"
+                title="Thêm phòng"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={handleAddRoom}
@@ -410,7 +410,7 @@ const Rooms = () => {
       </div>
 
       <CustomDrawer
-        title={isEditMode ? "Edit Room" : "Add Room"}
+        title={isEditMode ? "Cập nhật phòng" : "Thêm phòng"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={roomForm.handleSubmit(onSubmitRoom)}
@@ -420,30 +420,30 @@ const Rooms = () => {
           <CustomInput
             control={roomForm.control}
             name="name"
-            label="Room Name"
-            placeholder="Enter room name"
+            label="Tên phòng"
+            placeholder="Nhập tên phòng"
             required
           />
 
           <CustomInputNumber
             control={roomForm.control}
             name="quantity"
-            label="Quantity"
-            placeholder="Enter room quantity"
+            label="Số lượng"
+            placeholder="Nhập số lượng phòng"
           />
 
           <CustomInput
             control={roomForm.control}
             name="location"
-            label="Location"
-            placeholder="Enter room location"
+            label="Vị trí"
+            placeholder="Nhập vị trí phòng"
           />
 
           <CustomTextArea
             control={roomForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter room description"
+            label="Mô tả"
+            placeholder="Nhập mô tả phòng"
           />
         </div>
       </CustomDrawer>

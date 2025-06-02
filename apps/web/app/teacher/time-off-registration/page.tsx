@@ -90,20 +90,20 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "index",
   },
   {
-    title: "Request Name",
+    title: "Tên yêu cầu",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Time Off Schedules",
+    title: "Lịch nghỉ",
     dataIndex: "schedules",
     render: (schedules: ISchedule[]) => {
       if (!schedules || schedules.length === 0) return;
@@ -119,14 +119,14 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -138,7 +138,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -171,7 +171,7 @@ const TimeOffActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -183,14 +183,14 @@ const TimeOffActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Edit"
+          title="Cập nhật"
           icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
@@ -198,7 +198,7 @@ const TimeOffActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Delete"
+          title="Xóa"
           color="danger"
           icon={<DeleteOutlined />}
           onClick={() => onOpenDeleteModal(record.id)}
@@ -207,7 +207,7 @@ const TimeOffActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<CloseOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -218,17 +218,17 @@ const TimeOffActions = ({
 };
 
 const timeOffSchema = z.object({
-  name: z.string().min(1, "Request Name is required"),
+  name: z.string().min(1, "Tên yêu cầu là bắt buộc"),
   description: z.string().optional(),
   schedules: z
     .array(
       z.object({
-        date: z.any().refine((val) => !!val, "Date is required"),
-        startTime: z.any().refine((val) => !!val, "Start time is required"),
-        endTime: z.any().refine((val) => !!val, "End time is required"),
+        date: z.any().refine((val) => !!val, "Ngày là bắt buộc"),
+        startTime: z.any().refine((val) => !!val, "Giờ bắt đầu là bắt buộc"),
+        endTime: z.any().refine((val) => !!val, "Giờ kết thúc là bắt buộc"),
       }),
     )
-    .min(1, "At least one schedule is required"),
+    .min(1, "Ít nhất một lịch trình là bắt buộc"),
 });
 
 type TimeOffFormValues = z.infer<typeof timeOffSchema>;
@@ -446,7 +446,7 @@ const TimeOffRegistration = () => {
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Time off request canceled successfully");
+      toast.success("Yêu cầu nghỉ cố định đã được hủy bỏ thành công");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -459,7 +459,7 @@ const TimeOffRegistration = () => {
 
     try {
       await deleteTimeOff(selectedItemId).unwrap();
-      toast.success("Time off request deleted successfully");
+      toast.success("Yêu cầu nghỉ cố định đã được xóa thành công");
       refetch();
       dispatch(closeDeleteModal());
     } catch (error) {
@@ -559,27 +559,27 @@ const TimeOffRegistration = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by request name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -587,7 +587,7 @@ const TimeOffRegistration = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Time Off Request"
+                title="Tạo yêu cầu nghỉ cố định"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -608,13 +608,13 @@ const TimeOffRegistration = () => {
         </Card>
       </div>
       <Modal
-        title="Time Off Request Details"
+        title="Chi tiết yêu cầu nghỉ cố định"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -623,7 +623,7 @@ const TimeOffRegistration = () => {
               <CustomButton
                 key="edit"
                 type="primary"
-                title="Edit"
+                title="Cập nhật"
                 icon={<EditOutlined />}
                 onClick={() => handleStartEdit(timeOffDetail.data.id)}
               />
@@ -634,21 +634,21 @@ const TimeOffRegistration = () => {
         {timeOffDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Request Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {timeOffDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Text type="secondary">Mô tả:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {timeOffDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Status:</Typography.Text>
+              <Typography.Text type="secondary">Trạng thái:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[timeOffDetail.data.status]}>
                   {timeOffDetail.data.status}
@@ -656,25 +656,25 @@ const TimeOffRegistration = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Time Off Schedules</Divider>
+            <Divider orientation="left">Chi tiết lịch nghỉ cố định</Divider>
 
             {timeOffDetail.data?.schedules &&
               timeOffDetail.data.schedules.map((schedule, index) => (
                 <Card key={index} size="small" className="mb-4">
                   <div className="flex justify-between">
                     <Typography.Text strong>
-                      Schedule #{index + 1}
+                      Lịch nghỉ cố định #{index + 1}
                     </Typography.Text>
                   </div>
                   <div className="flex flex-col gap-2">
                     <div>
-                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text type="secondary">Ngày:</Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(schedule.startDate).format(DATE_FORMAT)}
                       </Typography.Text>
                     </div>
                     <div>
-                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text type="secondary">Giờ:</Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(schedule.startDate).format(TIME_FORMAT)} -{" "}
                         {dayjs(schedule.endDate).format(TIME_FORMAT)}
@@ -686,14 +686,16 @@ const TimeOffRegistration = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(timeOffDetail.data.createdAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(timeOffDetail.data.updatedAt).format(DATE_TIME_FORMAT)}
                 </Typography.Text>
@@ -702,14 +704,14 @@ const TimeOffRegistration = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(timeOffDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
               >
                 {calculateApprovalDeadline(timeOffDetail.data.createdAt)}
                 {isPastApprovalDeadline(timeOffDetail.data.createdAt) && (
-                  <span className="ml-2">(Overdue)</span>
+                  <span className="ml-2">(Quá hạn)</span>
                 )}
               </Typography.Text>
             </div>
@@ -721,7 +723,11 @@ const TimeOffRegistration = () => {
         )}
       </Modal>
       <CustomDrawer
-        title={isEditMode ? "Edit Time Off Request" : "Create Time Off Request"}
+        title={
+          isEditMode
+            ? "Cập nhật yêu cầu nghỉ cố định"
+            : "Tạo yêu cầu nghỉ cố định"
+        }
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={timeOffForm.handleSubmit(onSubmitCreate)}
@@ -731,8 +737,8 @@ const TimeOffRegistration = () => {
           <CustomInput
             control={timeOffForm.control}
             name="name"
-            label="Request Name"
-            placeholder="Enter request name"
+            label="Tên yêu cầu"
+            placeholder="Nhập tên yêu cầu"
             size="large"
             required
           />
@@ -740,12 +746,12 @@ const TimeOffRegistration = () => {
           <CustomInput
             control={timeOffForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter description (optional)"
+            label="Mô tả"
+            placeholder="Nhập mô tả (tùy chọn)"
             size="large"
           />
 
-          <Divider orientation="left">Time Off Schedules</Divider>
+          <Divider orientation="left">Chi tiết lịch nghỉ cố định</Divider>
 
           {fields.map((field, index) => (
             <div
@@ -754,7 +760,7 @@ const TimeOffRegistration = () => {
             >
               <div className="mb-2 flex items-center justify-between">
                 <Typography.Title level={5} className="m-0">
-                  Schedule #{index + 1}
+                  Lịch nghỉ cố định #{index + 1}
                 </Typography.Title>
                 <CustomButton
                   type="text"
@@ -769,9 +775,9 @@ const TimeOffRegistration = () => {
               <CustomDatePicker
                 control={timeOffForm.control}
                 name={`schedules.${index}.date`}
-                label="Date"
+                label="Ngày"
                 size="large"
-                placeholder="Select date"
+                placeholder="Chọn ngày"
                 required
               />
 
@@ -780,9 +786,9 @@ const TimeOffRegistration = () => {
                   <CustomTimePicker
                     control={timeOffForm.control}
                     name={`schedules.${index}.startTime`}
-                    label="Start Time"
+                    label="Giờ bắt đầu"
                     size="large"
-                    placeholder="Start time"
+                    placeholder="Giờ bắt đầu"
                     required
                   />
                 </div>
@@ -790,10 +796,10 @@ const TimeOffRegistration = () => {
                   <CustomTimePicker
                     control={timeOffForm.control}
                     name={`schedules.${index}.endTime`}
-                    label="End Time"
+                    label="Giờ kết thúc"
                     size="large"
                     format="HH:mm"
-                    placeholder="End time"
+                    placeholder="Giờ kết thúc"
                     required
                   />
                 </div>
@@ -803,7 +809,7 @@ const TimeOffRegistration = () => {
 
           <CustomButton
             type="dashed"
-            title="Add Schedule"
+            title="Tạo lịch nghỉ cố định"
             onClick={addScheduleEntry}
             icon={<PlusOutlined />}
             className="mt-2"
@@ -812,53 +818,53 @@ const TimeOffRegistration = () => {
         </div>
       </CustomDrawer>
       <Modal
-        title="Cancel Time Off Request"
+        title="Hủy bỏ yêu cầu nghỉ cố định"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Request"
+            title="Có, hủy bỏ"
             loading={isCanceling}
             onClick={handleCancel}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this time off request? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ yêu cầu nghỉ cố định này? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
       <Modal
-        title="Delete Time Off Request"
+        title="Xóa yêu cầu nghỉ cố định"
         open={isDeleteModalOpen}
         onCancel={() => dispatch(closeDeleteModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Hủy bỏ"
             onClick={() => dispatch(closeDeleteModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Delete Request"
+            title="Xóa"
             loading={isDeleting}
             onClick={handleDelete}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to delete this time off request? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn xóa yêu cầu nghỉ cố định này? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

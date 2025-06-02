@@ -72,12 +72,12 @@ const columnsTitles: TableColumn<IUser>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã nhân viên",
     dataIndex: "detail",
     render: (detail: IDetailUser) => detail.code,
   },
   {
-    title: "Full Name",
+    title: "Họ và tên",
     dataIndex: "fullName",
   },
   {
@@ -85,35 +85,35 @@ const columnsTitles: TableColumn<IUser>[] = [
     dataIndex: "email",
   },
   {
-    title: "Phone",
+    title: "Số điện thoại",
     dataIndex: "phoneNumber",
   },
   {
-    title: "Role",
+    title: "Vai trò",
     dataIndex: "role",
     render: (role: IRole) => (
       <Tag color={ROLE_TAG[role.roleName]}>{ROLE_LABEL[role.roleName]}</Tag>
     ),
   },
   {
-    title: "Department",
+    title: "Phòng ban",
     dataIndex: "detail",
     render: (detail: IDetailUser) => detail?.department?.name,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
     ),
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -135,20 +135,20 @@ type SearchFormData = z.infer<typeof searchSchema>;
 // Define Zod schema for manager form validation
 const managerFormSchema = z
   .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    firstName: z.string().min(1, "Họ là bắt buộc"),
+    lastName: z.string().min(1, "Tên là bắt buộc"),
+    email: z.string().email("Email không hợp lệ"),
+    password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
     confirmPassword: z
       .string()
-      .min(8, "Confirm password must be at least 8 characters"),
+      .min(8, "Mật khẩu xác nhận phải có ít nhất 8 ký tự"),
     phoneNumber: z.string().optional(),
-    roleName: z.nativeEnum(RoleName, { required_error: "Role is required" }),
+    roleName: z.nativeEnum(RoleName, { required_error: "Vai trò là bắt buộc" }),
     status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
     departmentId: z.string().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Mật khẩu không khớp",
     path: ["confirmPassword"],
   });
 
@@ -174,20 +174,20 @@ const ManagerActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onView(record.id)}
       />
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       {record.status === UserStatus.ACTIVE && (
         <CustomButton
           type="link"
-          title="Lock"
+          title="Khóa"
           color="orange"
           icon={<LockOutlined />}
           onClick={() => onLock(record.id)}
@@ -196,7 +196,7 @@ const ManagerActions = ({
       {record.status === UserStatus.BLOCKED && (
         <CustomButton
           type="link"
-          title="Unlock"
+          title="Mở khóa"
           color="green"
           icon={<UnlockOutlined />}
           onClick={() => onUnlock(record.id)}
@@ -204,7 +204,7 @@ const ManagerActions = ({
       )}
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -359,15 +359,15 @@ const ManagerList = () => {
 
   const handleDeleteManager = (id: string) => {
     Modal.confirm({
-      title: "Delete Manager",
-      content: "Are you sure you want to delete this manager?",
-      okText: "Yes",
+      title: "Xóa nhân viên",
+      content: "Bạn có chắc chắn muốn xóa nhân viên này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteManager(id).unwrap();
-          toast.success("Manager deleted successfully");
+          toast.success("Nhân viên đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -378,15 +378,15 @@ const ManagerList = () => {
 
   const handleLockUser = (id: string) => {
     Modal.confirm({
-      title: "Lock User",
-      content: "Are you sure you want to lock this user?",
+      title: "Khóa nhân viên",
+      content: "Bạn có chắc chắn muốn khóa nhân viên này?",
       onOk: async () => {
         try {
           await updateUserStatus({ id, status: UserStatus.BLOCKED }).unwrap();
-          toast.success("User locked successfully");
+          toast.success("Nhân viên đã được khóa thành công");
           refetch();
         } catch (error) {
-          toast.error("Failed to lock user");
+          toast.error("Không thể khóa nhân viên");
         }
       },
     });
@@ -394,15 +394,15 @@ const ManagerList = () => {
 
   const handleUnlockUser = (id: string) => {
     Modal.confirm({
-      title: "Unlock User",
-      content: "Are you sure you want to unlock this user?",
+      title: "Mở khóa nhân viên",
+      content: "Bạn có chắc chắn muốn mở khóa nhân viên này?",
       onOk: async () => {
         try {
           await updateUserStatus({ id, status: UserStatus.ACTIVE }).unwrap();
-          toast.success("User unlocked successfully");
+          toast.success("Nhân viên đã được mở khóa thành công");
           refetch();
         } catch (error) {
-          toast.error("Failed to unlock user");
+          toast.error("Không thể mở khóa nhân viên");
         }
       },
     });
@@ -440,7 +440,7 @@ const ManagerList = () => {
 
       // Submit FormData
       await createManager(formData).unwrap();
-      toast.success("Manager created successfully");
+      toast.success("Nhân viên đã được tạo thành công");
 
       handleCloseDrawer();
       refetch();
@@ -484,40 +484,40 @@ const ManagerList = () => {
                 control={searchForm.control}
                 name="search"
                 size="large"
-                placeholder="Search by name, email or code"
+                placeholder="Tìm kiếm theo tên, email hoặc mã nhân viên"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="roleName"
                 size="large"
-                placeholder="Filter by role"
+                placeholder="Lọc theo vai trò"
                 options={ManagerRoleOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
               <CustomButton
                 type="primary"
-                title="Add Manager"
+                title="Thêm người quản lý"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -537,7 +537,7 @@ const ManagerList = () => {
           />
         </Card>
         <CustomDrawer
-          title="Add Manager"
+          title="Thêm người quản lý"
           open={isOpenCreateModal}
           onCancel={handleCloseDrawer}
           onSubmit={managerForm.handleSubmit(onSubmitCreate)}
@@ -547,17 +547,17 @@ const ManagerList = () => {
             <CustomInput
               control={managerForm.control}
               name="firstName"
-              label="First Name"
+              label="Họ"
               size="large"
-              placeholder="Enter first name"
+              placeholder="Nhập họ"
               required
             />
             <CustomInput
               control={managerForm.control}
               name="lastName"
-              label="Last Name"
+              label="Tên"
               size="large"
-              placeholder="Enter last name"
+              placeholder="Nhập tên"
               required
             />
             <CustomInput
@@ -565,16 +565,16 @@ const ManagerList = () => {
               name="email"
               label="Email"
               size="large"
-              placeholder="Enter email"
+              placeholder="Nhập email"
               required
               autoComplete="off"
             />
             <CustomInput
               control={managerForm.control}
               name="password"
-              label="Password"
+              label="Mật khẩu"
               size="large"
-              placeholder="Enter password"
+              placeholder="Nhập mật khẩu"
               type="password"
               required
               autoComplete="new-password"
@@ -582,9 +582,9 @@ const ManagerList = () => {
             <CustomInput
               control={managerForm.control}
               name="confirmPassword"
-              label="Confirm Password"
+              label="Xác nhận mật khẩu"
               size="large"
-              placeholder="Confirm password"
+              placeholder="Xác nhận mật khẩu"
               type="password"
               required
               autoComplete="new-password"
@@ -592,18 +592,18 @@ const ManagerList = () => {
             <CustomInput
               control={managerForm.control}
               name="phoneNumber"
-              label="Phone Number"
+              label="Số điện thoại"
               size="large"
-              placeholder="Enter phone number"
+              placeholder="Nhập số điện thoại"
             />
 
             {/* Department selection */}
             <CustomSelect
               control={managerForm.control}
               name="departmentId"
-              label="Department"
+              label="Phòng ban"
               size="large"
-              placeholder="Select department"
+              placeholder="Chọn phòng ban"
               options={departmentSelectProps.options}
               onFocus={departmentSelectProps.onFocus}
               onPopupScroll={departmentSelectProps.onPopupScroll}
@@ -612,18 +612,18 @@ const ManagerList = () => {
             <CustomSelect
               control={managerForm.control}
               name="roleName"
-              label="Role"
+              label="Vai trò"
               size="large"
-              placeholder="Select role"
+              placeholder="Chọn vai trò"
               options={ManagerRoleOptions}
               required
             />
             <CustomSelect
               control={managerForm.control}
               name="status"
-              label="Status"
+              label="Trạng thái"
               size="large"
-              placeholder="Select status"
+              placeholder="Chọn trạng thái"
               options={StatusOptions}
               required
             />

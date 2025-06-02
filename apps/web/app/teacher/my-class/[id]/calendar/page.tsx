@@ -1,8 +1,6 @@
 "use client";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import CustomButton from "@web/components/common/CustomButton";
-import CustomDropdown from "@web/components/common/CustomDropdown";
 import Loading from "@web/components/common/Loading";
 import { useGetClassSchedulesQuery } from "@web/libs/features/classes/classApi";
 import { SCHEDULE_TYPE_LABEL, SCHEDULE_TYPE_TAG } from "@web/libs/schedule";
@@ -13,77 +11,6 @@ import { IEvent } from "antd-calendar/dist/types";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { z } from "zod";
-
-// Define validation schema
-const searchFormSchema = z.object({
-  startDate: z.any().optional(),
-  endDate: z.any().optional(),
-});
-
-// Define types based on the schema
-type SearchFormValues = z.infer<typeof searchFormSchema>;
-
-// Define schedule form schema
-const scheduleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  startDate: z.any().refine((val) => !!val, "Start date is required"),
-  endDate: z.any().refine((val) => !!val, "End date is required"),
-  shift: z.string().min(1, "Shift is required"),
-  weekdays: z.array(z.number()).min(1, "At least one weekday must be selected"),
-});
-
-// Define types for schedule form
-type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
-
-// Define edit schedule form schema
-const editScheduleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  eventDate: z.any().refine((val) => !!val, "Date is required"),
-  shift: z.string().min(1, "Shift is required"),
-});
-
-// Define types for edit schedule form
-type EditScheduleFormValues = z.infer<typeof editScheduleFormSchema>;
-
-const ScheduleActions = ({
-  event,
-  onEdit,
-  onDelete,
-  canDelete,
-  isDeleting,
-}: {
-  event: IEvent;
-  onEdit: (event: IEvent) => void;
-  onDelete: (eventId: string) => void;
-  canDelete: boolean;
-  isDeleting: boolean;
-}) => {
-  if (!canDelete || event.type !== "TEACHING") {
-    return null;
-  }
-
-  return (
-    <CustomDropdown>
-      <CustomButton
-        type="link"
-        title="Edit"
-        icon={<EditOutlined />}
-        onClick={() => onEdit(event)}
-      />
-      <CustomButton
-        type="link"
-        title="Delete"
-        color="danger"
-        icon={<DeleteOutlined />}
-        loading={isDeleting}
-        onClick={() => onDelete(event.id)}
-      />
-    </CustomDropdown>
-  );
-};
 
 const ClassCalendar = () => {
   const { id: classId } = useParams<{ id: string }>();
@@ -96,11 +23,7 @@ const ClassCalendar = () => {
     endDate: dayjs().endOf("month").endOf("week").toISOString(),
   });
 
-  const {
-    data: scheduleData,
-    isLoading,
-    refetch,
-  } = useGetClassSchedulesQuery(
+  const { data: scheduleData, isLoading } = useGetClassSchedulesQuery(
     {
       classId,
       ...dateRange,
@@ -151,7 +74,7 @@ const ClassCalendar = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Class Calendar
+            Thời khóa biểu
           </Typography.Title>
         </div>
       }
@@ -191,7 +114,7 @@ const ClassCalendar = () => {
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             onClick={() => setIsDetailModalOpen(false)}
           />,
         ]}
@@ -229,7 +152,7 @@ const ClassCalendar = () => {
         ) : (
           <div className="py-6 text-center">
             <Typography.Text type="secondary">
-              No events for this day
+              Không có buổi học nào cho ngày này
             </Typography.Text>
           </div>
         )}

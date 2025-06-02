@@ -89,15 +89,15 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "index",
   },
   {
-    title: "Request Name",
+    title: "Tên yêu cầu",
     dataIndex: "name",
   },
   {
-    title: "Reason",
+    title: "Lý do",
     dataIndex: "description",
   },
   {
-    title: "Date",
+    title: "Ngày",
     dataIndex: "schedules",
     render: (schedules: ISchedule[]) =>
       schedules &&
@@ -105,7 +105,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
       dayjs(schedules[0].startDate).format(DATE_FORMAT),
   },
   {
-    title: "Time",
+    title: "Thời gian",
     dataIndex: "schedules",
     render: (schedules: ISchedule[]) =>
       schedules &&
@@ -113,14 +113,14 @@ const columnsTitles: TableColumn<IRequest>[] = [
       `${dayjs(schedules[0]?.startDate).format(TIME_FORMAT)} - ${dayjs(schedules[0]?.endDate).format(TIME_FORMAT)}`,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn chấp nhận",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -132,7 +132,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -165,7 +165,7 @@ const BusyScheduleActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -177,14 +177,14 @@ const BusyScheduleActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Edit"
+          title="Cập nhật"
           icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
@@ -192,7 +192,7 @@ const BusyScheduleActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Delete"
+          title="Xóa"
           color="danger"
           icon={<DeleteOutlined />}
           onClick={() => onOpenDeleteModal(record.id)}
@@ -201,7 +201,7 @@ const BusyScheduleActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -212,11 +212,11 @@ const BusyScheduleActions = ({
 };
 
 const busyScheduleSchema = z.object({
-  name: z.string().min(1, "Request Name is required"),
-  description: z.string().min(1, "Reason is required"),
-  date: z.any().refine((val) => !!val, "Date is required"),
-  startTime: z.any().refine((val) => !!val, "Start time is required"),
-  endTime: z.any().refine((val) => !!val, "End time is required"),
+  name: z.string().min(1, "Tên yêu cầu là bắt buộc"),
+  description: z.string().min(1, "Lý do là bắt buộc"),
+  date: z.any().refine((val) => !!val, "Ngày là bắt buộc"),
+  startTime: z.any().refine((val) => !!val, "Thời gian bắt đầu là bắt buộc"),
+  endTime: z.any().refine((val) => !!val, "Thời gian kết thúc là bắt buộc"),
 });
 
 type BusyScheduleFormValues = z.infer<typeof busyScheduleSchema>;
@@ -533,27 +533,27 @@ const BusyScheduleRegistration = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by request name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -561,7 +561,7 @@ const BusyScheduleRegistration = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Busy Schedule Request"
+                title="Tạo yêu cầu"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -583,13 +583,13 @@ const BusyScheduleRegistration = () => {
       </div>
       {/* Detail Modal */}
       <Modal
-        title="Busy Schedule Request Details"
+        title="Chi tiết yêu cầu"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -597,7 +597,7 @@ const BusyScheduleRegistration = () => {
             <CustomButton
               key="edit"
               type="primary"
-              title="Edit"
+              title="Cập nhật"
               icon={<EditOutlined />}
               onClick={() => handleStartEdit(busyScheduleDetail.data.id)}
             />
@@ -608,21 +608,21 @@ const BusyScheduleRegistration = () => {
         {busyScheduleDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Request Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {busyScheduleDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Reason:</Typography.Text>
+              <Typography.Text type="secondary">Lý do:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {busyScheduleDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Status:</Typography.Text>
+              <Typography.Text type="secondary">Trạng thái:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[busyScheduleDetail.data.status]}>
                   {busyScheduleDetail.data.status}
@@ -630,14 +630,14 @@ const BusyScheduleRegistration = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Busy Schedule Details</Divider>
+            <Divider orientation="left">Chi tiết yêu cầu</Divider>
 
             {busyScheduleDetail.data?.schedules &&
               busyScheduleDetail.data.schedules.length > 0 && (
                 <Card size="small" className="mb-4">
                   <div className="flex flex-col gap-2">
                     <div>
-                      <Typography.Text type="secondary">Date:</Typography.Text>
+                      <Typography.Text type="secondary">Ngày:</Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(
                           busyScheduleDetail.data.schedules[0].startDate,
@@ -645,7 +645,9 @@ const BusyScheduleRegistration = () => {
                       </Typography.Text>
                     </div>
                     <div>
-                      <Typography.Text type="secondary">Time:</Typography.Text>
+                      <Typography.Text type="secondary">
+                        Thời gian:
+                      </Typography.Text>
                       <Typography.Text className="ml-2">
                         {dayjs(
                           busyScheduleDetail.data.schedules[0].startDate,
@@ -662,7 +664,7 @@ const BusyScheduleRegistration = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(busyScheduleDetail.data.createdAt).format(
                     DATE_TIME_FORMAT,
@@ -671,7 +673,9 @@ const BusyScheduleRegistration = () => {
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(busyScheduleDetail.data.updatedAt).format(
                     DATE_TIME_FORMAT,
@@ -682,14 +686,14 @@ const BusyScheduleRegistration = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn chấp nhận:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(busyScheduleDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
               >
                 {calculateApprovalDeadline(busyScheduleDetail.data.createdAt)}
                 {isPastApprovalDeadline(busyScheduleDetail.data.createdAt) && (
-                  <span className="ml-2">(Overdue)</span>
+                  <span className="ml-2">(Quá hạn)</span>
                 )}
               </Typography.Text>
             </div>
@@ -702,11 +706,7 @@ const BusyScheduleRegistration = () => {
       </Modal>
       {/* Create/Edit Drawer - Notice there's no field array or add/remove buttons */}
       <CustomDrawer
-        title={
-          isEditMode
-            ? "Edit Busy Schedule Request"
-            : "Create Busy Schedule Request"
-        }
+        title={isEditMode ? "Cập nhật yêu cầu" : "Tạo yêu cầu"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={busyScheduleForm.handleSubmit(onSubmitCreate)}
@@ -716,8 +716,8 @@ const BusyScheduleRegistration = () => {
           <CustomInput
             control={busyScheduleForm.control}
             name="name"
-            label="Request Name"
-            placeholder="Enter request name"
+            label="Tên yêu cầu"
+            placeholder="Nhập tên yêu cầu"
             size="large"
             required
           />
@@ -725,21 +725,21 @@ const BusyScheduleRegistration = () => {
           <CustomInput
             control={busyScheduleForm.control}
             name="description"
-            label="Reason"
-            placeholder="Enter reason for busy schedule"
+            label="Lý do"
+            placeholder="Nhập lý do cho yêu cầu"
             size="large"
             required
           />
 
-          <Divider orientation="left">Busy Schedule Details</Divider>
+          <Divider orientation="left">Chi tiết yêu cầu</Divider>
 
           <div className="flex flex-col gap-2">
             <CustomDatePicker
               control={busyScheduleForm.control}
               name="date"
-              label="Date"
+              label="Ngày"
               size="large"
-              placeholder="Select date"
+              placeholder="Chọn ngày"
               required
             />
           </div>
@@ -749,9 +749,9 @@ const BusyScheduleRegistration = () => {
               <CustomTimePicker
                 control={busyScheduleForm.control}
                 name="startTime"
-                label="Start Time"
+                label="Thời gian bắt đầu"
                 size="large"
-                placeholder="Start time"
+                placeholder="Thời gian bắt đầu"
                 required
               />
             </div>
@@ -759,10 +759,10 @@ const BusyScheduleRegistration = () => {
               <CustomTimePicker
                 control={busyScheduleForm.control}
                 name="endTime"
-                label="End Time"
+                label="Thời gian kết thúc"
                 size="large"
                 format="HH:mm"
-                placeholder="End time"
+                placeholder="Thời gian kết thúc"
                 required
               />
             </div>
@@ -771,54 +771,54 @@ const BusyScheduleRegistration = () => {
       </CustomDrawer>
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Busy Schedule Request"
+        title="Hủy bỏ yêu cầu"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Request"
+            title="Có, hủy bỏ"
             loading={isCanceling}
             onClick={handleCancel}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this busy schedule request? This
-          action cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ yêu cầu này không? Hành động này không
+          thể được hoàn tác.
         </Typography.Paragraph>
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Delete Busy Schedule Request"
+        title="Xóa yêu cầu"
         open={isDeleteModalOpen}
         onCancel={() => dispatch(closeDeleteModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Hủy bỏ"
             onClick={() => dispatch(closeDeleteModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Delete Request"
+            title="Xóa"
             loading={isDeleting}
             onClick={handleDelete}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to delete this busy schedule request? This
-          action cannot be undone.
+          Bạn có chắc chắn muốn xóa yêu cầu này không? Hành động này không thể
+          được hoàn tác.
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

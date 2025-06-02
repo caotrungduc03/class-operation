@@ -156,9 +156,9 @@ const HomeStudent: React.FC = () => {
           {/* My Classes */}
           <Col xs={24} lg={12}>
             <Card
-              title={NAV_TITLE.MY_TEACHER_CLASS}
+              title={NAV_TITLE.MY_STUDENT_CLASS}
               extra={
-                <Link href={NAV_LINK.MY_TEACHER_CLASS}>
+                <Link href={NAV_LINK.MY_STUDENT_CLASS}>
                   <CustomButton
                     type="link"
                     title="Xem tất cả"
@@ -233,7 +233,7 @@ const HomeStudent: React.FC = () => {
           {/* Today's Schedule */}
           <Col xs={24} lg={12}>
             <Card
-              title="Lịch Dạy Hôm Nay"
+              title="Lịch học hôm nay"
               extra={
                 <Link href={NAV_LINK.MY_TEACHER_CALENDAR}>
                   <CustomButton

@@ -53,11 +53,11 @@ const searchFormSchema = z.object({
 });
 
 const busyScheduleFormSchema = z.object({
-  name: z.string().min(1, "Request name is required"),
+  name: z.string().min(1, "Tên yêu cầu là bắt buộc"),
   description: z.string().optional(),
-  date: z.any().refine((val) => !!val, "Date is required"),
-  startTime: z.any().refine((val) => !!val, "Start time is required"),
-  endTime: z.any().refine((val) => !!val, "End time is required"),
+  date: z.any().refine((val) => !!val, "Ngày là bắt buộc"),
+  startTime: z.any().refine((val) => !!val, "Thời gian bắt đầu là bắt buộc"),
+  endTime: z.any().refine((val) => !!val, "Thời gian kết thúc là bắt buộc"),
 });
 
 // Define types based on the schemas
@@ -224,12 +224,11 @@ const MyCalendar = () => {
     try {
       // Call the API to create busy schedule
       await createBusySchedule(formattedData).unwrap();
-      toast.success("Busy schedule created successfully");
+      toast.success("Yêu cầu đã được tạo thành công");
       handleCloseBusyScheduleModal();
     } catch (error) {
       toast.error(
-        "Failed to create busy schedule: " +
-          (error.data?.message || "Unknown error"),
+        "Lỗi khi tạo yêu cầu: " + (error.data?.message || "Lỗi không xác định"),
       );
     }
   };
@@ -244,27 +243,27 @@ const MyCalendar = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by event name"
+                placeholder="Tìm kiếm theo tên sự kiện"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="type"
                 size="large"
-                placeholder="Filter by event type"
+                placeholder="Lọc theo loại sự kiện"
                 options={SCHEDULE_TYPE_OPTIONS}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -272,7 +271,7 @@ const MyCalendar = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Busy Schedule"
+                title="Tạo yêu cầu"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => setIsBusyScheduleModalOpen(true)}
@@ -313,7 +312,7 @@ const MyCalendar = () => {
 
         {/* Busy Schedule Modal */}
         <CustomDrawer
-          title="Create Busy Schedule"
+          title="Tạo yêu cầu"
           open={isBusyScheduleModalOpen}
           onCancel={handleCloseBusyScheduleModal}
           onSubmit={busyScheduleForm.handleSubmit(onSubmitBusySchedule)}
@@ -323,8 +322,8 @@ const MyCalendar = () => {
             <CustomInput
               control={busyScheduleForm.control}
               name="name"
-              label="Request Name"
-              placeholder="Enter request name"
+              label="Tên yêu cầu"
+              placeholder="Nhập tên yêu cầu"
               size="large"
               required
             />
@@ -332,25 +331,25 @@ const MyCalendar = () => {
             <CustomTextArea
               control={busyScheduleForm.control}
               name="description"
-              label="Reason"
-              placeholder="Enter reason for busy schedule"
+              label="Lý do"
+              placeholder="Nhập lý do cho yêu cầu"
               size="large"
               required
             />
 
-            <Divider orientation="left">Schedule Details</Divider>
+            <Divider orientation="left">Chi tiết sự kiện</Divider>
 
             {/* Date picker */}
             <div className="flex flex-col gap-2">
               <Typography.Text>
-                Date<span className="text-red-500">*</span>
+                Ngày<span className="text-red-500">*</span>
               </Typography.Text>
               <DatePicker
                 style={{ width: "100%" }}
                 size="large"
                 value={busyScheduleForm.watch("date")}
                 onChange={(date) => busyScheduleForm.setValue("date", date)}
-                placeholder="Select date"
+                placeholder="Chọn ngày"
                 status={
                   busyScheduleForm.formState.errors.date ? "error" : undefined
                 }
@@ -366,7 +365,7 @@ const MyCalendar = () => {
             <div className="flex gap-2">
               <div className="flex flex-1 flex-col gap-2">
                 <Typography.Text>
-                  Start Time<span className="text-red-500">*</span>
+                  Thời gian bắt đầu<span className="text-red-500">*</span>
                 </Typography.Text>
                 <TimePicker
                   style={{ width: "100%" }}
@@ -376,7 +375,7 @@ const MyCalendar = () => {
                   onChange={(time) =>
                     busyScheduleForm.setValue("startTime", time)
                   }
-                  placeholder="Start time"
+                  placeholder="Thời gian bắt đầu"
                   status={
                     busyScheduleForm.formState.errors.startTime
                       ? "error"
@@ -394,7 +393,7 @@ const MyCalendar = () => {
               </div>
               <div className="flex flex-1 flex-col gap-2">
                 <Typography.Text>
-                  End Time<span className="text-red-500">*</span>
+                  Thời gian kết thúc<span className="text-red-500">*</span>
                 </Typography.Text>
                 <TimePicker
                   style={{ width: "100%" }}
@@ -404,7 +403,7 @@ const MyCalendar = () => {
                   onChange={(time) =>
                     busyScheduleForm.setValue("endTime", time)
                   }
-                  placeholder="End time"
+                  placeholder="Thời gian kết thúc"
                   status={
                     busyScheduleForm.formState.errors.endTime
                       ? "error"
@@ -432,7 +431,7 @@ const MyCalendar = () => {
           footer={[
             <CustomButton
               key="close"
-              title="Close"
+              title="Đóng"
               onClick={() => setIsDetailModalOpen(false)}
             />,
           ]}
@@ -472,7 +471,7 @@ const MyCalendar = () => {
           ) : (
             <div className="py-6 text-center">
               <Typography.Text type="secondary">
-                No events for this day
+                Không có sự kiện cho ngày này
               </Typography.Text>
             </div>
           )}

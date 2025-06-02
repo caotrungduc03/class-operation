@@ -58,40 +58,40 @@ const columnsTitles: TableColumn<ICourse>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã khóa học",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên khóa học",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Type",
+    title: "Loại khóa học",
     dataIndex: "type",
   },
   {
-    title: "Hours",
+    title: "Số giờ",
     dataIndex: "hours",
     render: (hours: number) => (hours ? `${hours} giờ` : ""),
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
     ),
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm:ss"),
   },
@@ -104,13 +104,15 @@ const columnsTitles: TableColumn<ICourse>[] = [
 
 // Define Zod schema for course form validation
 const courseFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên khóa học là bắt buộc"),
   description: z.string().optional(),
-  type: z.nativeEnum(CourseType, { required_error: "Type is required" }),
+  type: z.nativeEnum(CourseType, {
+    required_error: "Loại khóa học là bắt buộc",
+  }),
   status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
   hours: z
     .number()
-    .min(0, "Hours must be positive")
+    .min(0, "Số giờ phải là số dương")
     .optional()
     .or(z.string().transform((val) => (val === "" ? undefined : Number(val)))),
 });
@@ -136,13 +138,13 @@ const CourseActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -307,15 +309,15 @@ const Courses = () => {
 
   const handleDeleteCourse = (id: string) => {
     Modal.confirm({
-      title: "Delete Course",
-      content: "Are you sure you want to delete this course?",
-      okText: "Yes",
+      title: "Xóa khóa học",
+      content: "Bạn có chắc chắn muốn xóa khóa học này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteCourse(id).unwrap();
-          toast.success("Course deleted successfully");
+          toast.success("Khóa học đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -337,10 +339,10 @@ const Courses = () => {
 
       if (isEditMode && selectedCourseId) {
         await updateCourse({ id: selectedCourseId, data: courseData }).unwrap();
-        toast.success("Course updated successfully");
+        toast.success("Khóa học đã được cập nhật thành công");
       } else {
         await createCourse(courseData).unwrap();
-        toast.success("Course created successfully");
+        toast.success("Khóa học đã được tạo thành công");
       }
       handleCloseDrawer();
       refetch();
@@ -378,10 +380,7 @@ const Courses = () => {
   };
 
   return (
-    <PageLayout
-      breadcrumbs={breadcrumbs}
-      title={NAV_TITLE.MANAGE_COURSES || "Manage Courses"}
-    >
+    <PageLayout breadcrumbs={breadcrumbs} title={NAV_TITLE.MANAGE_COURSES}>
       <div className="flex flex-col gap-6">
         <Card>
           <div className="flex flex-col gap-4">
@@ -390,20 +389,20 @@ const Courses = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by name or code"
+                placeholder="Tìm kiếm theo tên hoặc mã khóa học"
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -411,7 +410,7 @@ const Courses = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Add Course"
+                title="Thêm khóa học"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={handleAddCourse}
@@ -433,7 +432,7 @@ const Courses = () => {
       </div>
 
       <CustomDrawer
-        title={isEditMode ? "Edit Course" : "Add Course"}
+        title={isEditMode ? "Cập nhật khóa học" : "Thêm khóa học"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={courseForm.handleSubmit(onSubmitCourse)}
@@ -443,16 +442,16 @@ const Courses = () => {
           <CustomInput
             control={courseForm.control}
             name="name"
-            label="Course Name"
-            placeholder="Enter course name"
+            label="Tên khóa học"
+            placeholder="Nhập tên khóa học"
             required
           />
 
           <CustomSelect
             control={courseForm.control}
             name="type"
-            label="Course Type"
-            placeholder="Select course type"
+            label="Loại khóa học"
+            placeholder="Chọn loại khóa học"
             options={courseTypeOptions}
             required
           />
@@ -460,23 +459,23 @@ const Courses = () => {
           <CustomInput
             control={courseForm.control}
             name="hours"
-            label="Course Hours"
-            placeholder="Enter course hours"
+            label="Số giờ"
+            placeholder="Nhập số giờ khóa học"
             type="number"
           />
 
           <CustomTextArea
             control={courseForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter course description"
+            label="Mô tả"
+            placeholder="Nhập mô tả khóa học"
           />
 
           <CustomSelect
             control={courseForm.control}
             name="status"
-            label="Status"
-            placeholder="Select status"
+            label="Trạng thái"
+            placeholder="Chọn trạng thái"
             options={StatusOptions}
           />
         </div>

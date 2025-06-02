@@ -63,50 +63,46 @@ const columnsTitles: TableColumn<IClass>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã lớp",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên lớp",
     dataIndex: "name",
   },
   {
-    title: "Course",
+    title: "Khóa học",
     dataIndex: "course",
     render: (course: ICourse) => course?.name,
   },
   {
-    title: "Teacher",
+    title: "Giáo viên",
     dataIndex: "teacher",
     render: (teacher: IUser) => teacher?.fullName || "",
   },
   {
-    title: "Room",
+    title: "Phòng học",
     dataIndex: "room",
     render: (room: IRoom) => room?.name || "",
   },
   {
-    title: "Students",
+    title: "Học viên",
     dataIndex: "studentClasses",
     render: (_, record: IClass) =>
       `${record.studentClasses?.length || 0} / ${record.quantity}`,
   },
   {
-    title: "Start Date",
+    title: "Ngày bắt đầu",
     dataIndex: "startDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
   {
-    title: "End Date",
+    title: "Ngày kết thúc",
     dataIndex: "endDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
   {
-    title: "Quantity",
-    dataIndex: "quantity",
-  },
-  {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
@@ -121,17 +117,17 @@ const columnsTitles: TableColumn<IClass>[] = [
 
 // Define Zod schema for class form validation
 const classFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên lớp là bắt buộc"),
   description: z.string().optional(),
-  startDate: z.any().refine((val) => !!val, "Start date is required"),
-  endDate: z.any().refine((val) => !!val, "End date is required"),
+  startDate: z.any().refine((val) => !!val, "Ngày bắt đầu là bắt buộc"),
+  endDate: z.any().refine((val) => !!val, "Ngày kết thúc là bắt buộc"),
   quantity: z.number().int().nonnegative().optional(),
   status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
   courseId: z
     .string({
-      message: "Course is required",
+      message: "Khóa học là bắt buộc",
     })
-    .min(1, "Course is required"),
+    .min(1, "Khóa học là bắt buộc"),
   teacherId: z.string().optional().nullable(),
   roomId: z.string().optional().nullable(),
 });
@@ -163,13 +159,13 @@ const ClassActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -322,15 +318,15 @@ const Classes = () => {
 
   const handleDeleteClass = (id: string) => {
     Modal.confirm({
-      title: "Delete Class",
-      content: "Are you sure you want to delete this class?",
-      okText: "Yes",
+      title: "Xóa lớp",
+      content: "Bạn có chắc chắn muốn xóa lớp này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteClass(id).unwrap();
-          toast.success("Class deleted successfully");
+          toast.success("Lớp đã được xóa thành công");
           refetch();
         } catch (error) {
           // Handled by the apiErrorMiddleware
@@ -363,7 +359,7 @@ const Classes = () => {
       };
 
       await createClass(createData).unwrap();
-      toast.success("Class created successfully");
+      toast.success("Lớp đã được tạo thành công");
 
       handleCloseDrawer();
       refetch();
@@ -411,34 +407,34 @@ const Classes = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by name or code"
+                placeholder="Tìm kiếm theo tên hoặc mã lớp"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="courseId"
                 size="large"
-                placeholder="Filter by course"
+                placeholder="Lọc theo khóa học"
                 options={courseOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -446,7 +442,7 @@ const Classes = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Add Class"
+                title="Thêm lớp"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={handleAddClass}
@@ -468,7 +464,7 @@ const Classes = () => {
       </div>
 
       <CustomDrawer
-        title={"Add Class"}
+        title={"Thêm lớp"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={classForm.handleSubmit(onSubmitClass)}
@@ -478,16 +474,16 @@ const Classes = () => {
           <CustomInput
             control={classForm.control}
             name="name"
-            label="Class Name"
-            placeholder="Enter class name"
+            label="Tên lớp"
+            placeholder="Nhập tên lớp"
             required
           />
 
           <CustomSelect
             control={classForm.control}
             name="courseId"
-            label="Course"
-            placeholder="Select course"
+            label="Khóa học"
+            placeholder="Chọn khóa học"
             options={courseOptions}
             required
           />
@@ -495,38 +491,38 @@ const Classes = () => {
           <CustomDatePicker
             control={classForm.control}
             name="startDate"
-            label="Start Date"
-            placeholder="Select start date"
+            label="Ngày bắt đầu"
+            placeholder="Chọn ngày bắt đầu"
             required
           />
 
           <CustomDatePicker
             control={classForm.control}
             name="endDate"
-            label="End Date"
-            placeholder="Select end date"
+            label="Ngày kết thúc"
+            placeholder="Chọn ngày kết thúc"
             required
           />
 
           <CustomInputNumber
             control={classForm.control}
             name="quantity"
-            label="Quantity"
-            placeholder="Enter quantity"
+            label="Số lượng tối đa"
+            placeholder="Nhập số lượng tối đa"
           />
 
           <CustomTextArea
             control={classForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter class description"
+            label="Mô tả"
+            placeholder="Nhập mô tả lớp"
           />
 
           <CustomSelect
             control={classForm.control}
             name="status"
-            label="Status"
-            placeholder="Select status"
+            label="Trạng thái"
+            placeholder="Chọn trạng thái"
             options={StatusOptions}
           />
         </div>

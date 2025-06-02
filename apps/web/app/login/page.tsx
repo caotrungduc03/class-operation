@@ -47,10 +47,10 @@ const Login = () => {
           <div className="flex w-[500px] flex-col gap-6">
             <div className="text-center">
               <Typography.Title level={2} className="mb-2">
-                Login
+                Đăng nhập
               </Typography.Title>
               <Typography.Paragraph>
-                Login to Continue Learning
+                Đăng nhập để tiếp tục học tập
               </Typography.Paragraph>
             </div>
             <CustomInput
@@ -58,19 +58,19 @@ const Login = () => {
               name="email"
               size="large"
               prefix={<UserOutlined className="mr-2" />}
-              placeholder="Please enter your email"
+              placeholder="Nhập email của bạn"
             />
             <CustomInput
               control={control}
               name="password"
               size="large"
               prefix={<LockOutlined className="mr-2" />}
-              placeholder="Please enter your password"
+              placeholder="Nhập mật khẩu của bạn"
               type="password"
             />
             <CustomButton
               type="primary"
-              title="Login"
+              title="Đăng nhập"
               size="large"
               onClick={handleSubmit(onSubmit)}
               loading={isLoading}

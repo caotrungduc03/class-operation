@@ -11,7 +11,6 @@ import { IClass } from "@web/libs/class";
 import { TableColumn } from "@web/libs/common";
 import { ICourse } from "@web/libs/course";
 import { useGetMyClassesQuery } from "@web/libs/features/classes/classApi";
-import { useGetCoursesQuery } from "@web/libs/features/courses/courseApi";
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { IRoom } from "@web/libs/room";
 import { RootState } from "@web/libs/store";
@@ -42,48 +41,48 @@ const columnsTitles: TableColumn<IClass>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã lớp",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên lớp",
     dataIndex: "name",
   },
   {
-    title: "Course",
+    title: "Khóa học",
     dataIndex: "course",
     render: (course: ICourse) => course?.name,
   },
   {
-    title: "Teacher",
+    title: "Giáo viên",
     dataIndex: "teacher",
     render: (teacher: any) => teacher?.fullName || "",
   },
   {
-    title: "Room",
+    title: "Phòng học",
     dataIndex: "room",
     render: (room: IRoom) => room?.name || "",
   },
   {
-    title: "Students",
+    title: "Học viên",
     dataIndex: "studentClasses",
     render: (_, record: IClass) =>
       `${record.studentClasses?.length || 0} / ${record.quantity}`,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
     ),
   },
   {
-    title: "Start Date",
+    title: "Ngày bắt đầu",
     dataIndex: "startDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
   {
-    title: "End Date",
+    title: "Ngày kết thúc",
     dataIndex: "endDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
@@ -129,17 +128,6 @@ const MyClass = () => {
     resolver: zodResolver(searchFormSchema),
   });
 
-  // Get courses for filter dropdown
-  const { data: coursesData } = useGetCoursesQuery({ limit: 100 });
-  const courseOptions = useMemo(() => {
-    return (
-      coursesData?.data?.items.map((course) => ({
-        label: `${course.code} - ${course.name}`,
-        value: course.id,
-      })) || []
-    );
-  }, [coursesData]);
-
   const { data, isFetching, refetch } = useGetMyClassesQuery(searchParams);
 
   const { current, pageSize } = pagination;
@@ -162,11 +150,11 @@ const MyClass = () => {
                 icon={<EyeOutlined />}
                 onClick={() => handleViewClass(record.id)}
               >
-                View
+                Xem
               </Button>
             ) : (
               <Button type="primary" icon={<EyeOutlined />} disabled>
-                View
+                Xem
               </Button>
             );
           },
@@ -271,39 +259,26 @@ const MyClass = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by name or code"
-              />
-              <CustomSelect
-                control={searchForm.control}
-                name="courseId"
-                size="large"
-                placeholder="Filter by course"
-                options={courseOptions}
-              />
-              <CustomInput
-                control={searchForm.control}
-                name="teacherId"
-                size="large"
-                placeholder="Filter by teacher"
+                placeholder="Tìm kiếm theo tên hoặc mã lớp"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex gap-4">
               <CustomButton
-                title="Reset"
+                title="Làm mới"
                 size="large"
                 icon={<ReloadOutlined />}
                 onClick={handleReset}
               />
               <CustomButton
                 type="primary"
-                title="Search"
+                title="Tìm kiếm"
                 size="large"
                 icon={<SearchOutlined />}
                 onClick={searchForm.handleSubmit(onSubmitSearch)}

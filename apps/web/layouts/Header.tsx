@@ -35,7 +35,6 @@ import {
 } from "antd";
 import clsx from "clsx";
 import dayjs from "dayjs";
-import Image from "next/image";
 import Link from "next/link";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -225,7 +224,7 @@ const Header = () => {
       <Avatar
         icon={
           user?.avatar ? (
-            <Image
+            <img
               src={user?.avatar}
               alt="Avatar"
               width={160}

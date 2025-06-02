@@ -39,12 +39,14 @@ import { z } from "zod";
 
 // Define schedule form schema
 const scheduleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên buổi học là bắt buộc"),
   description: z.string().optional(),
-  startDate: z.any().refine((val) => !!val, "Start date is required"),
-  endDate: z.any().refine((val) => !!val, "End date is required"),
-  shift: z.string().min(1, "Shift is required"),
-  weekdays: z.array(z.number()).min(1, "At least one weekday must be selected"),
+  startDate: z.any().refine((val) => !!val, "Ngày bắt đầu là bắt buộc"),
+  endDate: z.any().refine((val) => !!val, "Ngày kết thúc là bắt buộc"),
+  shift: z.string().min(1, "Ca học là bắt buộc"),
+  weekdays: z
+    .array(z.number())
+    .min(1, "Ít nhất một ngày trong tuần phải được chọn"),
 });
 
 // Define types for schedule form
@@ -52,10 +54,10 @@ type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
 
 // Define edit schedule form schema
 const editScheduleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên buổi học là bắt buộc"),
   description: z.string().optional(),
-  eventDate: z.any().refine((val) => !!val, "Date is required"),
-  shift: z.string().min(1, "Shift is required"),
+  eventDate: z.any().refine((val) => !!val, "Ngày là bắt buộc"),
+  shift: z.string().min(1, "Ca học là bắt buộc"),
 });
 
 // Define types for edit schedule form
@@ -82,13 +84,13 @@ const ScheduleActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(event)}
       />
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         loading={isDeleting}
@@ -245,9 +247,7 @@ const ClassCalendar = () => {
 
   const handleOpenCreate = (date: Date) => {
     if (!hasTeacher) {
-      toast.error(
-        "Please assign a teacher to this class before adding schedules.",
-      );
+      toast.error("Vui lòng giao viên cho lớp trước khi thêm lịch học.");
       return;
     }
 
@@ -255,7 +255,7 @@ const ClassCalendar = () => {
     const selectedDay = dayjs(date);
 
     scheduleForm.reset({
-      name: classData?.data?.name || "Class Session",
+      name: classData?.data?.name || "Buổi học",
       description: "",
       startDate: selectedDay.toDate(),
       endDate: selectedDay.toDate(),
@@ -267,14 +267,12 @@ const ClassCalendar = () => {
 
   const handleOpenAddSchedule = () => {
     if (!hasTeacher) {
-      toast.error(
-        "Please assign a teacher to this class before adding schedules.",
-      );
+      toast.error("Vui lòng giao viên cho lớp trước khi thêm lịch học.");
       return;
     }
 
     scheduleForm.reset({
-      name: classData?.data?.name || "Class Session",
+      name: classData?.data?.name || "Buổi học",
       description: "",
       startDate: null,
       endDate: null,
@@ -337,7 +335,7 @@ const ClassCalendar = () => {
         schedules,
       }).unwrap();
 
-      toast.success(`${schedules.length} schedule(s) created successfully`);
+      toast.success(`${schedules.length} buổi học đã được tạo thành công`);
       setIsAddScheduleModalOpen(false);
       refetch();
     } catch (error) {
@@ -364,15 +362,15 @@ const ClassCalendar = () => {
 
   const handleDeleteEvent = async (eventId: string) => {
     Modal.confirm({
-      title: "Delete Schedule",
-      content: "Are you sure you want to delete this schedule?",
-      okText: "Yes",
+      title: "Xóa buổi học",
+      content: "Bạn có chắc chắn muốn xóa buổi học này?",
+      okText: "Có",
       okType: "danger",
-      cancelText: "No",
+      cancelText: "Không",
       onOk: async () => {
         try {
           await deleteSchedule(eventId).unwrap();
-          toast.success("Schedule deleted successfully");
+          toast.success("Buổi học đã được xóa thành công");
           refetch();
           setIsDetailModalOpen(false);
         } catch (error) {
@@ -406,7 +404,7 @@ const ClassCalendar = () => {
       );
 
       if (!selectedShift) {
-        toast.error("Invalid shift selected.");
+        toast.error("Ca học không hợp lệ.");
         return;
       }
 
@@ -435,7 +433,7 @@ const ClassCalendar = () => {
         },
       }).unwrap();
 
-      toast.success("Schedule updated successfully");
+      toast.success("Buổi học đã được cập nhật thành công");
       setIsEditScheduleModalOpen(false);
       refetch();
     } catch (error) {
@@ -450,11 +448,11 @@ const ClassCalendar = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Class Calendar
+            Thời khóa biểu
           </Typography.Title>
           <CustomButton
             type="primary"
-            title="Add Schedule"
+            title="Thêm buổi học"
             icon={<PlusOutlined />}
             onClick={handleOpenAddSchedule}
           />
@@ -464,8 +462,8 @@ const ClassCalendar = () => {
       <div className="flex flex-col gap-4">
         {!hasTeacher && (
           <Alert
-            message="Teacher Assignment Required"
-            description="Please assign a teacher to this class before scheduling. Without a teacher, the class schedule cannot be properly managed."
+            message="Giáo viên bắt buộc"
+            description="Vui lòng giáo viên cho lớp trước khi lập lịch. Không có giáo viên, lịch học không thể được quản lý chính xác."
             type="warning"
             showIcon
             className="mb-4"
@@ -554,7 +552,7 @@ const ClassCalendar = () => {
           ) : (
             <div className="py-6 text-center">
               <Typography.Text type="secondary">
-                No events for this day
+                Không có buổi học cho ngày này
               </Typography.Text>
             </div>
           )}
@@ -564,8 +562,10 @@ const ClassCalendar = () => {
         <Modal
           title={
             selectedCalendarDate
-              ? `Add Schedule for ${dayjs(selectedCalendarDate).format("MMMM D, YYYY")}`
-              : "Add Teaching Schedule"
+              ? `Thêm buổi học cho ${dayjs(selectedCalendarDate).format(
+                  "MMMM D, YYYY",
+                )}`
+              : "Thêm lịch học"
           }
           open={isAddScheduleModalOpen}
           onCancel={() => setIsAddScheduleModalOpen(false)}
@@ -573,13 +573,13 @@ const ClassCalendar = () => {
           footer={[
             <CustomButton
               key="cancel"
-              title="Cancel"
+              title="Hủy bỏ"
               onClick={() => setIsAddScheduleModalOpen(false)}
             />,
             <CustomButton
               key="submit"
               type="primary"
-              title="Add Schedule"
+              title="Lưu"
               onClick={scheduleForm.handleSubmit(handleAddSchedule)}
               loading={isCreatingSchedule}
             />,
@@ -588,16 +588,16 @@ const ClassCalendar = () => {
           <div className="flex flex-col gap-4 py-4">
             {totalCourseHours > 0 && (
               <Alert
-                message="Course Information"
+                message="Thông tin khóa học"
                 description={
                   <div>
-                    <div>Total course hours: {totalCourseHours}h</div>
+                    <div>Tổng số giờ khóa học: {totalCourseHours}h</div>
                     <div
                       className={
                         remainingHours <= 0 ? "text-red-500" : "text-blue-600"
                       }
                     >
-                      Remaining hours: {remainingHours.toFixed(1)}h
+                      Số giờ còn lại: {remainingHours.toFixed(1)}h
                     </div>
                   </div>
                 }
@@ -610,24 +610,24 @@ const ClassCalendar = () => {
             <CustomInput
               control={scheduleForm.control}
               name="name"
-              label="Schedule Name"
-              placeholder="Enter schedule name"
+              label="Tên buổi học"
+              placeholder="Nhập tên buổi học"
               required
             />
 
             <CustomTextArea
               control={scheduleForm.control}
               name="description"
-              label="Description"
-              placeholder="Enter schedule description"
+              label="Mô tả"
+              placeholder="Nhập mô tả buổi học"
             />
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CustomDatePicker
                 control={scheduleForm.control}
                 name="startDate"
-                label="Start Date"
-                placeholder="Select start date"
+                label="Ngày bắt đầu"
+                placeholder="Chọn ngày bắt đầu"
                 disabledDate={disabledDate}
                 required
               />
@@ -635,8 +635,8 @@ const ClassCalendar = () => {
               <CustomDatePicker
                 control={scheduleForm.control}
                 name="endDate"
-                label="End Date"
-                placeholder="Select end date"
+                label="Ngày kết thúc"
+                placeholder="Chọn ngày kết thúc"
                 disabledDate={disabledDate}
                 required
               />
@@ -645,8 +645,8 @@ const ClassCalendar = () => {
             <CustomSelect
               control={scheduleForm.control}
               name="shift"
-              label="Shift"
-              placeholder="Select shift"
+              label="Ca học"
+              placeholder="Chọn ca học"
               options={SHIFTS_OPTIONS.map((shift) => ({
                 label: shift.label,
                 value: shift.value,
@@ -658,7 +658,7 @@ const ClassCalendar = () => {
               <CustomCheckboxGroup
                 control={scheduleForm.control}
                 name="weekdays"
-                label="Weekdays"
+                label="Ngày trong tuần"
                 className="mr-2"
                 options={WEEKDAY_OPTIONS}
                 required
@@ -670,10 +670,10 @@ const ClassCalendar = () => {
                 message="Schedule Summary"
                 description={
                   <div>
-                    <div>Sessions to create: {estimatedData.scheduleCount}</div>
-                    <div>Hours per session: {HOURS_PER_SESSION}h</div>
+                    <div>Số buổi học: {estimatedData.scheduleCount}</div>
+                    <div>Số giờ buổi học: {HOURS_PER_SESSION}h</div>
                     <div>
-                      Total estimated hours:{" "}
+                      Tổng số giờ dự kiến:{" "}
                       {estimatedData.estimatedHours.toFixed(1)}h
                     </div>
                     {totalCourseHours > 0 && (
@@ -685,7 +685,7 @@ const ClassCalendar = () => {
                               : "text-green-600"
                           }
                         >
-                          Hours remaining after creation:{" "}
+                          Số giờ còn lại sau khi tạo:{" "}
                           {(
                             remainingHours - estimatedData.estimatedHours
                           ).toFixed(1)}
@@ -693,8 +693,7 @@ const ClassCalendar = () => {
                         </div>
                         {estimatedData.estimatedHours > remainingHours && (
                           <div className="mt-1 font-medium text-red-500">
-                            ⚠️ Warning: This will exceed the remaining course
-                            hours!
+                            ⚠️ Cảnh báo: Điều này sẽ vượt quá số giờ còn lại!
                           </div>
                         )}
                       </>
@@ -715,20 +714,20 @@ const ClassCalendar = () => {
 
         {/* Edit Schedule Modal */}
         <Modal
-          title="Edit Schedule"
+          title="Cập nhật buổi học"
           open={isEditScheduleModalOpen}
           onCancel={() => setIsEditScheduleModalOpen(false)}
           width={800}
           footer={[
             <CustomButton
               key="cancel"
-              title="Cancel"
+              title="Hủy bỏ"
               onClick={() => setIsEditScheduleModalOpen(false)}
             />,
             <CustomButton
               key="submit"
               type="primary"
-              title="Save Changes"
+              title="Lưu"
               onClick={editScheduleForm.handleSubmit(handleUpdateSchedule)}
               loading={isUpdatingSchedule}
             />,
@@ -739,29 +738,29 @@ const ClassCalendar = () => {
               <CustomInput
                 control={editScheduleForm.control}
                 name="name"
-                label="Schedule Name"
-                placeholder="Enter schedule name"
+                label="Tên buổi học"
+                placeholder="Nhập tên buổi học"
                 required
               />
               <CustomTextArea
                 control={editScheduleForm.control}
                 name="description"
-                label="Description"
-                placeholder="Enter schedule description"
+                label="Mô tả"
+                placeholder="Nhập mô tả buổi học"
               />
               <CustomDatePicker
                 control={editScheduleForm.control}
                 name="eventDate"
-                label="Date"
-                placeholder="Select date"
+                label="Ngày"
+                placeholder="Chọn ngày"
                 disabledDate={disabledDate}
                 required
               />
               <CustomSelect
                 control={editScheduleForm.control}
                 name="shift"
-                label="Shift"
-                placeholder="Select shift"
+                label="Ca học"
+                placeholder="Chọn ca học"
                 options={SHIFTS_OPTIONS.map((shift) => ({
                   label: shift.label,
                   value: shift.value,

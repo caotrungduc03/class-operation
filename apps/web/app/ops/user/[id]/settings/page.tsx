@@ -258,7 +258,7 @@ const UserSettings = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            User Settings
+            Cập nhật thông tin
           </Typography.Title>
         </div>
       }
@@ -266,7 +266,7 @@ const UserSettings = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Avatar:</Typography.Text>
+            <Typography.Text strong>Ảnh đại diện:</Typography.Text>
           </div>
           <div className="w-3/4">
             <Upload
@@ -280,7 +280,7 @@ const UserSettings = () => {
               {fileList.length >= 1 ? null : (
                 <div>
                   <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
                 </div>
               )}
             </Upload>
@@ -289,7 +289,7 @@ const UserSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Code:</Typography.Text>
+            <Typography.Text strong>Mã:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="code" control={control} size="large" disabled />
@@ -298,7 +298,7 @@ const UserSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>First name:</Typography.Text>
+            <Typography.Text strong>Họ:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput
@@ -311,7 +311,7 @@ const UserSettings = () => {
         </div>
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Last name:</Typography.Text>
+            <Typography.Text strong>Tên:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput
@@ -338,7 +338,7 @@ const UserSettings = () => {
         </div>
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Phone number:</Typography.Text>
+            <Typography.Text strong>Số điện thoại:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="phoneNumber" control={control} size="large" />
@@ -347,7 +347,7 @@ const UserSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Role:</Typography.Text>
+            <Typography.Text strong>Vai trò:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -364,7 +364,7 @@ const UserSettings = () => {
         {!isStudent && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Department:</Typography.Text>
+              <Typography.Text strong>Phòng ban:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
@@ -384,7 +384,7 @@ const UserSettings = () => {
         {isTeacher && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Field:</Typography.Text>
+              <Typography.Text strong>Lĩnh vực:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
@@ -404,7 +404,7 @@ const UserSettings = () => {
         {isTeacher && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Teacher Level:</Typography.Text>
+              <Typography.Text strong>Trình độ:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
@@ -420,7 +420,7 @@ const UserSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Status:</Typography.Text>
+            <Typography.Text strong>Trạng thái:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -435,14 +435,14 @@ const UserSettings = () => {
       </div>
       <div className="mt-8 flex justify-end gap-4">
         <CustomButton
-          title="Cancel"
+          title="Hủy bỏ"
           size="large"
           icon={<CloseOutlined />}
           onClick={handleCancel}
         />
         <CustomButton
           type="primary"
-          title="Save"
+          title="Lưu"
           size="large"
           loading={isUpdating}
           disabled={isUpdating}

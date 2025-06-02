@@ -91,20 +91,20 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "index",
   },
   {
-    title: "Ticket Name",
+    title: "Tên yêu cầu",
     dataIndex: "name",
   },
   {
-    title: "Description",
+    title: "Mô tả",
     dataIndex: "description",
   },
   {
-    title: "Class",
+    title: "Lớp",
     dataIndex: "supportTicket",
     render: (supportTicket: ISupportTicket) => supportTicket.class?.name,
   },
   {
-    title: "Priority",
+    title: "Mức độ ưu tiên",
     dataIndex: "supportTicket",
     render: (supportTicket: ISupportTicket) => (
       <Tag color={REQUEST_PRIORITY_TAG[supportTicket.priority]}>
@@ -113,19 +113,19 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -137,7 +137,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -149,11 +149,11 @@ const columnsTitles: TableColumn<IRequest>[] = [
 ];
 
 const supportTicketSchema = z.object({
-  name: z.string().min(1, "Ticket Name is required"),
+  name: z.string().min(1, "Tên yêu cầu là bắt buộc"),
   description: z.string().optional(),
-  classId: z.string().min(1, "Class ID is required"),
+  classId: z.string().min(1, "ID lớp là bắt buộc"),
   priority: z.nativeEnum(RequestPriority, {
-    errorMap: () => ({ message: "Priority is required" }),
+    errorMap: () => ({ message: "Mức độ ưu tiên là bắt buộc" }),
   }),
 });
 
@@ -181,7 +181,7 @@ const SupportTicketActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -193,14 +193,14 @@ const SupportTicketActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Edit"
+          title="Cập nhật"
           icon={<EditOutlined />}
           onClick={() => onStartEdit(record.id)}
         />
@@ -208,7 +208,7 @@ const SupportTicketActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Delete"
+          title="Xóa"
           color="danger"
           icon={<DeleteOutlined />}
           onClick={() => onOpenDeleteModal(record.id)}
@@ -217,7 +217,7 @@ const SupportTicketActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -456,7 +456,7 @@ const MySupportTicket = () => {
 
     try {
       await deleteSupportTicket(selectedItemId).unwrap();
-      toast.success("Support ticket deleted successfully");
+      toast.success("Yêu cầu hỗ trợ đã được xóa thành công");
       refetch();
       dispatch(closeDeleteModal());
     } catch (error) {
@@ -514,7 +514,7 @@ const MySupportTicket = () => {
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Support ticket canceled successfully");
+      toast.success("Yêu cầu hỗ trợ đã được hủy bỏ thành công");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -532,34 +532,34 @@ const MySupportTicket = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by ticket name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="priority"
                 size="large"
-                placeholder="Filter by priority"
+                placeholder="Lọc theo mức độ ưu tiên"
                 options={RequestPriorityOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -567,7 +567,7 @@ const MySupportTicket = () => {
               </div>
               <CustomButton
                 type="primary"
-                title="Create Support Ticket"
+                title="Tạo yêu cầu hỗ trợ"
                 size="large"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
@@ -589,13 +589,13 @@ const MySupportTicket = () => {
       </div>
       {/* Detail Modal */}
       <Modal
-        title="Support Ticket Details"
+        title="Chi tiết yêu cầu hỗ trợ"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -603,7 +603,7 @@ const MySupportTicket = () => {
             <CustomButton
               key="edit"
               type="primary"
-              title="Edit"
+              title="Cập nhật"
               icon={<EditOutlined />}
               onClick={() => handleStartEdit(supportTicketDetail.data.id)}
             />
@@ -614,14 +614,14 @@ const MySupportTicket = () => {
         {supportTicketDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Ticket Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {supportTicketDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Text type="secondary">Mô tả:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {supportTicketDetail.data.description || ""}
               </Typography.Paragraph>
@@ -629,7 +629,7 @@ const MySupportTicket = () => {
 
             <div className="flex gap-4">
               <div>
-                <Typography.Text type="secondary">Status:</Typography.Text>
+                <Typography.Text type="secondary">Trạng thái:</Typography.Text>
                 <span className="ml-2">
                   <Tag
                     color={REQUEST_STATUS_TAG[supportTicketDetail.data.status]}
@@ -639,7 +639,9 @@ const MySupportTicket = () => {
                 </span>
               </div>
               <div>
-                <Typography.Text type="secondary">Priority:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Mức độ ưu tiên:
+                </Typography.Text>
                 <span className="ml-2">
                   <Tag
                     color={
@@ -659,7 +661,7 @@ const MySupportTicket = () => {
             <Card size="small" className="mb-4">
               <div className="flex flex-col gap-2">
                 <div>
-                  <Typography.Text type="secondary">Class</Typography.Text>
+                  <Typography.Text type="secondary">Lớp</Typography.Text>
                   <Typography.Text className="ml-2">
                     {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
@@ -669,7 +671,7 @@ const MySupportTicket = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(supportTicketDetail.data.createdAt).format(
                     DATE_TIME_FORMAT,
@@ -678,7 +680,9 @@ const MySupportTicket = () => {
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(supportTicketDetail.data.updatedAt).format(
                     DATE_TIME_FORMAT,
@@ -689,14 +693,14 @@ const MySupportTicket = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(supportTicketDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
               >
                 {calculateApprovalDeadline(supportTicketDetail.data.createdAt)}
                 {isPastApprovalDeadline(supportTicketDetail.data.createdAt) && (
-                  <span className="ml-2">(Overdue)</span>
+                  <span className="ml-2">(Quá hạn)</span>
                 )}
               </Typography.Text>
             </div>
@@ -709,7 +713,7 @@ const MySupportTicket = () => {
       </Modal>
       {/* Create/Edit Drawer */}
       <CustomDrawer
-        title={isEditMode ? "Edit Support Ticket" : "Create Support Ticket"}
+        title={isEditMode ? "Cập nhật yêu cầu hỗ trợ" : "Tạo yêu cầu hỗ trợ"}
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={supportTicketForm.handleSubmit(onSubmitCreate)}
@@ -719,8 +723,8 @@ const MySupportTicket = () => {
           <CustomInput
             control={supportTicketForm.control}
             name="name"
-            label="Ticket Name"
-            placeholder="Enter ticket name"
+            label="Tên yêu cầu"
+            placeholder="Nhập tên yêu cầu"
             size="large"
             required
           />
@@ -728,19 +732,19 @@ const MySupportTicket = () => {
           <CustomInput
             control={supportTicketForm.control}
             name="description"
-            label="Description"
-            placeholder="Enter description (optional)"
+            label="Mô tả"
+            placeholder="Nhập mô tả (tùy chọn)"
             size="large"
           />
 
-          <Divider orientation="left">Support Ticket Details</Divider>
+          <Divider orientation="left">Chi tiết yêu cầu hỗ trợ</Divider>
 
           {/* Replace the class ID input with debounced select */}
           <CustomSelect
             control={supportTicketForm.control}
             name="classId"
-            label="Class"
-            placeholder="Search and select class"
+            label="Lớp"
+            placeholder="Tìm kiếm và chọn lớp"
             size="large"
             options={classSelectProps.options}
             onFocus={classSelectProps.onFocus}
@@ -751,8 +755,8 @@ const MySupportTicket = () => {
           <CustomSelect
             control={supportTicketForm.control}
             name="priority"
-            label="Priority"
-            placeholder="Select priority"
+            label="Mức độ ưu tiên"
+            placeholder="Chọn mức độ ưu tiên"
             size="large"
             options={RequestPriorityOptions}
             required
@@ -761,54 +765,54 @@ const MySupportTicket = () => {
       </CustomDrawer>
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Support Ticket"
+        title="Hủy bỏ yêu cầu hỗ trợ"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             onClick={() => dispatch(closeCancelModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Ticket"
+            title="Có, hủy bỏ"
             loading={isCanceling}
             onClick={handleCancel}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this support ticket? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ yêu cầu hỗ trợ này không? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Delete Support Ticket"
+        title="Xóa yêu cầu hỗ trợ"
         open={isDeleteModalOpen}
         onCancel={() => dispatch(closeDeleteModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Hủy bỏ"
             onClick={() => dispatch(closeDeleteModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Delete Request"
+            title="Xóa"
             loading={isDeleting}
             onClick={handleDelete}
           />,
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to delete this support ticket? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn xóa yêu cầu hỗ trợ này không? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

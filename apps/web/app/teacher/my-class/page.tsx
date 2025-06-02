@@ -48,43 +48,43 @@ const columnsTitles: TableColumn<IClass>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã lớp",
     dataIndex: "code",
   },
   {
-    title: "Name",
+    title: "Tên lớp",
     dataIndex: "name",
   },
   {
-    title: "Course",
+    title: "Khóa học",
     dataIndex: "course",
     render: (course: ICourse) => course?.name,
   },
   {
-    title: "Room",
+    title: "Phòng",
     dataIndex: "room",
     render: (room: IRoom) => room?.name || "",
   },
   {
-    title: "Students",
+    title: "Học viên",
     dataIndex: "studentClasses",
     render: (_, record: IClass) =>
       `${record.studentClasses?.length || 0} / ${record.quantity}`,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
     ),
   },
   {
-    title: "Start Date",
+    title: "Ngày bắt đầu",
     dataIndex: "startDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
   {
-    title: "End Date",
+    title: "Ngày kết thúc",
     dataIndex: "endDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
   },
@@ -144,7 +144,7 @@ const MyClass = () => {
               icon={<EyeOutlined />}
               onClick={() => handleViewClass(record.id)}
             >
-              View
+              Xem
             </Button>
           ),
           key: index,
@@ -245,33 +245,33 @@ const MyClass = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by name or code"
+                placeholder="Tìm kiếm theo tên hoặc mã lớp"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="courseId"
                 size="large"
-                placeholder="Filter by course"
+                placeholder="Lọc theo khóa học"
                 options={courseOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex gap-4">
               <CustomButton
-                title="Reset"
+                title="Làm mới"
                 size="large"
                 icon={<ReloadOutlined />}
                 onClick={handleReset}
               />
               <CustomButton
                 type="primary"
-                title="Search"
+                title="Tìm kiếm"
                 size="large"
                 icon={<SearchOutlined />}
                 onClick={searchForm.handleSubmit(onSubmitSearch)}

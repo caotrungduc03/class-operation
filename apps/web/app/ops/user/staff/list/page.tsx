@@ -74,12 +74,12 @@ const columnsTitles: TableColumn<IUser>[] = [
     dataIndex: "index",
   },
   {
-    title: "Code",
+    title: "Mã nhân viên",
     dataIndex: "detail",
     render: (detail: IDetailUser) => detail.code,
   },
   {
-    title: "Full Name",
+    title: "Họ và tên",
     dataIndex: "fullName",
   },
   {
@@ -87,35 +87,35 @@ const columnsTitles: TableColumn<IUser>[] = [
     dataIndex: "email",
   },
   {
-    title: "Phone",
+    title: "Số điện thoại",
     dataIndex: "phoneNumber",
   },
   {
-    title: "Role",
+    title: "Vai trò",
     dataIndex: "role",
     render: (role: IRole) => (
       <Tag color={ROLE_TAG[role.roleName]}>{ROLE_LABEL[role.roleName]}</Tag>
     ),
   },
   {
-    title: "Department",
+    title: "Phòng ban",
     dataIndex: "detail",
     render: (detail: IDetailUser) => detail?.department?.name,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: UserStatus) => (
       <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
     ),
   },
   {
-    title: "Created Date",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
   {
-    title: "Updated Date",
+    title: "Ngày cập nhật",
     dataIndex: "updatedAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -137,22 +137,22 @@ type SearchFormData = z.infer<typeof searchSchema>;
 // Define Zod schema for staff form validation
 const staffFormSchema = z
   .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email address"),
+    firstName: z.string().min(1, "Họ là bắt buộc"),
+    lastName: z.string().min(1, "Tên là bắt buộc"),
+    email: z.string().email("Email không hợp lệ"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
+      .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
       .optional()
       .or(z.literal("")),
     confirmPassword: z.string().optional().or(z.literal("")),
     phoneNumber: z.string().optional(),
-    roleName: z.nativeEnum(RoleName, { required_error: "Role is required" }),
+    roleName: z.nativeEnum(RoleName, { required_error: "Vai trò là bắt buộc" }),
     status: z.nativeEnum(UserStatus).optional(),
     departmentId: z.string().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Mật khẩu không khớp",
     path: ["confirmPassword"],
   });
 
@@ -178,20 +178,20 @@ const StaffActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onView(record.id)}
       />
       <CustomButton
         type="link"
-        title="Edit"
+        title="Cập nhật"
         icon={<EditOutlined />}
         onClick={() => onEdit(record.id)}
       />
       {record.status === UserStatus.ACTIVE && (
         <CustomButton
           type="link"
-          title="Lock"
+          title="Khóa"
           color="orange"
           icon={<LockOutlined />}
           onClick={() => onLock(record.id)}
@@ -200,7 +200,7 @@ const StaffActions = ({
       {record.status === UserStatus.BLOCKED && (
         <CustomButton
           type="link"
-          title="Unlock"
+          title="Mở khóa"
           color="green"
           icon={<UnlockOutlined />}
           onClick={() => onUnlock(record.id)}
@@ -208,7 +208,7 @@ const StaffActions = ({
       )}
       <CustomButton
         type="link"
-        title="Delete"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onDelete(record.id)}
@@ -487,38 +487,38 @@ const StaffList = () => {
               <CustomInput
                 control={searchForm.control}
                 name="search"
-                placeholder="Search by name, email or code"
+                placeholder="Tìm kiếm theo tên, email hoặc mã nhân viên"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="roleName"
-                placeholder="Filter by role"
+                placeholder="Lọc theo vai trò"
                 options={StaffRoleOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={StatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
               </div>
               <CustomButton
                 type="primary"
-                title="Add Staff"
+                title="Thêm nhân viên"
                 icon={<PlusOutlined />}
                 onClick={() => dispatch(openCreateModal())}
               />
@@ -539,7 +539,7 @@ const StaffList = () => {
       </div>
 
       <CustomDrawer
-        title="Add Staff"
+        title="Thêm nhân viên"
         open={isOpenCreateModal}
         onCancel={handleCloseDrawer}
         onSubmit={staffForm.handleSubmit(onSubmitCreate)}
@@ -549,16 +549,16 @@ const StaffList = () => {
           <CustomInput
             control={staffForm.control}
             name="firstName"
-            label="First Name"
-            placeholder="Enter first name"
+            label="Họ"
+            placeholder="Nhập họ"
             required
           />
 
           <CustomInput
             control={staffForm.control}
             name="lastName"
-            label="Last Name"
-            placeholder="Enter last name"
+            label="Tên"
+            placeholder="Nhập tên"
             required
           />
 
@@ -566,7 +566,7 @@ const StaffList = () => {
             control={staffForm.control}
             name="email"
             label="Email"
-            placeholder="Enter email"
+            placeholder="Nhập email"
             required
             autoComplete="off"
           />
@@ -574,8 +574,8 @@ const StaffList = () => {
           <CustomInput
             control={staffForm.control}
             name="password"
-            label="Password"
-            placeholder="Enter password"
+            label="Mật khẩu"
+            placeholder="Nhập mật khẩu"
             type="password"
             required
             autoComplete="new-password"
@@ -584,8 +584,8 @@ const StaffList = () => {
           <CustomInput
             control={staffForm.control}
             name="confirmPassword"
-            label="Confirm Password"
-            placeholder="Confirm password"
+            label="Xác nhận mật khẩu"
+            placeholder="Xác nhận mật khẩu"
             type="password"
             required
             autoComplete="new-password"
@@ -594,16 +594,16 @@ const StaffList = () => {
           <CustomInput
             control={staffForm.control}
             name="phoneNumber"
-            label="Phone Number"
-            placeholder="Enter phone number (optional)"
+            label="Số điện thoại"
+            placeholder="Nhập số điện thoại (tùy chọn)"
           />
 
           {/* Department selection */}
           <CustomSelect
             control={staffForm.control}
             name="departmentId"
-            label="Department"
-            placeholder="Select department"
+            label="Phòng ban"
+            placeholder="Chọn phòng ban"
             options={departmentSelectProps.options}
             onFocus={departmentSelectProps.onFocus}
             onPopupScroll={departmentSelectProps.onPopupScroll}
@@ -612,8 +612,8 @@ const StaffList = () => {
           <CustomSelect
             control={staffForm.control}
             name="roleName"
-            label="Role"
-            placeholder="Select role"
+            label="Vai trò"
+            placeholder="Chọn vai trò"
             options={StaffRoleOptions}
             required
           />
@@ -621,8 +621,8 @@ const StaffList = () => {
           <CustomSelect
             control={staffForm.control}
             name="status"
-            label="Status"
-            placeholder="Select status"
+            label="Trạng thái"
+            placeholder="Chọn trạng thái"
             options={StatusOptions}
             required
           />

@@ -16,12 +16,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "www.cartoonize.net",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "res.cloudinary.com",
         port: "",
         pathname: "/**",

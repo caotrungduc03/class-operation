@@ -6,7 +6,6 @@ import { useGetClassStudentsQuery } from "@web/libs/features/classes/classApi";
 import { IStudentClass } from "@web/libs/student-class";
 import { IUser, STATUS_LABEL, STATUS_TAG, UserStatus } from "@web/libs/user";
 import { Card, Table, Tag, Typography } from "antd";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,7 +34,7 @@ const columnsTitles: TableColumn<IStudentClass>[] = [
     dataIndex: "student",
     render: (student: IUser) =>
       student.avatar ? (
-        <Image
+        <img
           src={student.avatar}
           alt={student.fullName}
           width={40}

@@ -1,5 +1,5 @@
 "use client";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDatePicker from "@web/components/common/CustomDatePicker";
@@ -27,13 +27,13 @@ import { z } from "zod";
 
 // Define Zod schema for class form validation
 const classFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên lớp là bắt buộc"),
   description: z.string().optional(),
   startDate: z.any().optional(),
   endDate: z.any().optional(),
   quantity: z.number().int().nonnegative().optional(),
   status: z.enum([UserStatus.ACTIVE, UserStatus.BLOCKED]).optional(),
-  courseId: z.string().min(1, "Course is required"),
+  courseId: z.string().min(1, "Khóa học là bắt buộc"),
   teacherId: z.string().optional().nullable(),
   roomId: z.string().optional().nullable(),
 });
@@ -158,7 +158,7 @@ const ClassSettings = () => {
       };
 
       await updateClass({ id: classId, data: updateData }).unwrap();
-      toast.success("Class updated successfully");
+      toast.success("Lớp đã được cập nhật thành công");
       refetch();
     } catch (error) {
       // Handled by the apiErrorMiddleware
@@ -176,7 +176,7 @@ const ClassSettings = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Edit Class
+            Cập nhật thông tin
           </Typography.Title>
         </div>
       }
@@ -184,7 +184,7 @@ const ClassSettings = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Class Code:</Typography.Text>
+            <Typography.Text strong>Mã lớp:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput
@@ -199,7 +199,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Class Name:</Typography.Text>
+            <Typography.Text strong>Tên lớp:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="name" control={control} size="large" required />
@@ -208,7 +208,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Course:</Typography.Text>
+            <Typography.Text strong>Khóa học:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -223,7 +223,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Start Date:</Typography.Text>
+            <Typography.Text strong>Ngày bắt đầu:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomDatePicker name="startDate" control={control} size="large" />
@@ -232,7 +232,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>End Date:</Typography.Text>
+            <Typography.Text strong>Ngày kết thúc:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomDatePicker name="endDate" control={control} size="large" />
@@ -241,7 +241,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Quantity:</Typography.Text>
+            <Typography.Text strong>Số lượng tối đa:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInputNumber name="quantity" control={control} size="large" />
@@ -250,7 +250,7 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Status:</Typography.Text>
+            <Typography.Text strong>Trạng thái:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -264,14 +264,14 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Teacher:</Typography.Text>
+            <Typography.Text strong>Giáo viên:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
               name="teacherId"
               control={control}
               size="large"
-              placeholder="Select teacher"
+              placeholder="Chọn giáo viên"
               options={teacherSelectProps.options}
               onFocus={teacherSelectProps.onFocus}
               onPopupScroll={teacherSelectProps.onPopupScroll}
@@ -281,14 +281,14 @@ const ClassSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Room:</Typography.Text>
+            <Typography.Text strong>Phòng học:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
               name="roomId"
               control={control}
               size="large"
-              placeholder="Select room"
+              placeholder="Chọn phòng học"
               options={roomSelectProps.options}
               onFocus={roomSelectProps.onFocus}
               onPopupScroll={roomSelectProps.onPopupScroll}
@@ -298,7 +298,7 @@ const ClassSettings = () => {
 
         <div className="flex items-start">
           <div className="w-1/4">
-            <Typography.Text strong>Description:</Typography.Text>
+            <Typography.Text strong>Mô tả:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomTextArea name="description" control={control} rows={4} />
@@ -308,17 +308,18 @@ const ClassSettings = () => {
 
       <div className="mt-8 flex justify-end gap-4">
         <CustomButton
-          title="Cancel"
+          title="Hủy bỏ"
           size="large"
           icon={<CloseOutlined />}
           onClick={handleCancel}
         />
         <CustomButton
           type="primary"
-          title="Save"
+          title="Lưu"
           size="large"
           loading={isUpdating}
           disabled={isUpdating}
+          icon={<SaveOutlined />}
           onClick={handleSubmit(onSubmit)}
         />
       </div>

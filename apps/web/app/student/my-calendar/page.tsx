@@ -132,27 +132,27 @@ const MyCalendar = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by event name"
+                placeholder="Tìm kiếm theo tên sự kiện"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="type"
                 size="large"
-                placeholder="Filter by event type"
+                placeholder="Lọc theo loại sự kiện"
                 options={SCHEDULE_TYPE_OPTIONS}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -239,7 +239,7 @@ const MyCalendar = () => {
           ) : (
             <div className="py-6 text-center">
               <Typography.Text type="secondary">
-                No events for this day
+                Không có sự kiện nào cho ngày này
               </Typography.Text>
             </div>
           )}

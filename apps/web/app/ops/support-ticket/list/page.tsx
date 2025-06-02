@@ -75,25 +75,25 @@ const breadcrumbs: ItemType[] = [
 
 const columnsTitles: TableColumn<IRequest>[] = [
   { title: "STT", dataIndex: "index" },
-  { title: "Ticket Name", dataIndex: "name" },
-  { title: "Description", dataIndex: "description" },
+  { title: "Tên phiếu", dataIndex: "name" },
+  { title: "Mô tả", dataIndex: "description" },
   {
-    title: "Class",
+    title: "Lớp",
     dataIndex: "supportTicket",
     render: (supportTicket: ISupportTicket) => supportTicket?.class?.name,
   },
   {
-    title: "Creator",
+    title: "Người tạo",
     dataIndex: "creator",
     render: (creator: IUser) => creator?.fullName,
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Priority",
+    title: "Mức độ ưu tiên",
     dataIndex: "supportTicket",
     render: (supportTicket: ISupportTicket) => (
       <Tag color={REQUEST_PRIORITY_TAG[supportTicket?.priority]}>
@@ -102,14 +102,14 @@ const columnsTitles: TableColumn<IRequest>[] = [
     ),
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -121,7 +121,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format(DATE_TIME_FORMAT),
   },
@@ -150,7 +150,7 @@ const SupportTicketActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -162,14 +162,14 @@ const SupportTicketActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Approve"
+          title="Phê duyệt"
           icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
@@ -177,7 +177,7 @@ const SupportTicketActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Reject"
+          title="Từ chối"
           color="danger"
           icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
@@ -186,7 +186,7 @@ const SupportTicketActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -429,34 +429,34 @@ const SupportTicketList = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by ticket name"
+                placeholder="Tìm kiếm theo tên phiếu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
               <CustomSelect
                 control={searchForm.control}
                 name="priority"
                 size="large"
-                placeholder="Filter by priority"
+                placeholder="Lọc theo mức độ ưu tiên"
                 options={RequestPriorityOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   icon={<ReloadOutlined />}
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   icon={<SearchOutlined />}
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
@@ -480,13 +480,13 @@ const SupportTicketList = () => {
 
       {/* Detail Modal */}
       <Modal
-        title="Support Ticket Details"
+        title="Chi tiết phiếu hỗ trợ"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -494,7 +494,7 @@ const SupportTicketList = () => {
             <CustomButton
               key="approve"
               type="primary"
-              title="Approve"
+              title="Phê duyệt"
               icon={<CheckOutlined />}
               onClick={() =>
                 handleOpenApproveModal(supportTicketDetail.data.id)
@@ -506,7 +506,7 @@ const SupportTicketList = () => {
               key="reject"
               type="primary"
               color="danger"
-              title="Reject"
+              title="Từ chối"
               icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(supportTicketDetail.data.id)}
             />
@@ -517,28 +517,28 @@ const SupportTicketList = () => {
         {supportTicketDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Ticket Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên phiếu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {supportTicketDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Description:</Typography.Text>
+              <Typography.Text type="secondary">Mô tả:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {supportTicketDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Creator:</Typography.Text>
+              <Typography.Text type="secondary">Người tạo:</Typography.Text>
               <Typography.Text className="ml-2">
                 {supportTicketDetail.data.creator?.fullName || "N/A"}
               </Typography.Text>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text type="secondary">Người yêu cầu:</Typography.Text>
               <Typography.Text className="ml-2">
                 {supportTicketDetail.data.requester?.fullName || "N/A"}
               </Typography.Text>
@@ -546,7 +546,7 @@ const SupportTicketList = () => {
 
             <div className="flex gap-4">
               <div>
-                <Typography.Text type="secondary">Status:</Typography.Text>
+                <Typography.Text type="secondary">Trạng thái:</Typography.Text>
                 <span className="ml-2">
                   <Tag
                     color={REQUEST_STATUS_TAG[supportTicketDetail.data.status]}
@@ -556,7 +556,9 @@ const SupportTicketList = () => {
                 </span>
               </div>
               <div>
-                <Typography.Text type="secondary">Priority:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Mức độ ưu tiên:
+                </Typography.Text>
                 <span className="ml-2">
                   <Tag
                     color={
@@ -571,12 +573,12 @@ const SupportTicketList = () => {
               </div>
             </div>
 
-            <Divider orientation="left">Support Ticket Details</Divider>
+            <Divider orientation="left">Chi tiết phiếu hỗ trợ</Divider>
 
             <Card size="small" className="mb-4">
               <div className="flex flex-col gap-2">
                 <div>
-                  <Typography.Text type="secondary">Class:</Typography.Text>
+                  <Typography.Text type="secondary">Lớp:</Typography.Text>
                   <Typography.Text className="ml-2">
                     {supportTicketDetail.data.supportTicket?.class?.name}
                   </Typography.Text>
@@ -586,7 +588,7 @@ const SupportTicketList = () => {
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(supportTicketDetail.data.createdAt).format(
                     DATE_TIME_FORMAT,
@@ -595,7 +597,9 @@ const SupportTicketList = () => {
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(supportTicketDetail.data.updatedAt).format(
                     DATE_TIME_FORMAT,
@@ -606,7 +610,7 @@ const SupportTicketList = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(supportTicketDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
@@ -627,20 +631,20 @@ const SupportTicketList = () => {
 
       {/* Approve Confirmation Modal */}
       <Modal
-        title="Approve Support Ticket"
+        title="Phê duyệt phiếu hỗ trợ"
         open={isApproveModalOpen}
         onCancel={() => dispatch(closeApproveModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Hủy bỏ"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeApproveModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
-            title="Approve Ticket"
+            title="Phê duyệt"
             icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
@@ -648,19 +652,19 @@ const SupportTicketList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to approve this support ticket?
+          Bạn có chắc chắn muốn phê duyệt phiếu hỗ trợ này không?
         </Typography.Paragraph>
       </Modal>
 
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Support Ticket"
+        title="Hủy bỏ phiếu hỗ trợ"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Không, giữ nguyên"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
@@ -668,7 +672,7 @@ const SupportTicketList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Cancel Ticket"
+            title="Có, hủy bỏ"
             icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
@@ -676,20 +680,20 @@ const SupportTicketList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this support ticket? This action
-          cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ phiếu hỗ trợ này không? Hành động này
+          không thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
 
       {/* Reject Confirmation Modal */}
       <Modal
-        title="Reject Support Ticket"
+        title="Từ chối phiếu hỗ trợ"
         open={isRejectModalOpen}
         onCancel={() => dispatch(closeRejectModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Hủy bỏ"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeRejectModal())}
           />,
@@ -697,7 +701,7 @@ const SupportTicketList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Reject Ticket"
+            title="Từ chối"
             icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
@@ -705,7 +709,7 @@ const SupportTicketList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to reject this support ticket?
+          Bạn có chắc chắn muốn từ chối phiếu hỗ trợ này không?
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

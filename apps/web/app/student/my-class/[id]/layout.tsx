@@ -41,7 +41,7 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
             router.push(NAV_LINK.MY_STUDENT_CLASS_DETAIL_OVERVIEW(classId))
           }
         >
-          Overview
+          Thông tin chung
         </div>
       ),
     },
@@ -53,7 +53,7 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
             router.push(NAV_LINK.MY_STUDENT_CLASS_DETAIL_STUDENTS(classId))
           }
         >
-          Students
+          Danh sách học viên
         </div>
       ),
     },
@@ -70,10 +70,7 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
   if (isLoading || !classDetail) return <Loading />;
 
   return (
-    <PageLayout
-      breadcrumbs={breadcrumbs}
-      title={classDetail?.name || "Class Detail"}
-    >
+    <PageLayout breadcrumbs={breadcrumbs} title={classDetail?.name}>
       <div className="class-detail flex flex-col gap-6">
         <Card>
           <div className="flex gap-6">
@@ -93,15 +90,15 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
                   </Tag>
                 </div>
                 <div>
-                  <Typography.Text strong>Code: </Typography.Text>
+                  <Typography.Text strong>Mã lớp: </Typography.Text>
                   <Typography.Text>{classDetail?.code}</Typography.Text>
                 </div>
                 <div>
-                  <Typography.Text strong>Course: </Typography.Text>
+                  <Typography.Text strong>Khóa học: </Typography.Text>
                   <Typography.Text>{classDetail?.course?.name}</Typography.Text>
                 </div>
                 <div>
-                  <Typography.Text strong>Teacher: </Typography.Text>
+                  <Typography.Text strong>Giáo viên: </Typography.Text>
                   <Typography.Text>
                     {classDetail?.teacher?.fullName || ""}
                   </Typography.Text>
@@ -113,27 +110,27 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
                   <Typography.Text className="ml-2">
                     {classDetail?.startDate
                       ? `${dayjs(classDetail?.startDate).format("DD/MM/YYYY")}`
-                      : "Unknown"}
+                      : "Không có"}
                     {classDetail?.endDate
                       ? ` - ${dayjs(classDetail?.endDate).format("DD/MM/YYYY")}`
-                      : "Unknown"}
+                      : "Không có"}
                   </Typography.Text>
                 </div>
                 <div>
-                  <Typography.Text strong>Room: </Typography.Text>
+                  <Typography.Text strong>Phòng học: </Typography.Text>
                   <Typography.Text>
                     {classDetail?.room?.name || ""}
                   </Typography.Text>
                 </div>
                 <div>
-                  <Typography.Text strong>Quantity: </Typography.Text>
+                  <Typography.Text strong>Số lượng tối đa: </Typography.Text>
                   <Typography.Text>
                     {classDetail?.quantity || 0}
                   </Typography.Text>
                 </div>
               </div>
               <div className="mt-2">
-                <Typography.Text strong>Description: </Typography.Text>
+                <Typography.Text strong>Mô tả: </Typography.Text>
                 <Typography.Paragraph ellipsis={{ rows: 2 }}>
                   {classDetail?.description}
                 </Typography.Paragraph>

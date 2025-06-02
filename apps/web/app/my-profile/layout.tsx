@@ -9,7 +9,6 @@ import { RootState } from "@web/libs/store";
 import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Avatar, Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -46,7 +45,7 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
       key: "1",
       label: (
         <div onClick={() => router.push(NAV_LINK.MY_PROFILE_OVERVIEW)}>
-          Overview
+          Thông tin chung
         </div>
       ),
     },
@@ -54,7 +53,7 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
       key: "2",
       label: (
         <div onClick={() => router.push(NAV_LINK.MY_PROFILE_SETTINGS)}>
-          Settings
+          Cập nhật thông tin
         </div>
       ),
     },
@@ -90,7 +89,7 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
                   size={160}
                   icon={
                     user?.avatar ? (
-                      <Image
+                      <img
                         src={user?.avatar}
                         alt="Avatar"
                         width={160}
@@ -120,13 +119,13 @@ const MyProfile = ({ children }: React.PropsWithChildren) => {
                     <div>
                       <PhoneOutlined />
                       <Typography.Text className="ml-2">
-                        {user?.phoneNumber || "Unknown"}
+                        {user?.phoneNumber || "Không có"}
                       </Typography.Text>
                     </div>
                   </div>
                   <div className="mb-2 mt-auto w-[300px]">
                     <div className="mb-2 flex justify-between">
-                      <Typography.Text>Complete</Typography.Text>
+                      <Typography.Text>Hoàn thành</Typography.Text>
                       <Typography.Text>{percentage}%</Typography.Text>
                     </div>
                     <div className="h-1 w-full rounded bg-gray-200">

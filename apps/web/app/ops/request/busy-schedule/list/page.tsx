@@ -85,32 +85,32 @@ const columnsTitles: TableColumn<IRequest>[] = [
     dataIndex: "index",
   },
   {
-    title: "Request Name",
+    title: "Tên yêu cầu",
     dataIndex: "name",
   },
   {
-    title: "Reason",
+    title: "Lý do",
     dataIndex: "description",
   },
   {
-    title: "Creator",
+    title: "Người tạo",
     dataIndex: "creator",
     render: (creator: IUser) => creator?.fullName || "N/A",
   },
   {
-    title: "Approver",
+    title: "Người phê duyệt",
     dataIndex: "approver",
     render: (approver: IUser) => approver?.fullName,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     render: (status: RequestStatus) => (
       <Tag color={REQUEST_STATUS_TAG[status]}>{status}</Tag>
     ),
   },
   {
-    title: "Approval Deadline",
+    title: "Ngày hạn phê duyệt",
     dataIndex: "createdAt",
     render: (date: string) => {
       const isOverdue = isPastApprovalDeadline(date);
@@ -122,7 +122,7 @@ const columnsTitles: TableColumn<IRequest>[] = [
     },
   },
   {
-    title: "Created At",
+    title: "Ngày tạo",
     dataIndex: "createdAt",
     render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
   },
@@ -155,7 +155,7 @@ const BusyScheduleActions = ({
       <CustomDropdown>
         <CustomButton
           type="link"
-          title="View"
+          title="Xem"
           icon={<EyeOutlined />}
           onClick={() => onOpenDetail(record.id)}
         />
@@ -167,14 +167,14 @@ const BusyScheduleActions = ({
     <CustomDropdown>
       <CustomButton
         type="link"
-        title="View"
+        title="Xem"
         icon={<EyeOutlined />}
         onClick={() => onOpenDetail(record.id)}
       />
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Approve"
+          title="Phê duyệt"
           icon={<CheckOutlined />}
           onClick={() => onOpenApproveModal(record.id)}
         />
@@ -182,7 +182,7 @@ const BusyScheduleActions = ({
       {record.status === RequestStatus.PENDING && (
         <CustomButton
           type="link"
-          title="Reject"
+          title="Từ chối"
           color="danger"
           icon={<CloseOutlined />}
           onClick={() => onOpenRejectModal(record.id)}
@@ -191,7 +191,7 @@ const BusyScheduleActions = ({
       {record.status === RequestStatus.APPROVED && (
         <CustomButton
           type="link"
-          title="Cancel"
+          title="Hủy bỏ"
           color="danger"
           icon={<StopOutlined />}
           onClick={() => onOpenCancelModal(record.id)}
@@ -356,7 +356,7 @@ const BusyScheduleList = () => {
         id: selectedItemId,
         action: RequestAction.APPROVE,
       }).unwrap();
-      toast.success("Busy schedule request approved successfully");
+      toast.success("Yêu cầu được phê duyệt thành công");
       refetch();
       dispatch(closeApproveModal());
     } catch (error) {
@@ -372,7 +372,7 @@ const BusyScheduleList = () => {
         id: selectedItemId,
         action: RequestAction.CANCEL,
       }).unwrap();
-      toast.success("Busy schedule request canceled successfully");
+      toast.success("Yêu cầu được hủy bỏ thành công");
       refetch();
       dispatch(closeCancelModal());
     } catch (error) {
@@ -387,7 +387,7 @@ const BusyScheduleList = () => {
         id: selectedItemId,
         action: RequestAction.REJECT,
       }).unwrap();
-      toast.success("Busy schedule request rejected successfully");
+      toast.success("Yêu cầu được từ chối thành công");
       refetch();
       dispatch(closeRejectModal());
     } catch (error) {
@@ -413,26 +413,26 @@ const BusyScheduleList = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Search by request name"
+                placeholder="Tìm kiếm theo tên yêu cầu"
               />
               <CustomSelect
                 control={searchForm.control}
                 name="status"
                 size="large"
-                placeholder="Filter by status"
+                placeholder="Lọc theo trạng thái"
                 options={RequestStatusOptions}
               />
             </FilterGrid>
             <div className="flex justify-between">
               <div className="flex gap-4">
                 <CustomButton
-                  title="Reset"
+                  title="Làm mới"
                   size="large"
                   onClick={handleReset}
                 />
                 <CustomButton
                   type="primary"
-                  title="Search"
+                  title="Tìm kiếm"
                   size="large"
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
                 />
@@ -455,13 +455,13 @@ const BusyScheduleList = () => {
 
       {/* Detail Modal */}
       <Modal
-        title="Busy Schedule Request Details"
+        title="Chi tiết yêu cầu"
         open={isDetailModalOpen}
         onCancel={handleCloseDetail}
         footer={[
           <CustomButton
             key="close"
-            title="Close"
+            title="Đóng"
             icon={<CloseOutlined />}
             onClick={handleCloseDetail}
           />,
@@ -469,7 +469,7 @@ const BusyScheduleList = () => {
             <CustomButton
               key="approve"
               type="primary"
-              title="Approve"
+              title="Phê duyệt"
               icon={<CheckOutlined />}
               onClick={() => handleOpenApproveModal(busyScheduleDetail.data.id)}
             />
@@ -479,7 +479,7 @@ const BusyScheduleList = () => {
               key="reject"
               type="primary"
               color="danger"
-              title="Reject"
+              title="Từ chối"
               icon={<CloseOutlined />}
               onClick={() => handleOpenRejectModal(busyScheduleDetail.data.id)}
             />
@@ -490,35 +490,35 @@ const BusyScheduleList = () => {
         {busyScheduleDetail ? (
           <div className="flex flex-col gap-4">
             <div>
-              <Typography.Text type="secondary">Request Name:</Typography.Text>
+              <Typography.Text type="secondary">Tên yêu cầu:</Typography.Text>
               <Typography.Title level={5} className="mt-1">
                 {busyScheduleDetail.data.name}
               </Typography.Title>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Reason:</Typography.Text>
+              <Typography.Text type="secondary">Lý do:</Typography.Text>
               <Typography.Paragraph className="mt-1">
                 {busyScheduleDetail.data.description || ""}
               </Typography.Paragraph>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Creator:</Typography.Text>
+              <Typography.Text type="secondary">Người tạo:</Typography.Text>
               <Typography.Text className="ml-2">
                 {busyScheduleDetail.data.creator?.fullName || "N/A"}
               </Typography.Text>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Requester:</Typography.Text>
+              <Typography.Text type="secondary">Người yêu cầu:</Typography.Text>
               <Typography.Text className="ml-2">
                 {busyScheduleDetail.data.requester?.fullName || "N/A"}
               </Typography.Text>
             </div>
 
             <div>
-              <Typography.Text type="secondary">Status:</Typography.Text>
+              <Typography.Text type="secondary">Trạng thái:</Typography.Text>
               <span className="ml-2">
                 <Tag color={REQUEST_STATUS_TAG[busyScheduleDetail.data.status]}>
                   {busyScheduleDetail.data.status}
@@ -526,11 +526,11 @@ const BusyScheduleList = () => {
               </span>
             </div>
 
-            <Divider orientation="left">Busy Schedule Details</Divider>
+            <Divider orientation="left">Chi tiết yêu cầu</Divider>
 
             <div className="flex justify-between">
               <div>
-                <Typography.Text type="secondary">Created At:</Typography.Text>
+                <Typography.Text type="secondary">Ngày tạo:</Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(busyScheduleDetail.data.createdAt).format(
                     DATE_TIME_FORMAT,
@@ -539,7 +539,9 @@ const BusyScheduleList = () => {
               </div>
 
               <div>
-                <Typography.Text type="secondary">Updated At:</Typography.Text>
+                <Typography.Text type="secondary">
+                  Ngày cập nhật:
+                </Typography.Text>
                 <Typography.Text className="ml-2">
                   {dayjs(busyScheduleDetail.data.updatedAt).format(
                     DATE_TIME_FORMAT,
@@ -550,14 +552,14 @@ const BusyScheduleList = () => {
 
             <div>
               <Typography.Text type="secondary">
-                Approval Deadline:
+                Ngày hạn phê duyệt:
               </Typography.Text>
               <Typography.Text
                 className={`ml-2 ${isPastApprovalDeadline(busyScheduleDetail.data.createdAt) ? "font-medium text-red-500" : ""}`}
               >
                 {calculateApprovalDeadline(busyScheduleDetail.data.createdAt)}
                 {isPastApprovalDeadline(busyScheduleDetail.data.createdAt) && (
-                  <span className="ml-2">(Overdue)</span>
+                  <span className="ml-2">(Quá hạn)</span>
                 )}
               </Typography.Text>
             </div>
@@ -571,20 +573,20 @@ const BusyScheduleList = () => {
 
       {/* Approve Confirmation Modal */}
       <Modal
-        title="Approve Busy Schedule Request"
+        title="Phê duyệt yêu cầu làm bận"
         open={isApproveModalOpen}
         onCancel={() => dispatch(closeApproveModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Hủy bỏ"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeApproveModal())}
           />,
           <CustomButton
             key="submit"
             type="primary"
-            title="Approve Request"
+            title="Phê duyệt"
             icon={<CheckOutlined />}
             loading={isUpdatingStatus}
             onClick={handleApprove}
@@ -592,19 +594,19 @@ const BusyScheduleList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to approve this busy schedule request?
+          Bạn có chắc chắn muốn phê duyệt yêu cầu này không?
         </Typography.Paragraph>
       </Modal>
 
       {/* Cancel Confirmation Modal */}
       <Modal
-        title="Cancel Busy Schedule Request"
+        title="Hủy bỏ yêu cầu"
         open={isCancelModalOpen}
         onCancel={() => dispatch(closeCancelModal())}
         footer={[
           <CustomButton
             key="back"
-            title="No, Keep It"
+            title="Không, giữ nguyên"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeCancelModal())}
           />,
@@ -612,7 +614,7 @@ const BusyScheduleList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Yes, Cancel Request"
+            title="Có, hủy bỏ"
             icon={<StopOutlined />}
             loading={isUpdatingStatus}
             onClick={handleCancel}
@@ -620,20 +622,20 @@ const BusyScheduleList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to cancel this busy schedule request? This
-          action cannot be undone.
+          Bạn có chắc chắn muốn hủy bỏ yêu cầu này không? Hành động này không
+          thể hoàn tác.
         </Typography.Paragraph>
       </Modal>
 
       {/* Reject Confirmation Modal */}
       <Modal
-        title="Reject Busy Schedule Request"
+        title="Từ chối yêu cầu"
         open={isRejectModalOpen}
         onCancel={() => dispatch(closeRejectModal())}
         footer={[
           <CustomButton
             key="back"
-            title="Cancel"
+            title="Hủy bỏ"
             icon={<CloseOutlined />}
             onClick={() => dispatch(closeRejectModal())}
           />,
@@ -641,7 +643,7 @@ const BusyScheduleList = () => {
             key="submit"
             type="primary"
             color="danger"
-            title="Reject Request"
+            title="Từ chối"
             icon={<CloseOutlined />}
             loading={isUpdatingStatus}
             onClick={handleReject}
@@ -649,7 +651,7 @@ const BusyScheduleList = () => {
         ]}
       >
         <Typography.Paragraph>
-          Are you sure you want to reject this busy schedule request?
+          Bạn có chắc chắn muốn từ chối yêu cầu này không?
         </Typography.Paragraph>
       </Modal>
     </PageLayout>

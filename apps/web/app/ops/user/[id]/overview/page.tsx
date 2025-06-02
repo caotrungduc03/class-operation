@@ -34,13 +34,13 @@ const UserOverview = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            User Overview
+            Thông tin chung
           </Typography.Title>
           <Link href={NAV_LINK.USER_DETAIL_SETTINGS(userId)}>
-            <CustomButton 
-              type="primary" 
-              title="Edit User" 
-              size="large" 
+            <CustomButton
+              type="primary"
+              title="Cập nhật thông tin"
+              size="large"
               icon={<EditOutlined />}
             />
           </Link>
@@ -50,7 +50,7 @@ const UserOverview = () => {
       <div className="flex flex-col gap-4">
         <div className="flex">
           <div className="w-1/4">
-            <Typography.Text strong>Code:</Typography.Text>
+            <Typography.Text strong>Mã:</Typography.Text>
           </div>
           <div className="w-3/4">
             <Typography.Text>{user?.detail?.code || ""}</Typography.Text>
@@ -58,7 +58,7 @@ const UserOverview = () => {
         </div>
         <div className="flex">
           <div className="w-1/4">
-            <Typography.Text strong>Full name:</Typography.Text>
+            <Typography.Text strong>Họ và tên:</Typography.Text>
           </div>
           <div className="w-3/4">
             <Typography.Text>{user?.fullName || ""}</Typography.Text>
@@ -74,7 +74,7 @@ const UserOverview = () => {
         </div>
         <div className="flex">
           <div className="w-1/4">
-            <Typography.Text strong>Phone number:</Typography.Text>
+            <Typography.Text strong>Số điện thoại:</Typography.Text>
           </div>
           <div className="w-3/4">
             <Typography.Text>{user?.phoneNumber || ""}</Typography.Text>
@@ -82,7 +82,7 @@ const UserOverview = () => {
         </div>
         <div className="flex">
           <div className="w-1/4">
-            <Typography.Text strong>Role:</Typography.Text>
+            <Typography.Text strong>Vai trò:</Typography.Text>
           </div>
           <div className="w-3/4">
             <div>
@@ -97,7 +97,7 @@ const UserOverview = () => {
         {!isStudent && user?.detail?.department && (
           <div className="flex">
             <div className="w-1/4">
-              <Typography.Text strong>Department:</Typography.Text>
+              <Typography.Text strong>Phòng ban:</Typography.Text>
             </div>
             <div className="w-3/4">
               <Typography.Text>
@@ -111,7 +111,7 @@ const UserOverview = () => {
         {isTeacher && user?.detail?.field && (
           <div className="flex">
             <div className="w-1/4">
-              <Typography.Text strong>Field:</Typography.Text>
+              <Typography.Text strong>Lĩnh vực:</Typography.Text>
             </div>
             <div className="w-3/4">
               <Typography.Text>
@@ -125,7 +125,7 @@ const UserOverview = () => {
         {isTeacher && user?.detail?.teacherLevel && (
           <div className="flex">
             <div className="w-1/4">
-              <Typography.Text strong>Teacher Level:</Typography.Text>
+              <Typography.Text strong>Trình độ:</Typography.Text>
             </div>
             <div className="w-3/4">
               <Typography.Text>{user?.detail?.teacherLevel}</Typography.Text>
@@ -135,7 +135,7 @@ const UserOverview = () => {
 
         <div className="mb-4 flex">
           <div className="w-1/4">
-            <Typography.Text strong>Status:</Typography.Text>
+            <Typography.Text strong>Trạng thái:</Typography.Text>
           </div>
           <div className="w-3/4">
             <div>

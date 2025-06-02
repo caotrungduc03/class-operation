@@ -23,7 +23,6 @@ import {
 import { IStudentClass } from "@web/libs/student-class";
 import { IUser, STATUS_LABEL, STATUS_TAG, UserStatus } from "@web/libs/user";
 import { Button, Card, Modal, Table, Tag, Typography } from "antd";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -55,11 +54,11 @@ const columnsTitles: TableColumn<IStudentClass>[] = [
     render: (student: IUser) => student.detail.code,
   },
   {
-    title: "Avatar",
+    title: "Ảnh đại diện",
     dataIndex: "student",
     render: (student: IUser) =>
       student.avatar ? (
-        <Image
+        <img
           src={student.avatar}
           alt={student.fullName}
           width={40}
@@ -83,7 +82,7 @@ const columnsTitles: TableColumn<IStudentClass>[] = [
     render: (student: IUser) => student.email,
   },
   {
-    title: "Status",
+    title: "Trạng thái",
     dataIndex: "status",
     key: "status",
     render: (status: UserStatus) => (
@@ -91,7 +90,7 @@ const columnsTitles: TableColumn<IStudentClass>[] = [
     ),
   },
   {
-    title: "Actions",
+    title: "",
     key: "actions",
     dataIndex: "method",
   },
@@ -113,19 +112,19 @@ const StudentActions = ({
           type="link"
           icon={<LockOutlined />}
           onClick={() => onToggleStatus(record.id, UserStatus.BLOCKED)}
-          title="Block"
+          title="Khóa"
         />
       ) : (
         <CustomButton
           type="link"
           icon={<UnlockOutlined />}
           onClick={() => onToggleStatus(record.id, UserStatus.ACTIVE)}
-          title="Unblock"
+          title="Mở khóa"
         />
       )}
       <CustomButton
         type="link"
-        title="Remove"
+        title="Xóa"
         color="danger"
         icon={<DeleteOutlined />}
         onClick={() => onRemove(record.id)}
@@ -218,11 +217,11 @@ const ClassStudents = () => {
         classId,
         studentId: data.studentId,
       }).unwrap();
-      toast.success("Student added successfully");
+      toast.success("Học viên đã được thêm thành công");
       setIsAddDrawerOpen(false);
       refetch();
     } catch (error) {
-      toast.error("Failed to add student");
+      toast.error("Không thể thêm học viên");
     }
   };
 
@@ -234,11 +233,11 @@ const ClassStudents = () => {
         classId,
         studentId: studentToRemove,
       }).unwrap();
-      toast.success("Student removed successfully");
+      toast.success("Học viên đã được xóa thành công");
       setStudentToRemove(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to remove student");
+      toast.error("Không thể xóa học viên");
     }
   };
 
@@ -256,11 +255,11 @@ const ClassStudents = () => {
           ? "unblocked"
           : "blocked";
 
-      toast.success(`Student ${statusText} successfully`);
+      toast.success(`Học viên ${statusText} thành công`);
       setStudentToToggleStatus(null);
       refetch();
     } catch (error) {
-      toast.error("Failed to update student status");
+      toast.error("Không thể cập nhật trạng thái học viên");
     }
   };
 
@@ -271,11 +270,11 @@ const ClassStudents = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Class Students
+            Danh sách học viên
           </Typography.Title>
           <CustomButton
             type="primary"
-            title="Add Student"
+            title="Thêm học viên"
             icon={<PlusOutlined />}
             onClick={handleOpenAddDrawer}
           />
@@ -292,7 +291,7 @@ const ClassStudents = () => {
 
       {/* Add Student Drawer */}
       <CustomDrawer
-        title="Add Student"
+        title="Thêm học viên"
         open={isAddDrawerOpen}
         onCancel={handleCloseAddDrawer}
         onSubmit={addStudentForm.handleSubmit(handleAddStudent)}
@@ -302,8 +301,8 @@ const ClassStudents = () => {
           <CustomSelect
             control={addStudentForm.control}
             name="studentId"
-            label="Student"
-            placeholder="Select student"
+            label="Học viên"
+            placeholder="Chọn học viên"
             options={availableStudentOptions}
             onFocus={onFocus}
             onPopupScroll={onPopupScroll}
@@ -314,8 +313,8 @@ const ClassStudents = () => {
 
       {/* Remove Confirmation Modal */}
       <ConfirmModal
-        title="Remove Student"
-        content="Are you sure you want to remove this student from the class?"
+        title="Xóa học viên"
+        content="Bạn có chắc chắn muốn xóa học viên này khỏi lớp học?"
         open={!!studentToRemove}
         onCancel={() => setStudentToRemove(null)}
         onConfirm={handleConfirmRemove}
@@ -324,8 +323,8 @@ const ClassStudents = () => {
 
       {/* Toggle Status Confirmation Modal */}
       <ConfirmModal
-        title={`${studentToToggleStatus?.status === UserStatus.ACTIVE ? "Unblock" : "Block"} Student`}
-        content={`Are you sure you want to ${studentToToggleStatus?.status === UserStatus.ACTIVE ? "unblock" : "block"} this student?`}
+        title={`${studentToToggleStatus?.status === UserStatus.ACTIVE ? "Mở khóa" : "Khóa"} học viên`}
+        content={`Bạn có chắc chắn muốn ${studentToToggleStatus?.status === UserStatus.ACTIVE ? "mở khóa" : "khóa"} học viên này?`}
         open={!!studentToToggleStatus}
         onCancel={() => setStudentToToggleStatus(null)}
         onConfirm={handleConfirmToggleStatus}
@@ -359,7 +358,7 @@ const ConfirmModal = ({
       onCancel={onCancel}
       footer={[
         <Button key="cancel" onClick={onCancel}>
-          Cancel
+          Hủy
         </Button>,
         <Button
           key="confirm"
@@ -368,7 +367,7 @@ const ConfirmModal = ({
           loading={confirmLoading}
           onClick={onConfirm}
         >
-          Confirm
+          Xác nhận
         </Button>,
       ]}
     >

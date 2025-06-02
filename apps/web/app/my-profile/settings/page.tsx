@@ -1,6 +1,6 @@
 "use client";
 
-import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
@@ -146,7 +146,7 @@ const MyProfileSettings = () => {
       title={
         <div className="flex items-center justify-between">
           <Typography.Title level={4} className="mb-0">
-            Profile Settings
+            Cập nhật thông tin
           </Typography.Title>
         </div>
       }
@@ -154,7 +154,7 @@ const MyProfileSettings = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Avatar:</Typography.Text>
+            <Typography.Text strong>Ảnh đại diện:</Typography.Text>
           </div>
           <div className="w-3/4">
             <Upload
@@ -168,7 +168,7 @@ const MyProfileSettings = () => {
               {fileList.length >= 1 ? null : (
                 <div>
                   <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
                 </div>
               )}
             </Upload>
@@ -177,7 +177,7 @@ const MyProfileSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Code:</Typography.Text>
+            <Typography.Text strong>Mã:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="code" control={control} size="large" disabled />
@@ -186,7 +186,7 @@ const MyProfileSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>First name:</Typography.Text>
+            <Typography.Text strong>Họ:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="firstName" control={control} size="large" />
@@ -194,7 +194,7 @@ const MyProfileSettings = () => {
         </div>
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Last name:</Typography.Text>
+            <Typography.Text strong>Tên:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="lastName" control={control} size="large" />
@@ -210,7 +210,7 @@ const MyProfileSettings = () => {
         </div>
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Phone number:</Typography.Text>
+            <Typography.Text strong>Số điện thoại:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomInput name="phoneNumber" control={control} size="large" />
@@ -218,7 +218,7 @@ const MyProfileSettings = () => {
         </div>
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Role:</Typography.Text>
+            <Typography.Text strong>Vai trò:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -236,13 +236,13 @@ const MyProfileSettings = () => {
         {!isStudent && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Department:</Typography.Text>
+              <Typography.Text strong>Phòng ban:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
                 control={control}
                 name="departmentId"
-                placeholder="Select department"
+                placeholder="Chọn phòng ban"
                 size="large"
                 options={[
                   {
@@ -260,13 +260,13 @@ const MyProfileSettings = () => {
         {isTeacher && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Field:</Typography.Text>
+              <Typography.Text strong>Chuyên ngành:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
                 control={control}
                 name="fieldId"
-                placeholder="Select field"
+                placeholder="Chọn chuyên ngành"
                 size="large"
                 options={[
                   {
@@ -284,7 +284,7 @@ const MyProfileSettings = () => {
         {isTeacher && (
           <div className="flex items-center">
             <div className="w-1/4">
-              <Typography.Text strong>Teacher Level:</Typography.Text>
+              <Typography.Text strong>Trình độ:</Typography.Text>
             </div>
             <div className="w-3/4">
               <CustomSelect
@@ -292,7 +292,7 @@ const MyProfileSettings = () => {
                 control={control}
                 size="large"
                 options={TeacherLevelOptions}
-                placeholder="Select teacher level"
+                placeholder="Chọn trình độ"
                 disabled
               />
             </div>
@@ -301,7 +301,7 @@ const MyProfileSettings = () => {
 
         <div className="flex items-center">
           <div className="w-1/4">
-            <Typography.Text strong>Status:</Typography.Text>
+            <Typography.Text strong>Trạng thái:</Typography.Text>
           </div>
           <div className="w-3/4">
             <CustomSelect
@@ -319,17 +319,18 @@ const MyProfileSettings = () => {
       </div>
       <div className="mt-8 flex justify-end gap-4">
         <CustomButton
-          title="Cancel"
+          title="Hủy bỏ"
           size="large"
           icon={<CloseOutlined />}
           onClick={handleCancel}
         />
         <CustomButton
           type="primary"
-          title="Save"
+          title="Lưu"
           size="large"
           loading={isLoading}
           disabled={isLoading}
+          icon={<SaveOutlined />}
           onClick={handleSubmit(onSubmit)}
         />
       </div>

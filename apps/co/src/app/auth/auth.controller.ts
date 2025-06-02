@@ -32,7 +32,11 @@ export class AuthController {
   async login(@Body() loginRequestDto: LoginRequestDto) {
     const loginResponseDto = await this.authService.login(loginRequestDto);
 
-    return new ResponseDto(HttpStatus.OK, 'User logged in', loginResponseDto);
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Đăng nhập thành công',
+      loginResponseDto,
+    );
   }
 
   @Get('/my-profile')
