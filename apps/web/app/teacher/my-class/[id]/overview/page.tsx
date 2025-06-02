@@ -50,8 +50,9 @@ const ClassOverview = () => {
             ? dayjs(classDetail.endDate).format("DD/MM/YYYY")
             : "Not set"}
         </Descriptions.Item>
-        <Descriptions.Item label="Quantity" span={2}>
-          {classDetail.quantity || 0} students
+        <Descriptions.Item label="Students" span={2}>
+          {classDetail.studentClasses?.length || 0} / {classDetail.quantity}{" "}
+          students
         </Descriptions.Item>
         <Descriptions.Item label="Description" span={2}>
           {classDetail.description || ""}

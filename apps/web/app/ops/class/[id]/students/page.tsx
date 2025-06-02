@@ -3,16 +3,13 @@ import {
   DeleteOutlined,
   LockOutlined,
   PlusOutlined,
-  SearchOutlined,
   UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomDrawer from "@web/components/common/CustomDrawer";
 import CustomDropdown from "@web/components/common/CustomDropdown";
-import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
-import FilterGrid from "@web/components/common/FilterGrid";
 import Loading from "@web/components/common/Loading";
 import { useDebouncedSelect } from "@web/hooks/useDebouncedSelect";
 import { TableColumn } from "@web/libs/common";
@@ -21,15 +18,10 @@ import {
   useGetAvailableStudentsQuery,
   useGetClassStudentsQuery,
   useRemoveStudentFromClassMutation,
+  useUpdateStudentStatusMutation,
 } from "@web/libs/features/classes/classApi";
-import { useUpdateUserStatusMutation } from "@web/libs/features/users/userApi";
-import {
-  IDetailUser,
-  IUser,
-  STATUS_LABEL,
-  STATUS_TAG,
-  UserStatus,
-} from "@web/libs/user";
+import { IStudentClass } from "@web/libs/student-class";
+import { IUser, STATUS_LABEL, STATUS_TAG, UserStatus } from "@web/libs/user";
 import { Button, Card, Modal, Table, Tag, Typography } from "antd";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -51,7 +43,7 @@ const addStudentFormSchema = z.object({
 type SearchFormValues = z.infer<typeof searchFormSchema>;
 type AddStudentFormValues = z.infer<typeof addStudentFormSchema>;
 
-const columnsTitles: TableColumn<IUser>[] = [
+const columnsTitles: TableColumn<IStudentClass>[] = [
   {
     title: "STT",
     dataIndex: "index",
@@ -59,34 +51,36 @@ const columnsTitles: TableColumn<IUser>[] = [
   },
   {
     title: "Mã học viên",
-    dataIndex: "detail",
-    render: (detail: IDetailUser) => detail.code,
+    dataIndex: "student",
+    render: (student: IUser) => student.detail.code,
   },
   {
     title: "Avatar",
-    dataIndex: "avatar",
-    render: (avatar: string, record) =>
-      avatar ? (
+    dataIndex: "student",
+    render: (student: IUser) =>
+      student.avatar ? (
         <Image
-          src={avatar}
-          alt={record.fullName}
+          src={student.avatar}
+          alt={student.fullName}
           width={40}
           height={40}
           className="rounded-full"
         />
       ) : (
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-          {record.fullName.charAt(0).toUpperCase()}
+          {student.fullName.charAt(0).toUpperCase()}
         </div>
       ),
   },
   {
     title: "Họ và tên",
-    dataIndex: "fullName",
+    dataIndex: "student",
+    render: (student: IUser) => student.fullName,
   },
   {
     title: "Email",
-    dataIndex: "email",
+    dataIndex: "student",
+    render: (student: IUser) => student.email,
   },
   {
     title: "Status",
@@ -142,15 +136,12 @@ const StudentActions = ({
 
 const ClassStudents = () => {
   const { id: classId } = useParams<{ id: string }>();
-  const [searchText, setSearchText] = useState("");
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [studentToRemove, setStudentToRemove] = useState<string | null>(null);
   const [studentToToggleStatus, setStudentToToggleStatus] = useState<{
-    id: string;
     status: UserStatus;
+    studentClassId: string;
   } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
 
   const {
     data: studentsData,
@@ -159,19 +150,11 @@ const ClassStudents = () => {
   } = useGetClassStudentsQuery(
     {
       classId,
-      page: currentPage,
-      limit: pageSize,
-      search: searchText || undefined,
     },
     {
       skip: !classId,
     },
   );
-
-  // Setup forms with zod resolver
-  const searchForm = useForm<SearchFormValues>({
-    resolver: zodResolver(searchFormSchema),
-  });
 
   const addStudentForm = useForm<AddStudentFormValues>({
     resolver: zodResolver(addStudentFormSchema),
@@ -194,8 +177,8 @@ const ClassStudents = () => {
     useAddStudentToClassMutation();
   const [removeStudent, { isLoading: isRemovingStudent }] =
     useRemoveStudentFromClassMutation();
-  const [updateUserStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateUserStatusMutation();
+  const [updateStudentStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateStudentStatusMutation();
 
   // Map the columns with actions
   const tableColumns = columnsTitles.map((item, index) => {
@@ -207,8 +190,8 @@ const ClassStudents = () => {
           <StudentActions
             record={record}
             onRemove={setStudentToRemove}
-            onToggleStatus={(id, status) =>
-              setStudentToToggleStatus({ id, status })
+            onToggleStatus={(studentClassId, status) =>
+              setStudentToToggleStatus({ studentClassId, status })
             }
           />
         ),
@@ -219,12 +202,6 @@ const ClassStudents = () => {
       key: index,
     };
   });
-
-  // Event handlers
-  const onSubmitSearch = (data: SearchFormValues) => {
-    setSearchText(data.search || "");
-    setCurrentPage(1);
-  };
 
   const handleOpenAddDrawer = () => {
     addStudentForm.reset();
@@ -269,8 +246,8 @@ const ClassStudents = () => {
     if (!studentToToggleStatus) return;
 
     try {
-      await updateUserStatus({
-        id: studentToToggleStatus.id,
+      await updateStudentStatus({
+        studentClassId: studentToToggleStatus.studentClassId,
         status: studentToToggleStatus.status,
       }).unwrap();
 
@@ -285,10 +262,6 @@ const ClassStudents = () => {
     } catch (error) {
       toast.error("Failed to update student status");
     }
-  };
-
-  const handleTablePagination = (page: number) => {
-    setCurrentPage(page);
   };
 
   if (isLoading && !studentsData) return <Loading />;
@@ -309,36 +282,13 @@ const ClassStudents = () => {
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        <FilterGrid>
-          <CustomInput
-            control={searchForm.control}
-            name="search"
-            placeholder="Search by name or email"
-            size="large"
-          />
-          <CustomButton
-            icon={<SearchOutlined />}
-            type="primary"
-            title="Search"
-            onClick={searchForm.handleSubmit(onSubmitSearch)}
-          />
-        </FilterGrid>
-
-        <Table
-          dataSource={studentsData?.data?.items || []}
-          columns={tableColumns}
-          rowKey="id"
-          loading={isLoading}
-          pagination={{
-            total: studentsData?.data?.total || 0,
-            pageSize,
-            current: currentPage,
-            onChange: handleTablePagination,
-            showSizeChanger: false,
-          }}
-        />
-      </div>
+      <Table
+        dataSource={studentsData?.data || []}
+        columns={tableColumns}
+        rowKey="id"
+        loading={isLoading}
+        pagination={false}
+      />
 
       {/* Add Student Drawer */}
       <CustomDrawer

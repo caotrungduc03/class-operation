@@ -1,5 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { UserStatus } from '../../enums';
+import { StudentClassesDto } from '../class/class.dto';
 import { BaseDto } from '../common/base.dto';
 import { RoleDto } from '../role/role.dto';
 import { DetailUserDto } from './detail-user.dto';
@@ -39,4 +40,8 @@ export class UserDto extends BaseDto {
   @Expose()
   @Type(() => DetailUserDto)
   detail: DetailUserDto;
+
+  @Expose()
+  @Type(() => StudentClassesDto)
+  students: StudentClassesDto[];
 }

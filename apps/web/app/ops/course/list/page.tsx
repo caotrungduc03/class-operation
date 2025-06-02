@@ -31,8 +31,13 @@ import {
 } from "@web/libs/features/table/tableSlice";
 import { NAV_TITLE } from "@web/libs/nav";
 import { RootState } from "@web/libs/store";
-import { STATUS_LABEL, StatusOptions, UserStatus } from "@web/libs/user";
-import { Card, Modal, Table, TablePaginationConfig } from "antd";
+import {
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  UserStatus,
+} from "@web/libs/user";
+import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
@@ -76,7 +81,9 @@ const columnsTitles: TableColumn<ICourse>[] = [
   {
     title: "Status",
     dataIndex: "status",
-    render: (status: UserStatus) => STATUS_LABEL[status],
+    render: (status: UserStatus) => (
+      <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
+    ),
   },
   {
     title: "Created Date",

@@ -1,11 +1,5 @@
 "use client";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
@@ -15,7 +9,6 @@ import CustomDropdown from "@web/components/common/CustomDropdown";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTextArea from "@web/components/common/CustomTextArea";
-import FilterGrid from "@web/components/common/FilterGrid";
 import Loading from "@web/components/common/Loading";
 import { SHIFTS_OPTIONS } from "@web/libs/class";
 import { HOURS_PER_SESSION } from "@web/libs/common";
@@ -43,15 +36,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
-
-// Define validation schema
-const searchFormSchema = z.object({
-  startDate: z.any().optional(),
-  endDate: z.any().optional(),
-});
-
-// Define types based on the schema
-type SearchFormValues = z.infer<typeof searchFormSchema>;
 
 // Define schedule form schema
 const scheduleFormSchema = z.object({
@@ -177,11 +161,6 @@ const ClassCalendar = () => {
 
   const remainingHours = totalCourseHours - totalScheduledHours;
 
-  // Setup form with zod resolver
-  const { control, handleSubmit, reset } = useForm<SearchFormValues>({
-    resolver: zodResolver(searchFormSchema),
-  });
-
   // Setup schedule form with zod resolver
   const scheduleForm = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleFormSchema),
@@ -218,7 +197,7 @@ const ClassCalendar = () => {
     let scheduleCount = 0;
     let currentDate = start;
 
-    while (currentDate.isSame(end, "day") || currentDate.isBefore(end, "day")) {
+    while (currentDate.isBefore(end)) {
       if (weekdays.includes(currentDate.day())) {
         scheduleCount++;
       }
@@ -264,29 +243,6 @@ const ClassCalendar = () => {
     [],
   );
 
-  const onSubmitSearch = (data: SearchFormValues) => {
-    const newRange = {
-      startDate: data.startDate
-        ? dayjs(data.startDate).toISOString()
-        : undefined,
-      endDate: data.endDate ? dayjs(data.endDate).toISOString() : undefined,
-    };
-
-    setDateRange({
-      startDate: newRange.startDate || dateRange.startDate,
-      endDate: newRange.endDate || dateRange.endDate,
-    });
-  };
-
-  const handleReset = () => {
-    reset();
-    setDateRange({
-      startDate: dayjs().startOf("month").toISOString(),
-      endDate: dayjs().endOf("month").toISOString(),
-    });
-    refetch();
-  };
-
   const handleOpenCreate = (date: Date) => {
     if (!hasTeacher) {
       toast.error(
@@ -330,10 +286,10 @@ const ClassCalendar = () => {
   };
 
   const generateSchedules = (data: ScheduleFormValues) => {
-    const { startDate, endDate, shift, weekdays, name, description } = data;
+    const { startDate, endDate, weekdays, name, description } = data;
 
-    const start = dayjs(startDate);
-    const end = dayjs(endDate);
+    const start = dayjs(startDate).startOf("day");
+    const end = dayjs(endDate).endOf("day");
     const selectedShift = SHIFTS_OPTIONS.find(
       (shift) => shift.value === data.shift,
     );
@@ -341,7 +297,7 @@ const ClassCalendar = () => {
     const schedules = [];
     let currentDate = start.clone();
 
-    while (currentDate.isBefore(end, "day")) {
+    while (currentDate.isBefore(end)) {
       if (weekdays.includes(currentDate.day())) {
         const [startHour, startMinute] = selectedShift.startTime.split(":");
         const scheduleStartDate = currentDate
@@ -386,16 +342,6 @@ const ClassCalendar = () => {
       refetch();
     } catch (error) {
       // Handled by the apiErrorMiddleware
-    }
-  };
-
-  const handleDeleteSchedule = async (scheduleId: string) => {
-    try {
-      await deleteSchedule(scheduleId).unwrap();
-      toast.success("Schedule deleted successfully");
-      refetch();
-    } catch (error) {
-      // Error will be handled by middleware
     }
   };
 
@@ -525,40 +471,6 @@ const ClassCalendar = () => {
             className="mb-4"
           />
         )}
-
-        <FilterGrid>
-          <CustomDatePicker
-            control={control}
-            name="startDate"
-            size="large"
-            placeholder="Start date"
-            label="Start Date"
-          />
-          <CustomDatePicker
-            control={control}
-            name="endDate"
-            size="large"
-            placeholder="End date"
-            label="End Date"
-          />
-        </FilterGrid>
-        <div className="flex justify-between">
-          <div className="flex gap-4">
-            <CustomButton
-              title="Reset"
-              size="large"
-              icon={<ReloadOutlined />}
-              onClick={handleReset}
-            />
-            <CustomButton
-              type="primary"
-              title="Search"
-              size="large"
-              icon={<SearchOutlined />}
-              onClick={handleSubmit(onSubmitSearch)}
-            />
-          </div>
-        </div>
 
         <AntdCalendar
           events={events}

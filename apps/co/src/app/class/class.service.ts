@@ -43,7 +43,7 @@ export class ClassService extends BaseService<ClassEntity> {
   async findById(id: string): Promise<ClassEntity> {
     const classEntity = await this.findOne({
       where: { id },
-      relations: ['course', 'teacher', 'room'],
+      relations: ['course', 'teacher', 'room', 'studentClasses'],
     });
 
     if (!classEntity) {
@@ -101,17 +101,7 @@ export class ClassService extends BaseService<ClassEntity> {
     return classEntity;
   }
 
-  async findStudentsByClassId(
-    query: Record<string, any>,
-    classId: string,
-  ): Promise<{
-    page: number;
-    limit: number;
-    total: number;
-    data: UserEntity[];
-  }> {
-    const { page = 1, limit = 10, sort = 'createdAt:desc', search } = query;
-
+  async findStudentsByClassId(classId: string): Promise<StudentClassEntity[]> {
     const classEntity = await this.findOne({
       where: { id: classId },
     });
@@ -120,50 +110,12 @@ export class ClassService extends BaseService<ClassEntity> {
       throw new NotFoundException('Class not found');
     }
 
-    // Fetch student IDs from student-class relationship
-    const studentClasses = await this.studentClassRepository.find({
-      where: { classId, status: UserStatus.ACTIVE },
+    const students = await this.studentClassRepository.find({
+      where: { classId },
+      relations: ['student', 'student.role', 'student.detail'],
     });
 
-    const studentIds = studentClasses.map((sc) => sc.studentId);
-
-    if (studentIds.length === 0) {
-      return { page, limit, total: 0, data: [] };
-    }
-
-    const queryBuilder = this.userRepository
-      .createQueryBuilder('entity')
-      .innerJoinAndSelect('entity.role', 'role')
-      .innerJoinAndSelect('entity.detail', 'detail')
-      .where('entity.id IN (:...studentIds)', { studentIds });
-
-    if (search) {
-      queryBuilder.andWhere(
-        '(entity.fullName ILIKE :search OR entity.email ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-
-    const metadata = this.userRepository.metadata;
-    queryBuilder.skip((page - 1) * limit);
-    queryBuilder.take(limit);
-
-    const [sortColumn, sortOrder] = sort.split(':');
-    if (this.columnExists(sortColumn, metadata)) {
-      queryBuilder.orderBy(
-        `entity.${sortColumn}`,
-        sortOrder.toUpperCase() as 'ASC' | 'DESC',
-      );
-    }
-
-    const [data, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      page,
-      limit,
-      total,
-      data,
-    };
+    return students;
   }
 
   async getSchedules(classId: string) {
@@ -212,7 +164,7 @@ export class ClassService extends BaseService<ClassEntity> {
       queryBuilder.andWhere('studentClasses.studentId = :userId', { userId });
     }
 
-    const metadata = this.repository.metadata;
+    const metadata = this.classRepository.metadata;
     this.applyFiltering(queryBuilder, filter, metadata);
     this.applyPagination(queryBuilder, page, limit);
     this.applySorting(queryBuilder, sort, metadata);
@@ -370,59 +322,6 @@ export class ClassService extends BaseService<ClassEntity> {
     };
   }
 
-  async addStudentsBulk(classId: string, studentIds: string[]): Promise<void> {
-    const classEntity = await this.findById(classId);
-
-    // Get current students in the class
-    const existingRelations = await this.studentClassRepository.find({
-      where: {
-        classId,
-        studentId: { $in: studentIds } as any,
-      },
-    });
-
-    const existingStudentIds = existingRelations.map(
-      (relation) => relation.studentId,
-    );
-
-    // Filter out students already in the class
-    const newStudentIds = studentIds.filter(
-      (id) => !existingStudentIds.includes(id),
-    );
-
-    // Create relationships for new students
-    const studentClasses = newStudentIds.map((studentId) =>
-      this.studentClassRepository.create({
-        classId,
-        studentId,
-        status: UserStatus.ACTIVE,
-      }),
-    );
-
-    if (studentClasses.length > 0) {
-      await this.studentClassRepository.save(studentClasses);
-    }
-  }
-
-  async removeStudentsBulk(
-    classId: string,
-    studentIds: string[],
-  ): Promise<void> {
-    const classEntity = await this.findById(classId);
-
-    // Get current students in the class
-    const existingRelations = await this.studentClassRepository.find({
-      where: {
-        classId,
-        studentId: { $in: studentIds } as any,
-      },
-    });
-
-    if (existingRelations.length > 0) {
-      await this.studentClassRepository.remove(existingRelations);
-    }
-  }
-
   async updateClassStatus(
     classId: string,
     status: UserStatus,
@@ -443,7 +342,6 @@ export class ClassService extends BaseService<ClassEntity> {
     });
 
     // Get completed schedules
-    const now = new Date();
     const completedSchedules = await this.scheduleRepository.count({
       where: {
         classId,
@@ -480,28 +378,20 @@ export class ClassService extends BaseService<ClassEntity> {
   }
 
   async updateStudentStatus(
-    studentId: string,
+    studentClassId: string,
     status: UserStatus,
-  ): Promise<UserEntity> {
-    // Find the student
-    const student = await this.userRepository.findOne({
-      where: { id: studentId },
-      relations: ['role', 'detail'],
+  ): Promise<StudentClassEntity> {
+    const studentClass = await this.studentClassRepository.findOne({
+      where: { id: studentClassId },
     });
 
-    if (!student) {
-      throw new NotFoundException('Student not found');
+    if (!studentClass) {
+      throw new NotFoundException('Student is not in any class');
     }
 
-    // Check if the user is a student
-    if (student.role?.roleName !== RoleName.STUDENT) {
-      throw new BadRequestException('User is not a student');
-    }
-
-    // Update student status
-    student.status = status;
+    studentClass.status = status;
 
     // Save the updated student
-    return this.userRepository.save(student);
+    return this.studentClassRepository.save(studentClass);
   }
 }

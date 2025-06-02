@@ -31,7 +31,18 @@ export const NAV_LINK = {
   MANAGE_SUPPORT_TICKETS: "/ops/support-ticket/list",
 
   MY_TEACHER_CLASS: "/teacher/my-class",
+  MY_TEACHER_CLASS_DETAIL_OVERVIEW: (id: string) =>
+    `/teacher/my-class/${id}/overview`,
+  MY_TEACHER_CLASS_DETAIL_CALENDAR: (id: string) =>
+    `/teacher/my-class/${id}/calendar`,
+  MY_TEACHER_CLASS_DETAIL_STUDENTS: (id: string) =>
+    `/teacher/my-class/${id}/students`,
+
   MY_STUDENT_CLASS: "/student/my-class",
+  MY_STUDENT_CLASS_DETAIL_OVERVIEW: (id: string) =>
+    `/student/my-class/${id}/overview`,
+  MY_STUDENT_CLASS_DETAIL_STUDENTS: (id: string) =>
+    `/student/my-class/${id}/students`,
 
   MY_SUPPORT_TICKET: "/teacher/my-support-ticket",
 

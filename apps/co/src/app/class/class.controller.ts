@@ -6,6 +6,7 @@ import {
   ResponseDto,
   RoleName,
   Roles,
+  StudentClassesDto,
   UpdateClassDto,
   User,
   UserDto,
@@ -105,22 +106,22 @@ export class ClassController {
   }
 
   @Get('/:id/students')
-  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
-  async findStudentsByClassId(
-    @Query() query: Record<string, any>,
-    @Param('id') id: string,
-  ) {
-    const { page, limit, total, data } =
-      await this.classService.findStudentsByClassId(query, id);
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.STAFF_ACADEMIC,
+    RoleName.TEACHER_FULL_TIME,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.STUDENT,
+  )
+  async findStudentsByClassId(@Param('id') id: string) {
+    const students = await this.classService.findStudentsByClassId(id);
 
-    const results: Pagination<UserDto> = {
-      page,
-      limit,
-      total,
-      items: UserDto.plainToInstance(data, ['admin']),
-    };
-
-    return new ResponseDto(HttpStatus.OK, 'Success', results);
+    return new ResponseDto(
+      HttpStatus.OK,
+      'Success',
+      StudentClassesDto.plainToInstance(students, ['admin']),
+    );
   }
 
   @Post('/')
@@ -220,34 +221,6 @@ export class ClassController {
     return new ResponseDto(HttpStatus.OK, 'Success', results);
   }
 
-  @Post('/:id/students/bulk')
-  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
-  async addStudentsBulk(
-    @Param('id') id: string,
-    @Body() { studentIds }: { studentIds: string[] },
-  ) {
-    await this.classService.addStudentsBulk(id, studentIds);
-
-    return new ResponseDto(
-      HttpStatus.OK,
-      'Students added to class successfully',
-    );
-  }
-
-  @Delete('/:id/students/bulk')
-  @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
-  async removeStudentsBulk(
-    @Param('id') id: string,
-    @Body() { studentIds }: { studentIds: string[] },
-  ) {
-    await this.classService.removeStudentsBulk(id, studentIds);
-
-    return new ResponseDto(
-      HttpStatus.OK,
-      'Students removed from class successfully',
-    );
-  }
-
   @Put('/:id/status')
   @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async updateClassStatus(
@@ -281,14 +254,14 @@ export class ClassController {
     );
   }
 
-  @Patch('/students/:studentId/status')
+  @Patch('/students/:studentClassId/status')
   @Roles(RoleName.ADMIN, RoleName.STAFF_ACADEMIC)
   async updateStudentStatus(
-    @Param('studentId') studentId: string,
+    @Param('studentClassId') studentClassId: string,
     @Body() { status }: { status: UserStatus },
   ) {
     const student = await this.classService.updateStudentStatus(
-      studentId,
+      studentClassId,
       status,
     );
 

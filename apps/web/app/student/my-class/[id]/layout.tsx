@@ -8,8 +8,8 @@ import { STATUS_LABEL, STATUS_TAG } from "@web/libs/user";
 import { Card, Tabs, Tag, Typography } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
-import { useParams } from "next/navigation";
-import React from "react";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 const breadcrumbs: ItemType[] = [
   {
@@ -22,8 +22,10 @@ const breadcrumbs: ItemType[] = [
 ];
 
 const ClassDetail = ({ children }: React.PropsWithChildren) => {
+  const [currentTab, setCurrentTab] = useState("1");
   const { id: classId } = useParams<{ id: string }>();
-
+  const router = useRouter();
+  const pathname = usePathname();
   const { data: classData, isLoading } = useGetClassByIdQuery(classId, {
     skip: !classId,
   });
@@ -33,9 +35,37 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
   const tabs = [
     {
       key: "1",
-      label: "Overview",
+      label: (
+        <div
+          onClick={() =>
+            router.push(NAV_LINK.MY_STUDENT_CLASS_DETAIL_OVERVIEW(classId))
+          }
+        >
+          Overview
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div
+          onClick={() =>
+            router.push(NAV_LINK.MY_STUDENT_CLASS_DETAIL_STUDENTS(classId))
+          }
+        >
+          Students
+        </div>
+      ),
     },
   ];
+
+  useEffect(() => {
+    if (pathname.includes("/overview")) {
+      setCurrentTab("1");
+    } else if (pathname.includes("/students")) {
+      setCurrentTab("2");
+    }
+  }, [pathname]);
 
   if (isLoading || !classDetail) return <Loading />;
 
@@ -110,7 +140,12 @@ const ClassDetail = ({ children }: React.PropsWithChildren) => {
               </div>
             </div>
           </div>
-          <Tabs size="large" items={tabs} className="mt-4" activeKey="1" />
+          <Tabs
+            size="large"
+            items={tabs}
+            className="mt-4"
+            activeKey={currentTab}
+          />
         </Card>
         {children}
       </div>

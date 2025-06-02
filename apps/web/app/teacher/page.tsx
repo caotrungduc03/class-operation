@@ -6,8 +6,6 @@ import {
   ClockCircleOutlined,
   EyeOutlined,
   FileTextOutlined,
-  MessageOutlined,
-  PlusOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import CustomButton from "@web/components/common/CustomButton";
@@ -82,40 +80,6 @@ const HomeTeacher: React.FC = () => {
         totalClasses > 0 ? (activeClasses / totalClasses) * 100 : 0,
     };
   }, [myClassesData, scheduleData, supportTicketsData]);
-
-  const quickActions = [
-    {
-      title: "Lịch Dạy Hôm Nay",
-      description: "Xem lịch giảng dạy hôm nay",
-      icon: <CalendarOutlined />,
-      color: "#1890ff",
-      link: NAV_LINK.MY_TEACHER_CALENDAR,
-      badge: statistics.todaySchedules,
-    },
-    {
-      title: "Lớp Học Của Tôi",
-      description: "Quản lý các lớp học",
-      icon: <BookOutlined />,
-      color: "#52c41a",
-      link: NAV_LINK.MY_TEACHER_CLASS,
-      badge: statistics.activeClasses,
-    },
-    {
-      title: "Tạo Yêu Cầu Hỗ Trợ",
-      description: "Gửi yêu cầu hỗ trợ mới",
-      icon: <PlusOutlined />,
-      color: "#faad14",
-      link: NAV_LINK.MY_SUPPORT_TICKET,
-    },
-    {
-      title: "Tin Nhắn",
-      description: "Kiểm tra tin nhắn mới",
-      icon: <MessageOutlined />,
-      color: "#f5222d",
-      link: "#",
-      badge: 0,
-    },
-  ];
 
   const recentClasses = useMemo(() => {
     return (
@@ -225,7 +189,9 @@ const HomeTeacher: React.FC = () => {
                   <List.Item
                     actions={[
                       <Link
-                        href={`/teacher/my-class/${item.id}/overview`}
+                        href={NAV_LINK.MY_TEACHER_CLASS_DETAIL_OVERVIEW(
+                          item.id,
+                        )}
                         key="view"
                       >
                         <CustomButton

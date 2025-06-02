@@ -2,7 +2,6 @@
 import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
-import CustomDatePicker from "@web/components/common/CustomDatePicker";
 import CustomInput from "@web/components/common/CustomInput";
 import CustomSelect from "@web/components/common/CustomSelect";
 import CustomTooltip from "@web/components/common/CustomTooltip";
@@ -13,10 +12,15 @@ import { TableColumn } from "@web/libs/common";
 import { ICourse } from "@web/libs/course";
 import { useGetMyClassesQuery } from "@web/libs/features/classes/classApi";
 import { useGetCoursesQuery } from "@web/libs/features/courses/courseApi";
-import { NAV_TITLE } from "@web/libs/nav";
+import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { IRoom } from "@web/libs/room";
-import { STATUS_LABEL, StatusOptions, UserStatus } from "@web/libs/user";
-import { Button, Card, Table, TablePaginationConfig } from "antd";
+import {
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  UserStatus,
+} from "@web/libs/user";
+import { Button, Card, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -34,8 +38,6 @@ const searchSchema = z.object({
   name: z.string().optional(),
   courseId: z.string().optional(),
   status: z.string().optional(),
-  startDateFrom: z.any().optional(),
-  startDateTo: z.any().optional(),
 });
 
 type SearchFormData = z.infer<typeof searchSchema>;
@@ -64,6 +66,19 @@ const columnsTitles: TableColumn<IClass>[] = [
     render: (room: IRoom) => room?.name || "",
   },
   {
+    title: "Students",
+    dataIndex: "studentClasses",
+    render: (_, record: IClass) =>
+      `${record.studentClasses?.length || 0} / ${record.quantity}`,
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    render: (status: UserStatus) => (
+      <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
+    ),
+  },
+  {
     title: "Start Date",
     dataIndex: "startDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
@@ -72,11 +87,6 @@ const columnsTitles: TableColumn<IClass>[] = [
     title: "End Date",
     dataIndex: "endDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    render: (status: UserStatus) => STATUS_LABEL[status],
   },
   {
     title: "",
@@ -100,8 +110,6 @@ const MyClass = () => {
     name: undefined,
     courseId: undefined,
     status: undefined,
-    startDateFrom: undefined,
-    startDateTo: undefined,
   });
   const router = useRouter();
 
@@ -188,27 +196,17 @@ const MyClass = () => {
   }, [data]);
 
   const handleViewClass = (id: string) => {
-    router.push(`/teacher/my-class/${id}/overview`);
+    router.push(NAV_LINK.MY_TEACHER_CLASS_DETAIL_OVERVIEW(id));
   };
 
   const onSubmitSearch = (formData: SearchFormData) => {
-    const { name, courseId, startDateFrom, startDateTo, status } = formData;
-
-    const formattedStartDateFrom = startDateFrom
-      ? dayjs(startDateFrom).format("YYYY-MM-DD")
-      : undefined;
-
-    const formattedStartDateTo = startDateTo
-      ? dayjs(startDateTo).format("YYYY-MM-DD")
-      : undefined;
+    const { name, courseId, status } = formData;
 
     setSearchParams({
       ...searchParams,
       name,
       courseId,
       status,
-      startDateFrom: formattedStartDateFrom,
-      startDateTo: formattedStartDateTo,
       page: 1,
     });
   };
@@ -220,8 +218,6 @@ const MyClass = () => {
       name: undefined,
       courseId: undefined,
       status: undefined,
-      startDateFrom: undefined,
-      startDateTo: undefined,
       page: 1,
     }));
     setPagination({
@@ -257,18 +253,6 @@ const MyClass = () => {
                 size="large"
                 placeholder="Filter by course"
                 options={courseOptions}
-              />
-              <CustomDatePicker
-                control={searchForm.control}
-                name="startDateFrom"
-                size="large"
-                placeholder="Start Date From"
-              />
-              <CustomDatePicker
-                control={searchForm.control}
-                name="startDateTo"
-                size="large"
-                placeholder="Start Date To"
               />
               <CustomSelect
                 control={searchForm.control}

@@ -1,6 +1,7 @@
 import { ITimestamps } from "./common";
 import { ICourse } from "./course";
 import { IRoom } from "./room";
+import { IStudentClass } from "./student-class";
 import { IUser, UserStatus } from "./user";
 
 export interface IClass extends ITimestamps {
@@ -18,6 +19,7 @@ export interface IClass extends ITimestamps {
   course?: ICourse;
   teacher?: IUser;
   room?: IRoom;
+  studentClasses?: IStudentClass[];
 }
 
 export interface CreateClassDto {
@@ -48,8 +50,6 @@ export interface QueryClassDto {
   courseId?: string;
   teacherId?: string;
   status?: UserStatus;
-  startDateFrom?: string;
-  startDateTo?: string;
   page?: number;
   limit?: number;
 }

@@ -34,8 +34,14 @@ import {
 import { NAV_LINK, NAV_TITLE } from "@web/libs/nav";
 import { IRoom } from "@web/libs/room";
 import { RootState } from "@web/libs/store";
-import { IUser, STATUS_LABEL, StatusOptions, UserStatus } from "@web/libs/user";
-import { Card, Modal, Table, TablePaginationConfig } from "antd";
+import {
+  IUser,
+  STATUS_LABEL,
+  STATUS_TAG,
+  StatusOptions,
+  UserStatus,
+} from "@web/libs/user";
+import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -80,6 +86,12 @@ const columnsTitles: TableColumn<IClass>[] = [
     render: (room: IRoom) => room?.name || "",
   },
   {
+    title: "Students",
+    dataIndex: "studentClasses",
+    render: (_, record: IClass) =>
+      `${record.studentClasses?.length || 0} / ${record.quantity}`,
+  },
+  {
     title: "Start Date",
     dataIndex: "startDate",
     render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "N/A"),
@@ -96,7 +108,9 @@ const columnsTitles: TableColumn<IClass>[] = [
   {
     title: "Status",
     dataIndex: "status",
-    render: (status: UserStatus) => STATUS_LABEL[status],
+    render: (status: UserStatus) => (
+      <Tag color={STATUS_TAG[status]}>{STATUS_LABEL[status]}</Tag>
+    ),
   },
   {
     title: "",
@@ -176,8 +190,6 @@ const Classes = () => {
     courseId?: string;
     teacherId?: string;
     status?: UserStatus;
-    startDateFrom?: string;
-    startDateTo?: string;
     page?: number;
     limit?: number;
   }>({
@@ -276,24 +288,13 @@ const Classes = () => {
   }, [data, current, pageSize]);
 
   const onSubmitSearch = (formData: any) => {
-    const { name, courseId, startDateFrom, startDateTo, status } = formData;
-
-    const formattedStartDateFrom = startDateFrom
-      ? dayjs(startDateFrom).format("YYYY-MM-DD")
-      : undefined;
-
-    const formattedStartDateTo = startDateTo
-      ? dayjs(startDateTo).format("YYYY-MM-DD")
-      : undefined;
-
+    const { name, courseId, status } = formData;
     setSearchParams({
       ...searchParams,
       name,
       courseId,
       status,
-      startDateFrom: formattedStartDateFrom,
-      startDateTo: formattedStartDateTo,
-      page: 1, // Reset to first page on new search
+      page: 1,
     });
     setPagination({
       ...pagination,
@@ -418,20 +419,6 @@ const Classes = () => {
                 size="large"
                 placeholder="Filter by course"
                 options={courseOptions}
-              />
-              <CustomDatePicker
-                control={searchForm.control}
-                name="startDateFrom"
-                size="large"
-                placeholder="Start Date From"
-                required
-              />
-              <CustomDatePicker
-                control={searchForm.control}
-                name="startDateTo"
-                size="large"
-                placeholder="Start Date To"
-                required
               />
               <CustomSelect
                 control={searchForm.control}

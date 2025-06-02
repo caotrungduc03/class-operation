@@ -12,6 +12,9 @@ export class StudentClassesDto extends BaseDto {
   @Expose()
   @Type(() => UserDto)
   student: UserDto;
+
+  @Expose()
+  status: UserStatus;
 }
 
 export class ClassDto extends BaseDto {

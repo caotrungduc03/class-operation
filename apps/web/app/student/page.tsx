@@ -173,7 +173,9 @@ const HomeStudent: React.FC = () => {
                   <List.Item
                     actions={[
                       <Link
-                        href={`/teacher/my-class/${item.id}/overview`}
+                        href={NAV_LINK.MY_TEACHER_CLASS_DETAIL_OVERVIEW(
+                          item.id,
+                        )}
                         key="view"
                       >
                         <CustomButton

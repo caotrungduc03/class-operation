@@ -8,6 +8,7 @@ import {
 import { CustomResponse, Pagination } from "@web/libs/common";
 import { baseFetchQuery } from "@web/libs/customBaseQuery";
 import { ISchedule } from "@web/libs/schedule";
+import { IStudentClass } from "@web/libs/student-class";
 import { IUser, UserStatus } from "@web/libs/user";
 
 export const classApi = createApi({
@@ -70,13 +71,12 @@ export const classApi = createApi({
     }),
 
     getClassStudents: builder.query<
-      CustomResponse<Pagination<IUser[]>>,
-      { classId: string; page?: number; limit?: number; search?: string }
+      CustomResponse<IStudentClass[]>,
+      { classId: string }
     >({
-      query: ({ classId, ...params }) => ({
+      query: ({ classId }) => ({
         url: `/classes/${classId}/students`,
         method: "GET",
-        params,
       }),
     }),
 
@@ -118,11 +118,11 @@ export const classApi = createApi({
     }),
 
     updateStudentStatus: builder.mutation<
-      CustomResponse<IUser>,
-      { studentId: string; status: UserStatus }
+      CustomResponse<IStudentClass>,
+      { studentClassId: string; status: UserStatus }
     >({
-      query: ({ studentId, status }) => ({
-        url: `/classes/students/${studentId}/status`,
+      query: ({ studentClassId, status }) => ({
+        url: `/classes/students/${studentClassId}/status`,
         method: "PATCH",
         body: { status },
       }),
