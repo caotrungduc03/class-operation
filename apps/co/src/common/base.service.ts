@@ -90,6 +90,8 @@ export abstract class BaseService<T extends BaseEntity>
         const isEnumColumn =
           column?.type === 'enum' || column?.type === 'simple-enum';
 
+        const isUUIDColumn = column?.type === 'uuid';
+
         if (Array.isArray(value)) {
           queryBuilder.andWhere(
             new Brackets((qb) => {
@@ -119,6 +121,10 @@ export abstract class BaseService<T extends BaseEntity>
               [key]: numericValue,
             });
           } else if (isEnumColumn) {
+            queryBuilder.andWhere(`entity.${key} = :${key}`, {
+              [key]: value,
+            });
+          } else if (isUUIDColumn) {
             queryBuilder.andWhere(`entity.${key} = :${key}`, {
               [key]: value,
             });

@@ -656,7 +656,7 @@ const MySupportTicket = () => {
               </div>
             </div>
 
-            <Divider orientation="left">Support Ticket Details</Divider>
+            <Divider orientation="left">Chi tiết yêu cầu hỗ trợ</Divider>
 
             <Card size="small" className="mb-4">
               <div className="flex flex-col gap-2">

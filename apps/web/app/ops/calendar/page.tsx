@@ -31,7 +31,7 @@ import { EventType } from "antd-calendar/dist/constants";
 import { IEvent } from "antd-calendar/dist/types";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
@@ -64,7 +64,6 @@ type BusyScheduleFormValues = z.infer<typeof busyScheduleFormSchema>;
 
 const Calendar = () => {
   const [isBusyScheduleModalOpen, setIsBusyScheduleModalOpen] = useState(false);
-  const [isRefetching, setIsRefetching] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedEvents, setSelectedEvents] = useState<IEvent[]>([]);
@@ -112,14 +111,6 @@ const Calendar = () => {
     },
   );
 
-  useEffect(() => {
-    if (!isRefetching || isLoadingWeeklyNorms || isLoadingSchedules) return;
-
-    refetchWeeklyNorms();
-    refetchSchedules();
-    setIsRefetching(false);
-  }, [isRefetching, refetchSchedules, refetchWeeklyNorms]);
-
   const [createBusySchedule, { isLoading: isCreatingBusySchedule }] =
     useCreateBusyScheduleMutation();
 
@@ -159,6 +150,7 @@ const Calendar = () => {
       endDate: dayjs(schedule.endDate).toDate(),
       type: schedule.type as unknown as EventType,
       description: schedule.description,
+      classroomName: schedule.class?.room?.name,
     }));
   }, [schedules]);
 
@@ -219,7 +211,8 @@ const Calendar = () => {
       ...searchParams,
       ...data,
     });
-    setIsRefetching(true);
+    refetchWeeklyNorms();
+    refetchSchedules();
   };
 
   const handleReset = () => {
@@ -229,7 +222,8 @@ const Calendar = () => {
       type: undefined,
       teacherId: undefined,
     });
-    setIsRefetching(true);
+    refetchWeeklyNorms();
+    refetchSchedules();
   };
 
   const handleCloseBusyScheduleModal = () => {
@@ -474,6 +468,13 @@ const Calendar = () => {
                           <Tag color={SCHEDULE_TYPE_TAG[event.type]}>
                             {SCHEDULE_TYPE_LABEL[event.type]}
                           </Tag>
+                        </div>
+                      )}
+                      {event.classroomName && (
+                        <div className="mt-2">
+                          <Typography.Text type="secondary">
+                            {event.classroomName}
+                          </Typography.Text>
                         </div>
                       )}
                     </div>

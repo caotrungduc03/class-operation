@@ -44,7 +44,7 @@ import { Card, Modal, Table, TablePaginationConfig, Tag } from "antd";
 import { ItemType } from "antd/es/breadcrumb/Breadcrumb";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -300,6 +300,18 @@ const Students = () => {
     );
   }, [data, current, pageSize]);
 
+  // Add this useEffect to update pagination when data changes
+  useEffect(() => {
+    if (data?.data) {
+      setPagination((prev) => ({
+        ...prev,
+        current: data.data.page || prev.current,
+        pageSize: data.data.limit || prev.pageSize,
+        total: data.data.total || 0,
+      }));
+    }
+  }, [data]);
+
   const onSubmitSearch = (formData: { search?: string; status?: string }) => {
     setSearchParams({
       ...searchParams,
@@ -393,6 +405,10 @@ const Students = () => {
 
       if (data.password) {
         formData.append("password", data.password);
+      }
+
+      if (data.confirmPassword) {
+        formData.append("confirmPassword", data.confirmPassword);
       }
 
       if (data.phoneNumber) {

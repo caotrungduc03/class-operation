@@ -259,7 +259,7 @@ const MyClass = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Tìm kiếm theo tên hoặc mã lớp"
+                placeholder="Tìm kiếm theo tên lớp"
               />
               <CustomSelect
                 control={searchForm.control}

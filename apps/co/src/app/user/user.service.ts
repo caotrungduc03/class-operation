@@ -167,7 +167,14 @@ export class UserService extends BaseService<UserEntity> {
   }
 
   async findUsersByRoleName(roleNames: RoleName[], query: Record<string, any>) {
-    const { page = 1, limit = 10, sort = 'id:desc', search } = query;
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'id:desc',
+      search,
+      status,
+      roleName,
+    } = query;
 
     const queryBuilder = this.repository
       .createQueryBuilder('entity')
@@ -179,9 +186,17 @@ export class UserService extends BaseService<UserEntity> {
 
     if (search) {
       queryBuilder.andWhere(
-        '(entity.firstName ILIKE :search OR entity.lastName ILIKE :search OR entity.email ILIKE :search)',
+        '(entity.firstName ILIKE :search OR entity.lastName ILIKE :search OR entity.email ILIKE :search OR detail.code ILIKE :search)',
         { search: `%${search}%` },
       );
+    }
+
+    if (roleName) {
+      queryBuilder.andWhere('role.roleName = :roleName', { roleName });
+    }
+
+    if (status) {
+      queryBuilder.andWhere('entity.status = :status', { status });
     }
 
     const metadata = this.repository.metadata;

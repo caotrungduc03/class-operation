@@ -135,7 +135,12 @@ export class RequestController {
   }
 
   @Patch('weekly-norms/:id/status')
-  @Roles(RoleName.ADMIN, RoleName.MANAGE)
+  @Roles(
+    RoleName.ADMIN,
+    RoleName.MANAGE,
+    RoleName.TEACHER_PART_TIME,
+    RoleName.TEACHER_FULL_TIME,
+  )
   async updateWeeklyNormStatus(
     @Param('id') id: string,
     @User('userId') userId: string,

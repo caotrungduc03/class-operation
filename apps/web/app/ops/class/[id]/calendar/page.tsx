@@ -21,6 +21,7 @@ import {
   useDeleteScheduleMutation,
   useUpdateScheduleMutation,
 } from "@web/libs/features/schedules/scheduleApi";
+import { useGetWeeklyNormsQuery } from "@web/libs/features/weekly-norms/weeklyNormApi";
 import {
   SCHEDULE_TYPE_LABEL,
   SCHEDULE_TYPE_TAG,
@@ -136,6 +137,21 @@ const ClassCalendar = () => {
   const totalCourseHours = classData?.data?.course?.hours || 0;
 
   const {
+    isLoading: isLoadingWeeklyNorms,
+    data: weeklyNorms,
+    isFetching: isFetchingWeeklyNorms,
+    refetch: refetchWeeklyNorms,
+  } = useGetWeeklyNormsQuery(
+    {
+      ...dateRange,
+      teacherId: classData?.data?.teacher?.id,
+    },
+    {
+      skip: !classData?.data?.teacher?.id,
+    },
+  );
+
+  const {
     data: scheduleData,
     isLoading,
     refetch,
@@ -221,8 +237,20 @@ const ClassCalendar = () => {
       endDate: dayjs(schedule.endDate).toDate(),
       type: schedule.type as unknown as EventType,
       description: schedule.description,
+      classroomName: schedule.class?.room?.name,
     }));
   }, [scheduleData]);
+
+  const norms = useMemo(() => {
+    if (!weeklyNorms?.data) return [];
+
+    return weeklyNorms.data.map((norm) => ({
+      id: norm.id,
+      startDate: dayjs(norm.startDate).toDate(),
+      endDate: dayjs(norm.endDate).toDate(),
+      maxShift: norm.quantity,
+    }));
+  }, [weeklyNorms]);
 
   const handleOpenDetail = useCallback((date: Date, events: IEvent[]) => {
     setSelectedDate(date);
@@ -472,6 +500,7 @@ const ClassCalendar = () => {
 
         <AntdCalendar
           events={events}
+          norms={norms}
           onOpenDetail={handleOpenDetail}
           onOpenCreate={handleOpenCreate}
           onRefetchAPI={handleRefetchAPI}
@@ -534,6 +563,13 @@ const ClassCalendar = () => {
                         <div className="mt-2">
                           <Typography.Text type="secondary">
                             {event.description}
+                          </Typography.Text>
+                        </div>
+                      )}
+                      {event.classroomName && (
+                        <div className="mt-2">
+                          <Typography.Text type="secondary">
+                            {event.classroomName}
                           </Typography.Text>
                         </div>
                       )}

@@ -50,7 +50,7 @@ export class WeeklyNormService extends BaseService<WeeklyNormEntity> {
 
     const canceledWeeklyNorm = await this.store({
       ...weeklyNorm,
-      status: false,
+      status: UserStatus.BLOCKED,
     });
 
     return canceledWeeklyNorm;

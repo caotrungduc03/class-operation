@@ -407,10 +407,6 @@ const WeeklyNormList = () => {
   };
 
   const handleOpenRejectModal = (id: string) => {
-    dispatch(openCancelModal(id));
-  };
-
-  const handleCloseRejectModal = (id: string) => {
     dispatch(openRejectModal(id));
   };
 

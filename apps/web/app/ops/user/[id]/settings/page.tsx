@@ -1,5 +1,5 @@
 "use client";
-import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
+import { CloseOutlined, SaveOutlined, UploadOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CustomButton from "@web/components/common/CustomButton";
 import CustomInput from "@web/components/common/CustomInput";
@@ -45,7 +45,7 @@ const userSettingsSchema = z.object({
   status: z.nativeEnum(UserStatus, { required_error: "Status is required" }),
   departmentId: z.string().optional(),
   fieldId: z.string().optional(),
-  teacherLevel: z.nativeEnum(TeacherLevel).optional(),
+  teacherLevel: z.nativeEnum(TeacherLevel).nullable().optional(),
 });
 
 // Define type from schema
@@ -79,7 +79,7 @@ const UserSettings = () => {
       ]
     : [];
 
-  const { control, handleSubmit, reset, watch } =
+  const { control, handleSubmit, reset, watch, formState } =
     useForm<UserSettingsFormValues>({
       resolver: zodResolver(userSettingsSchema),
     });
@@ -447,6 +447,7 @@ const UserSettings = () => {
           loading={isUpdating}
           disabled={isUpdating}
           onClick={handleSubmit(onSubmit)}
+          icon={<SaveOutlined />}
         />
       </div>
     </Card>

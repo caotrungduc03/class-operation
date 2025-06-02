@@ -452,9 +452,9 @@ const WeeklyNormRegistration = () => {
     };
 
     try {
-      if (isEditMode && selectedItemId) {
+      if (isEditMode && normDetail?.data) {
         const res = await updateWeeklyNorm({
-          id: selectedItemId,
+          id: normDetail.data.id,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
@@ -780,6 +780,7 @@ const WeeklyNormRegistration = () => {
             key="back"
             title="Không, giữ nguyên"
             onClick={() => dispatch(closeCancelModal())}
+            icon={<CloseOutlined />}
           />,
           <CustomButton
             key="submit"

@@ -447,6 +447,10 @@ const Teachers = () => {
         formData.append("password", data.password);
       }
 
+      if (data.confirmPassword) {
+        formData.append("confirmPassword", data.confirmPassword);
+      }
+
       if (data.phoneNumber) {
         formData.append("phoneNumber", data.phoneNumber);
       }

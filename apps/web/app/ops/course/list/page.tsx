@@ -389,7 +389,7 @@ const Courses = () => {
                 control={searchForm.control}
                 name="name"
                 size="large"
-                placeholder="Tìm kiếm theo tên hoặc mã khóa học"
+                placeholder="Tìm kiếm theo tên khóa học"
               />
             </FilterGrid>
             <div className="flex justify-between">

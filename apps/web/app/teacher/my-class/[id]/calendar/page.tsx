@@ -43,6 +43,7 @@ const ClassCalendar = () => {
       endDate: dayjs(schedule.endDate).toDate(),
       type: schedule.type as unknown as EventType,
       description: schedule.description,
+      classroomName: schedule.class?.room?.name,
     }));
   }, [scheduleData]);
 
@@ -141,6 +142,13 @@ const ClassCalendar = () => {
                       <div className="mt-2">
                         <Typography.Text type="secondary">
                           {event.description}
+                        </Typography.Text>
+                      </div>
+                    )}
+                    {event.classroomName && (
+                      <div className="mt-2">
+                        <Typography.Text type="secondary">
+                          {event.classroomName}
                         </Typography.Text>
                       </div>
                     )}

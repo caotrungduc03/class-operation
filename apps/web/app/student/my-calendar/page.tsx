@@ -74,6 +74,7 @@ const MyCalendar = () => {
       endDate: dayjs(schedule.endDate).toDate(),
       type: schedule.type as unknown as EventType,
       description: schedule.description,
+      classroomName: schedule.class?.room?.name,
     }));
   }, [schedules]);
 
@@ -222,6 +223,13 @@ const MyCalendar = () => {
                           <Tag color={SCHEDULE_TYPE_TAG[event.type]}>
                             {SCHEDULE_TYPE_LABEL[event.type]}
                           </Tag>
+                        </div>
+                      )}
+                      {event.classroomName && (
+                        <div className="mt-2">
+                          <Typography.Text type="secondary">
+                            {event.classroomName}
+                          </Typography.Text>
                         </div>
                       )}
                     </div>

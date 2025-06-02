@@ -113,7 +113,7 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
 
     return this.scheduleRepository.find({
       where: conditions,
-      relations: ['request'],
+      relations: ['request', 'class', 'class.room'],
     });
   }
 
@@ -208,6 +208,7 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
         studentId: userId,
         status: UserStatus.ACTIVE,
       },
+
       select: ['classId'],
     });
 
@@ -236,7 +237,7 @@ export class ScheduleService extends BaseService<ScheduleEntity> {
 
     return this.scheduleRepository.find({
       where: conditions,
-      relations: ['class', 'class.course'],
+      relations: ['class', 'class.course', 'class.room'],
     });
   }
 }

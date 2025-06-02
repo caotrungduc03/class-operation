@@ -134,6 +134,7 @@ export class ClassService extends BaseService<ClassEntity> {
           type: ScheduleType.BUSY,
         },
       ],
+      relations: ['class', 'class.room'],
     });
   }
 

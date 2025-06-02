@@ -1,4 +1,6 @@
+import { IClass } from "./class";
 import { ITimestamps } from "./common";
+import { IRoom } from "./room";
 import { UserStatus } from "./user";
 
 export enum ScheduleType {
@@ -17,6 +19,9 @@ export interface ISchedule extends ITimestamps {
   requestId: string;
   teacherId: string;
   classId?: string;
+  class?: IClass;
+  roomId?: string;
+  room?: IRoom;
 }
 
 export const SCHEDULE_TYPE_LABEL = {

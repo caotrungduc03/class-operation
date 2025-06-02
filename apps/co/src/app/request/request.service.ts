@@ -93,13 +93,17 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
       case RoleName.MANAGE:
         const teacherIds = await this.getFieldTeacherIds(userId);
-        queryBuilder.andWhere(
-          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
-          {
-            teacherIds,
-            userId,
-          },
-        );
+        if (teacherIds.length > 0) {
+          queryBuilder.andWhere(
+            '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+            {
+              teacherIds,
+              userId,
+            },
+          );
+        } else {
+          queryBuilder.andWhere('entity.requesterId = :userId', { userId });
+        }
         break;
       case RoleName.TEACHER_FULL_TIME:
       case RoleName.TEACHER_PART_TIME:
@@ -199,7 +203,8 @@ export class RequestService extends BaseService<RequestEntity> {
         ...pick(norm, ['startDate', 'endDate', 'quantity']),
         teacherId: updateData.teacherId,
         requestId: request.id,
-        status: role === RoleName.ADMIN, // Only admin can create active weekly norms
+        status:
+          role === RoleName.ADMIN ? UserStatus.ACTIVE : UserStatus.BLOCKED,
       };
     });
 
@@ -415,13 +420,17 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
       case RoleName.MANAGE:
         const teacherIds = await this.getFieldTeacherIds(userId);
-        queryBuilder.andWhere(
-          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
-          {
-            teacherIds,
-            userId,
-          },
-        );
+        if (teacherIds.length > 0) {
+          queryBuilder.andWhere(
+            '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+            {
+              teacherIds,
+              userId,
+            },
+          );
+        } else {
+          queryBuilder.andWhere('entity.requesterId = :userId', { userId });
+        }
         break;
       case RoleName.TEACHER_PART_TIME:
         queryBuilder.andWhere('entity.creatorId = :userId', { userId });
@@ -734,13 +743,17 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
       case RoleName.MANAGE:
         const teacherIds = await this.getFieldTeacherIds(userId);
-        queryBuilder.andWhere(
-          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
-          {
-            teacherIds,
-            userId,
-          },
-        );
+        if (teacherIds.length > 0) {
+          queryBuilder.andWhere(
+            '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+            {
+              teacherIds,
+              userId,
+            },
+          );
+        } else {
+          queryBuilder.andWhere('entity.requesterId = :userId', { userId });
+        }
         break;
       case RoleName.TEACHER_PART_TIME:
         queryBuilder.andWhere('entity.creatorId = :userId', { userId });
@@ -1145,13 +1158,17 @@ export class RequestService extends BaseService<RequestEntity> {
         break;
       case RoleName.MANAGE:
         const teacherIds = await this.getFieldTeacherIds(userId);
-        queryBuilder.andWhere(
-          '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
-          {
-            teacherIds,
-            userId,
-          },
-        );
+        if (teacherIds.length > 0) {
+          queryBuilder.andWhere(
+            '(entity.creatorId IN (:...teacherIds) OR entity.requesterId = :userId)',
+            {
+              teacherIds,
+              userId,
+            },
+          );
+        } else {
+          queryBuilder.andWhere('entity.requesterId = :userId', { userId });
+        }
         break;
       case RoleName.TEACHER_FULL_TIME:
       case RoleName.TEACHER_PART_TIME:
