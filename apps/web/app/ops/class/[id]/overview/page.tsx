@@ -73,8 +73,9 @@ const ClassOverview = () => {
             ? dayjs(classDetail.endDate).format("DD/MM/YYYY")
             : "Không có"}
         </Descriptions.Item>
-        <Descriptions.Item label="Số lượng" span={2}>
-          {classDetail.quantity || 0} học viên
+        <Descriptions.Item label="Học viên" span={2}>
+          {classDetail.studentClasses?.length || 0} / {classDetail.quantity} học
+          viên
         </Descriptions.Item>
         <Descriptions.Item label="Mô tả" span={2}>
           {classDetail.description || ""}
