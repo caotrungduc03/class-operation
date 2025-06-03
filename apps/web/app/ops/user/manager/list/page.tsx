@@ -5,6 +5,8 @@ import {
   EyeOutlined,
   LockOutlined,
   PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
   UnlockOutlined,
 } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -511,12 +513,14 @@ const ManagerList = () => {
                   title="Làm mới"
                   size="large"
                   onClick={handleReset}
+                  icon={<ReloadOutlined />}
                 />
                 <CustomButton
                   type="primary"
                   title="Tìm kiếm"
                   size="large"
                   onClick={searchForm.handleSubmit(onSubmitSearch)}
+                  icon={<SearchOutlined />}
                 />
               </div>
               <CustomButton

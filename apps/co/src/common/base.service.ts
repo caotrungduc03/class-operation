@@ -89,7 +89,6 @@ export abstract class BaseService<T extends BaseEntity>
         const column = metadata.columns.find((col) => col.propertyName === key);
         const isEnumColumn =
           column?.type === 'enum' || column?.type === 'simple-enum';
-
         const isUUIDColumn = column?.type === 'uuid';
 
         if (Array.isArray(value)) {

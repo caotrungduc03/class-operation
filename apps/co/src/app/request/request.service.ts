@@ -1141,6 +1141,7 @@ export class RequestService extends BaseService<RequestEntity> {
       page = 1,
       limit = 10,
       sort = 'createdAt:desc',
+      priority,
       ...filter
     } = getRequestDto;
 
@@ -1174,6 +1175,10 @@ export class RequestService extends BaseService<RequestEntity> {
       case RoleName.TEACHER_PART_TIME:
         queryBuilder.andWhere('entity.requesterId = :userId', { userId });
         break;
+    }
+
+    if (priority) {
+      queryBuilder.andWhere('supportTicket.priority = :priority', { priority });
     }
 
     const metadata = this.repository.metadata;
