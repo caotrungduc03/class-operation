@@ -498,9 +498,9 @@ const TimeOffRegistration = () => {
     };
 
     try {
-      if (isEditMode && selectedItemId) {
+      if (isEditMode && timeOffDetail?.data) {
         const res = await updateTimeOff({
-          id: selectedItemId,
+          id: timeOffDetail.data.id,
           data: formattedData,
         }).unwrap();
         toast.success(res.message);
