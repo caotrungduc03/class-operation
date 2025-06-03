@@ -19,6 +19,7 @@ export class WeeklyNormController {
     RoleName.TEACHER_FULL_TIME,
     RoleName.TEACHER_PART_TIME,
     RoleName.RECEPTIONIST,
+    RoleName.STAFF_ACADEMIC,
   )
   async findByRangeDate(
     @Query() query: GetWeeklyNormDto,
