@@ -23,6 +23,7 @@ const nextConfig = {
     ],
   },
   allowedDevOrigins: ["https://devtobiz.id.vn"],
+  output: "standalone",
 };
 
 const plugins = [

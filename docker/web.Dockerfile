@@ -11,16 +11,17 @@ COPY apps/web ./apps/web
 RUN npx nx build web --prod
 
 # Production stage
-FROM caotrungduc/base-deploy-fe AS production
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
-COPY --from=builder /app/apps/web/.next ./.next
+COPY --from=builder /app/apps/web/.next/standalone/apps/web ./
+COPY --from=builder /app/apps/web/.next/standalone/node_modules ./node_modules
+COPY --from=builder /app/apps/web/.next/static ./.next/static
 COPY --from=builder /app/apps/web/public ./public
 
 ARG WEB_PORT=3000
 EXPOSE $WEB_PORT
 
-# Start the Next.js app
-CMD ["yarn", "start"]
+CMD ["node", "server.js"]
 
